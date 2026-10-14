@@ -93,8 +93,8 @@ Quiz: activity (4), budget (100k / 250k / 500k / 1M / 2M+), size (5–20 / 20–
 ## Fruit / crop designation ("Torpaq təyinatı — meyvələr")
 - Each plot has a suitability score per crop (`PlotCropSuitability`). Priority of sources: EXPERT > AI > RULE.
 - **RULE score** (needs PlotClimate; if missing, crops in `recommendedCrops` get 70, others no score):
-  start 100; if absMinTempC < frostToleranceC → −40; if elevationM > maxElevationM → −30; if waterNeed HIGH and no irrigation → −30 (MEDIUM → −15); if precipMm < 300 and no irrigation → −15; if crop in recommendedCrops → +10; clamp 0–100. Reason text lists the penalties in Azerbaijani.
-- **AI score**: from AI analysis `suitableCrops[].code` → overrides RULE for that crop.
+  start 100; if absMinTempC < frostToleranceC → −40; if elevationM > maxElevationM → −30; if waterNeed HIGH and no irrigation → −30 (MEDIUM → −15); if precipMm < 300 and no irrigation → −15; if crop NOT in recommendedCrops → −20 (a "+10 bonus" would always be clamped away); clamp 0–100. Reason text lists the penalties in Azerbaijani. Only crops whose activityType equals plot.purpose are scored.
+- **AI score**: from AI analysis `suitableCrops[].code` → overrides RULE for that crop; `notRecommended[].name` matching a crop nameAz → AI score 20.
 - UI: catalog/map filter "Hansı meyvə üçün?" (fruit crops) → plots with score ≥ 60, sorted by score; passport shows chips "Nar 85% · Fındıq 78% · Üzüm 64%" with source label.
 
 ## ROI + prediction

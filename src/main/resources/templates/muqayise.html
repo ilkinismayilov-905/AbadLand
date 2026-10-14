@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Müqayisə')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
+    <h1 class="text-2xl font-bold">Sahələrin müqayisəsi</h1>
+    <p th:if="${cards.size() < 2}" class="bg-white rounded-lg shadow p-6 text-gray-600">
+        Müqayisə üçün <a th:href="@{/saheler}" class="text-leaf-700 underline">kataloqda</a> 2 və ya 3 sahə seçin.</p>
+    <div th:if="${cards.size() >= 2}" class="bg-white rounded-lg shadow overflow-x-auto">
+        <table class="w-full text-sm">
+            <tr class="bg-earth-50">
+                <th class="text-left p-3 w-56"></th>
+                <th th:each="c : ${cards}" class="text-left p-3">
+                    <a th:href="@{/saheler/{id}(id=${c.plot.id})}" class="text-leaf-700 hover:underline" th:text="${c.plot.code}"></a>
+                    <div class="font-normal text-gray-600" th:text="${c.plot.name}"></div>
+                </th>
+            </tr>
+            <tr th:each="r : ${rows}" class="border-t">
+                <td class="p-3 text-gray-500" th:text="${r.label}"></td>
+                <td th:each="v, st : ${r.values}" th:class="'p-3 ' + (${r.best.contains(st.index)} ? 'bg-green-50 font-semibold text-green-800' : '')"
+                    th:text="${v}"></td>
+            </tr>
+        </table>
+        <p class="p-3 text-xs text-gray-500">Yaşıl — ən yaxşı dəyər.</p>
+    </div>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Xəritə')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
+    <h1 class="text-2xl font-bold">Sahələr xəritədə</h1>
+    <form th:replace="~{layout :: plotFilter('/xerite')}"></form>
+    <p class="text-sm text-gray-600" th:text="${mapPlots.size()} + ' sahə göstərilir. Sahəyə klikləyin — pasporta keçid.'"></p>
+    <div id="map" class="w-full rounded-lg shadow" style="height: 620px"></div>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script th:src="@{/js/map.js}"></script>
+<script th:inline="javascript">
+    const map = createMap('map');
+    drawPlots(map, /*[[${mapPlots}]]*/ [], true);
+    addLegend(map);
+</script>
+</body>
+</html>

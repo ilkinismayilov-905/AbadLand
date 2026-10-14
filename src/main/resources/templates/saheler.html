@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Sahələr')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Torpaq sahələri</h1>
+        <a th:href="@{/xerite(fruit=${filter.fruit},region=${filter.region},district=${filter.district},activity=${filter.activity},demining=${filter.demining},minHa=${filter.minHa},maxHa=${filter.maxHa})}"
+           class="text-leaf-700 underline text-sm">Xəritədə göstər →</a>
+    </div>
+    <form th:replace="~{layout :: plotFilter('/saheler')}"></form>
+    <p th:if="${filter.fruit != null and !filter.fruit.isEmpty()}" class="text-sm text-gray-600">
+        Uyğunluq balı ≥ 60% olan sahələr, bala görə sıralanıb.</p>
+    <form th:action="@{/muqayise}" method="get" id="compareForm">
+        <div class="flex items-center gap-3 mb-3">
+            <span class="text-sm text-gray-600" th:text="${cards.size()} + ' sahə tapıldı'"></span>
+            <button class="ml-auto px-4 py-1.5 rounded bg-earth-500 text-white text-sm hover:bg-earth-700">Seçilənləri müqayisə et (2–3)</button>
+        </div>
+        <p th:if="${cards.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600">Filtrə uyğun sahə tapılmadı.</p>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div th:each="c : ${cards}" class="bg-white rounded-lg shadow p-4 flex flex-col gap-2">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="text-xs text-gray-500" th:text="${c.plot.code}"></div>
+                        <a th:href="@{/saheler/{id}(id=${c.plot.id})}" class="font-semibold text-lg hover:underline" th:text="${c.plot.name}"></a>
+                        <div class="text-sm text-gray-600" th:text="${c.plot.district} + ' · ' + ${@fmt.dec(c.plot.areaHa)} + ' ha'"></div>
+                    </div>
+                    <span th:if="${c.fruitScore != null}" class="text-2xl font-bold text-leaf-700" th:text="${c.fruitScore} + '%'"></span>
+                </div>
+                <div class="flex flex-wrap gap-1">
+                    <span th:class="${@statusLabels.badge(c.plot.purpose)}" th:text="${@statusLabels.label(c.plot.purpose)}"></span>
+                    <span th:class="${@statusLabels.badge(c.plot.demining)}" th:text="${@statusLabels.label(c.plot.demining)}"></span>
+                </div>
+                <span th:replace="~{layout :: suitChips(${c.top3()})}"></span>
+                <div class="text-sm mt-auto pt-2 border-t">
+                    <span th:if="${c.competition == null}" class="text-gray-500">Açıq müsabiqə yoxdur</span>
+                    <span th:if="${c.competition != null}">
+                        <span th:text="${c.competition.code}"></span> ·
+                        <span th:class="${c.daysLeft <= 7} ? 'text-red-600 font-semibold' : 'text-gray-700'" th:text="${c.daysLeft} + ' gün qalıb'"></span>
+                    </span>
+                </div>
+                <label class="text-sm flex items-center gap-2"><input type="checkbox" name="ids" th:value="${c.plot.id}"> Müqayisəyə əlavə et</label>
+            </div>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+<script>
+    document.getElementById('compareForm').addEventListener('submit', e => {
+        const n = document.querySelectorAll('input[name=ids]:checked').length;
+        if (n < 2 || n > 3) { e.preventDefault(); alert('Müqayisə üçün 2 və ya 3 sahə seçin.'); }
+    });
+</script>
+</body>
+</html>

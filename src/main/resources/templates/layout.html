@@ -53,10 +53,63 @@
     <div th:if="${error}" th:text="${error}" class="p-3 rounded bg-red-100 text-red-800 border border-red-200"></div>
 </div>
 
+<!-- Catalog/map filter; action = page URL -->
+<form th:fragment="plotFilter(action)" th:action="@{${action}}" method="get"
+      class="bg-white rounded-lg shadow p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 text-sm items-end">
+    <label class="col-span-2 block"><span class="font-semibold text-leaf-700">Hansı meyvə üçün?</span>
+        <select name="fruit" class="mt-1 w-full border rounded px-2 py-1.5 border-leaf-500">
+            <option value="">— hamısı —</option>
+            <option th:each="f : ${fruits}" th:value="${f.code}" th:text="${f.nameAz}" th:selected="${f.code == filter.fruit}"></option>
+        </select></label>
+    <label class="block"><span>Region</span>
+        <select name="region" class="mt-1 w-full border rounded px-2 py-1.5">
+            <option value="">Hamısı</option>
+            <option th:each="r : ${regions}" th:value="${r}" th:text="${@statusLabels.label(r)}" th:selected="${r == filter.region}"></option>
+        </select></label>
+    <label class="block"><span>Rayon</span>
+        <select name="district" class="mt-1 w-full border rounded px-2 py-1.5">
+            <option value="">Hamısı</option>
+            <option th:each="d : ${districts}" th:value="${d}" th:text="${d}" th:selected="${d == filter.district}"></option>
+        </select></label>
+    <label class="block"><span>Fəaliyyət</span>
+        <select name="activity" class="mt-1 w-full border rounded px-2 py-1.5">
+            <option value="">Hamısı</option>
+            <option th:each="a : ${activities}" th:value="${a}" th:text="${@statusLabels.label(a)}" th:selected="${a == filter.activity}"></option>
+        </select></label>
+    <label class="block"><span>Mina vəziyyəti</span>
+        <select name="demining" class="mt-1 w-full border rounded px-2 py-1.5">
+            <option value="">Hamısı</option>
+            <option th:each="d : ${deminings}" th:value="${d}" th:text="${@statusLabels.label(d)}" th:selected="${d == filter.demining}"></option>
+        </select></label>
+    <label class="block"><span>Min ha</span>
+        <input name="minHa" type="number" min="0" step="any" th:value="${filter.minHa}" class="mt-1 w-full border rounded px-2 py-1.5"></label>
+    <label class="block"><span>Maks ha</span>
+        <input name="maxHa" type="number" min="0" step="any" th:value="${filter.maxHa}" class="mt-1 w-full border rounded px-2 py-1.5"></label>
+    <div class="col-span-2 md:col-span-4 lg:col-span-8 flex gap-3">
+        <button class="px-4 py-1.5 rounded bg-leaf-600 text-white font-medium hover:bg-leaf-700">Filtrlə</button>
+        <a th:href="@{${action}}" class="px-4 py-1.5 rounded border">Sıfırla</a>
+    </div>
+</form>
+
+<!-- Suitability chips: "Nar 85% · Qayda" -->
+<span th:fragment="suitChips(list)" class="flex flex-wrap gap-1">
+    <span th:each="s : ${list}" th:title="${s.reason}"
+          th:class="'inline-block px-2 py-0.5 rounded text-xs font-medium ' + (${s.score >= 75} ? 'bg-green-100 text-green-800' : (${s.score >= 60} ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'))">
+        <span th:text="${s.crop.nameAz} + ' ' + ${s.score} + '%'"></span>
+        <span class="opacity-60" th:text="'· ' + ${@statusLabels.label(s.source)}"></span>
+    </span>
+</span>
+
 <footer th:fragment="footer" class="mt-16 border-t bg-earth-50 text-sm text-earth-700">
     <div class="max-w-7xl mx-auto px-4 py-6">
         AqroInvest Qarabağ — hakaton MVP. Bütün məlumatlar uydurmadır (sınaq dəyəri).
     </div>
+    <!-- Dev only: auto-refresh after code changes (Spring DevTools LiveReload, spring-boot:run) -->
+    <script th:if="${liveReload}">
+        const lr = document.createElement('script');
+        lr.src = '//' + location.hostname + ':35729/livereload.js';
+        document.head.appendChild(lr);
+    </script>
 </footer>
 </body>
 </html>

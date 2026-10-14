@@ -25,6 +25,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private final PasswordEncoder encoder;
     private final CalendarService calendarService;
+    private final az.aqroinvest.service.SuitabilityService suitabilityService;
     private final UserRepository users;
     private final CropRepository crops;
     private final CropCalendarTemplateRepository templates;
@@ -64,6 +65,7 @@ public class DataSeeder implements CommandLineRunner {
         Map<String, Competition> comp = seedCompetitions(today);
         seedApplicationsAndFarms(comp, today);
         seedAiSample();
+        suitabilityService.recomputeAll();
         logCounts();
     }
 

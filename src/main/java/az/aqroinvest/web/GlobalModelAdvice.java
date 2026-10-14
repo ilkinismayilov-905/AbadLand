@@ -12,6 +12,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalModelAdvice {
 
     private final NotificationRepository notifications;
+    private final org.springframework.context.ApplicationContext context;
+
+    /** True only when DevTools runs (spring-boot:run): layout then loads livereload.js. */
+    @ModelAttribute("liveReload")
+    public boolean liveReload() {
+        return context.containsBean("liveReloadServer");
+    }
 
     @ModelAttribute("unreadCount")
     public long unreadCount(Authentication auth) {
