@@ -111,7 +111,10 @@ class Step4ApplicationFlowTest {
         assertThat(decided.getDecision()).isEqualTo(Decision.APPROVED);
         assertThat(farms.findAll()).anyMatch(f -> f.getApplication().getId().equals(id) && f.getCommittedJobs() == 24);
         assertThat(history.findByApplicationOrderByAtAscIdAsc(decided)).hasSize(5);
-        assertThat(audit.findAll()).filteredOn(a -> "QAR-2026-000008".equals(a.getEntityId())).hasSize(5);
+        assertThat(audit.findAll()).filteredOn(a -> "QAR-2026-000008".equals(a.getEntityId()))
+                .extracting(a -> a.getAction()).containsExactly("APPLICATION_SUBMIT", "STATUS_CHANGE", "STATUS_CHANGE",
+                        "STATUS_CHANGE", "STATUS_CHANGE", "EKTIS_SEND");
+        assertThat(decided.getEktisRef()).startsWith("EKTIS-INV-");
 
         mvc.perform(get(location).with(ELVIN)).andExpect(content().string(allOf(
                 containsString("Qərar verilib: Müsbət"), containsString("torpaq analizi müsbətdir"))));

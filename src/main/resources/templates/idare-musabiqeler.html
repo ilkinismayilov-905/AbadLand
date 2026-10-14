@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head('Müsabiqələr — idarəetmə')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <nav th:replace="~{app-fragments :: staffNav('comps')}"></nav>
+    <h1 class="text-2xl font-bold">Müsabiqələr</h1>
+
+    <details sec:authorize="hasAnyRole('OPERATOR','ADMIN')" class="bg-white rounded-lg shadow p-5" th:attr="open=${openForm} ? 'open' : null">
+        <summary class="cursor-pointer font-semibold text-leaf-700">+ Yeni müsabiqə yarat</summary>
+        <form th:action="@{/idare/musabiqeler}" th:object="${form}" method="post" class="mt-4 space-y-4">
+            <label class="block"><span class="text-sm font-medium">Başlıq</span>
+                <input th:field="*{title}" maxlength="200" class="mt-1 w-full border rounded px-3 py-2">
+                <span class="text-sm text-red-600" th:errors="*{title}"></span></label>
+            <label class="block"><span class="text-sm font-medium">Tələblər</span>
+                <textarea th:field="*{requirements}" rows="3" maxlength="3000" class="mt-1 w-full border rounded px-3 py-2"></textarea>
+                <span class="text-sm text-red-600" th:errors="*{requirements}"></span></label>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <label class="block"><span class="text-sm font-medium">Minimum investisiya (AZN)</span>
+                    <input th:field="*{minInvestment}" type="number" min="1" class="mt-1 w-full border rounded px-3 py-2">
+                    <span class="text-sm text-red-600" th:errors="*{minInvestment}"></span></label>
+                <label class="block"><span class="text-sm font-medium">Son tarix</span>
+                    <input th:field="*{deadline}" type="date" class="mt-1 w-full border rounded px-3 py-2">
+                    <span class="text-sm text-red-600" th:errors="*{deadline}"></span></label>
+            </div>
+            <fieldset>
+                <legend class="text-sm font-medium">Sahələr (dərc edilmiş müsabiqədə olmayanlar)</legend>
+                <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2 mt-2 text-sm">
+                    <label th:each="p : ${freePlots}" class="flex gap-2 items-center border rounded px-2 py-1.5">
+                        <input type="checkbox" name="plotIds" th:value="${p.id}" th:checked="${form.plotIds.contains(p.id)}">
+                        <span th:text="${p.code} + ' · ' + ${p.district} + ' · ' + ${@fmt.dec(p.areaHa)} + ' ha'"></span></label>
+                </div>
+                <span class="text-sm text-red-600" th:errors="*{plotIds}"></span>
+            </fieldset>
+            <button class="px-5 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Yarat və təsdiqə göndər</button>
+        </form>
+    </details>
+
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <table class="w-full text-sm">
+            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3">Kod</th><th>Başlıq</th><th>Sahələr</th><th class="text-right">Minimum</th>
+                <th class="pl-4">Son tarix</th><th>Status</th><th>Yaradan</th><th class="w-72"></th></tr>
+            <tr th:each="c : ${competitions}" class="border-t align-top">
+                <td class="p-3 font-medium" th:text="${c.code}"></td>
+                <td th:text="${c.title}"></td>
+                <td class="text-xs" th:text="${#strings.listJoin(c.plots.![code], ', ')}"></td>
+                <td class="text-right" th:text="${@fmt.money(c.minInvestment)}"></td>
+                <td class="pl-4" th:text="${@fmt.date(c.deadline)}"></td>
+                <td><span th:class="${@statusLabels.badge(c.status)}" th:text="${@statusLabels.label(c.status)}"></span>
+                    <div th:if="${c.comment != null}" class="text-xs text-gray-600 mt-1" th:text="${c.comment}"></div></td>
+                <td class="text-xs" th:text="${c.createdBy != null} ? ${c.createdBy.fullName} : '—'"></td>
+                <td class="py-2 pr-3">
+                    <div sec:authorize="hasAnyRole('COMMISSION','ADMIN')" th:if="${c.status.name() == 'PENDING_APPROVAL'}" class="space-y-2">
+                        <form th:action="@{/idare/musabiqeler/{id}/tesdiq(id=${c.id})}" method="post">
+                            <button class="px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700">Təsdiqlə</button></form>
+                        <form th:action="@{/idare/musabiqeler/{id}/redd(id=${c.id})}" method="post" class="flex gap-1">
+                            <input name="comment" required placeholder="Rədd səbəbi" class="flex-1 border rounded px-2 py-1 text-xs">
+                            <button class="px-3 py-1 rounded bg-red-600 text-white text-xs hover:bg-red-700">Rədd et</button></form>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

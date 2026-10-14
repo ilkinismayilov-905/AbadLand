@@ -4,10 +4,38 @@
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
-<main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
     <nav th:replace="~{app-fragments :: staffNav('dashboard')}"></nav>
-    <h1 class="text-2xl font-bold">İdarəetmə paneli</h1>
-    <p class="text-gray-600">Dashboard Step 5-də əlavə olunacaq. <a th:href="@{/idare/muracietler}" class="text-leaf-700 underline">Müraciətlərə keç →</a></p>
+    <h1 class="text-2xl font-bold">Dashboard</h1>
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="bg-white rounded-lg shadow p-4"><div class="text-2xl font-bold text-leaf-700" th:text="${d.totalApplications}"></div><div class="text-sm text-gray-600">Ümumi müraciət</div></div>
+        <div class="bg-white rounded-lg shadow p-4"><div class="text-2xl font-bold text-leaf-700" th:text="${@fmt.money(d.totalInvestment)}"></div><div class="text-sm text-gray-600">Ümumi investisiya</div></div>
+        <div class="bg-white rounded-lg shadow p-4"><div class="text-2xl font-bold text-leaf-700" th:text="${@fmt.num(d.expectedJobs)}"></div><div class="text-sm text-gray-600">Gözlənilən iş yerləri</div></div>
+        <div class="bg-white rounded-lg shadow p-4"><div class="text-2xl font-bold text-leaf-700" th:text="${d.approved}"></div><div class="text-sm text-gray-600">Təsdiqlənmiş</div></div>
+        <div class="bg-white rounded-lg shadow p-4"><div class="text-2xl font-bold text-leaf-700" th:text="${d.publishedCompetitions}"></div><div class="text-sm text-gray-600">Dərc edilmiş müsabiqə</div></div>
+    </section>
+    <div class="grid lg:grid-cols-3 gap-6">
+        <section class="bg-white rounded-lg shadow p-5">
+            <h2 class="font-semibold mb-3">Statuslar üzrə</h2>
+            <ul class="space-y-2 text-sm">
+                <li th:each="e : ${d.byStatus}" class="flex justify-between items-center">
+                    <a th:href="@{/idare/muracietler(status=${e.key})}" th:class="${@statusLabels.badge(e.key)}" th:text="${@statusLabels.label(e.key)}"></a>
+                    <b th:text="${e.value}"></b></li>
+            </ul>
+        </section>
+        <section class="lg:col-span-2 bg-white rounded-lg shadow p-5">
+            <h2 class="font-semibold mb-3">Rayonlar üzrə investisiya</h2>
+            <table class="w-full text-sm">
+                <tr class="text-left text-gray-500"><th class="py-1 w-28">Rayon</th><th class="w-20">Müraciət</th><th class="w-36 text-right pr-3">İnvestisiya</th><th></th></tr>
+                <tr th:each="r : ${d.byDistrict}" class="border-t">
+                    <td class="py-2" th:text="${r.district}"></td>
+                    <td th:text="${r.applications}"></td>
+                    <td class="text-right pr-3" th:text="${@fmt.money(r.investment)}"></td>
+                    <td><div class="h-3 rounded bg-leaf-500" th:style="'width:' + ${r.barPercent} + '%'"></div></td>
+                </tr>
+            </table>
+        </section>
+    </div>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>
 </body>

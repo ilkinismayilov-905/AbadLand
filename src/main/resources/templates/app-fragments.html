@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
 <!-- Horizontal status steps: Qəbul edilib → Baxılır → Qərar verilib (amber side state for info request) -->
@@ -40,6 +40,10 @@
 <nav th:fragment="staffNav(active)" class="flex flex-wrap gap-2 text-sm">
     <a th:href="@{/idare}" th:class="'px-3 py-1.5 rounded ' + (${active == 'dashboard'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Dashboard</a>
     <a th:href="@{/idare/muracietler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'apps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Müraciətlər</a>
+    <a th:href="@{/idare/musabiqeler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'comps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Müsabiqələr</a>
+    <a th:href="@{/idare/inteqrasiya}" th:class="'px-3 py-1.5 rounded ' + (${active == 'ektis'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">EKTİS inteqrasiyası</a>
+    <a sec:authorize="hasAnyRole('COMMISSION','ADMIN')" th:href="@{/idare/audit}" th:class="'px-3 py-1.5 rounded ' + (${active == 'audit'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Audit</a>
+    <a th:href="@{/swagger-ui.html}" target="_blank" class="px-3 py-1.5 rounded bg-white shadow hover:bg-leaf-50">API ↗</a>
 </nav>
 </body>
 </html>

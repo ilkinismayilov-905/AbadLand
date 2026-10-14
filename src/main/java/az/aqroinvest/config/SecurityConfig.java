@@ -64,10 +64,15 @@ public class SecurityConfig {
                                 "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/pay-layiheleri", "/pay-layiheleri/*").permitAll()
                         .requestMatchers("/kabinet/**").hasRole("INVESTOR")
+                        .requestMatchers("/idare/audit").hasAnyRole("COMMISSION", "ADMIN")
                         .requestMatchers("/idare/**").hasAnyRole("OPERATOR", "COMMISSION", "ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(f -> f.loginPage("/giris").successHandler(onLogin).failureUrl("/giris?xeta").permitAll())
                 .logout(l -> l.logoutUrl("/cixis").logoutSuccessUrl("/").permitAll())
+                // REST: 401 instead of a redirect to the login page
+                .exceptionHandling(e -> e.defaultAuthenticationEntryPointFor(
+                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
+                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/**")))
                 .addFilterBefore(new ExternalApiKeyFilter(externalApiKey), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

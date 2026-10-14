@@ -6,7 +6,7 @@
 | 2 | Map, catalog, fruit filter, passport, ROI + prediction, compare | 1:25 | ✅ |
 | 3 | Matching quiz | 0:40 | ✅ |
 | 4 | Application, review cycle, notifications | 1:30 | ✅ |
-| 5 | Competition approval, EKTİS mock, dashboard, audit, API | 0:50 | ⬜ |
+| 5 | Competition approval, EKTİS mock, dashboard, audit, API | 0:50 | ✅ |
 | 6 | Satellite, real climate, AI land analysis | 1:00 | ⬜ |
 | 7 | Farm management + planting calendar | 0:50 | ⬜ |
 | 8 | OPTIONAL: co-investment shares (simulation) | 0:35 | ⬜ |
@@ -39,3 +39,9 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - `StorageService` (PDF/JPG/PNG by extension + magic bytes, ≤ 5 MB, UUID names in `uploads/`), `/fayl/{id}` download (owner or staff, else 404). Over-limit upload → flash.
 - Pages: `/kabinet` (profile edit + applications), `/kabinet/muraciet/yeni`, `/kabinet/muraciet/{id}` (steps, info-reply card, decision, docs, history), `/idare/muracietler` (+ status filter, masked FİN/VÖEN), `/idare/muracietler/{id}` (role/status buttons), `/bildirisler`. Login returns to the saved page (only `/kabinet/…`, `/idare/…`, `/pay-layiheleri`, `/bildirisler`).
 - `Step4ApplicationFlowTest` runs demo steps 6–9 on its own H2 DB (`jdbc:h2:mem:step4`) — keep separate DB names in tests that write data.
+
+### Step 5 — 2026-10-14
+- EKTİS: `EktisClient` → `MockEktisClient` (300 ms, runtime fail flag) / `HttpEktisClient` stub by `ektis.mode`; `EktisService` builds SPEC payload, logs every call (IntegrationLog + audit `EKTIS_SEND`), sets `ektisRef`, admin `retry`. `/idare/inteqrasiya`: mode badge, masked pretty JSON, retry + mock-fail toggle (admin).
+- `CompetitionService` (create → PENDING_APPROVAL, approve/reject with comment, code `MUS-<year>-NN`), `/idare/musabiqeler`. `DashboardService` + `/idare` (5 KPIs, statuses, districts with CSS bars). `/idare/audit` (C/A, last 200).
+- REST `/api/v1` (DTO records): plots, plot detail with suitability, competitions, application status (owner/staff, 401 if anonymous), external decisions (`X-API-Key`). Swagger group `v1` shows only `/api/v1/**`.
+- Tests: `Step5AdminEktisTest` (own DB `step5`). Step 4 test now also expects the `EKTIS_SEND` audit row.
