@@ -58,6 +58,7 @@ public class SecurityConfig {
         };
         http
                 .authorizeHttpRequests(a -> a
+                        .requestMatchers(HttpMethod.POST, "/saheler/*/ai-analiz").authenticated()
                         .requestMatchers("/", "/xerite", "/saheler/**", "/muqayise", "/musabiqeler", "/uygunluq/**",
                                 "/qeydiyyat", "/giris", "/error", "/css/**", "/js/**", "/favicon.ico",
                                 "/api/v1/plots/**", "/api/v1/competitions", "/api/v1/external/**",

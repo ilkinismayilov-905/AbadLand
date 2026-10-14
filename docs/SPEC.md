@@ -108,7 +108,7 @@ Quiz: activity (4), budget (100k / 250k / 500k / 1M / 2M+), size (5–20 / 20–
 Inputs: (1) Esri World Imagery export JPEG 1024×1024 of polygon bbox + 15%; (2) plot facts; (3) PlotClimate (Open-Meteo); (4) allowed crop codes.
 - Esri export: `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox={minLng},{minLat},{maxLng},{maxLat}&bboxSR=4326&imageSR=3857&size=1024,1024&format=jpg&f=image`
 - Open-Meteo elevation: `https://api.open-meteo.com/v1/elevation?latitude={lat}&longitude={lng}`; archive: `https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lng}&start_date=2025-01-01&end_date=2025-12-31&daily=temperature_2m_mean,temperature_2m_min,precipitation_sum&timezone=Asia%2FBaku`
-- Claude API: POST `https://api.anthropic.com/v1/messages`, headers `x-api-key`, `anthropic-version: 2023-06-01`, `content-type: application/json`; model from `ai.model` (default `claude-haiku-5-5` for development, set `claude-sonnet-5-5` for the demo); `max_tokens` 1500; image block first, then text.
+- Claude API: POST `https://api.anthropic.com/v1/messages`, headers `x-api-key`, `anthropic-version: 2023-06-01`, `content-type: application/json`; model from `ai.model` (default `claude-haiku-5-5` for development, set `claude-sonnet-5-5` for the demo); `max_tokens` 4000 with `output_config.effort: "low"` (current models think by default and thinking counts toward `max_tokens`, so 1500 could truncate the JSON); no `temperature`; for `claude-sonnet-5-5` also `fallbacks: "default"` + header `anthropic-beta: server-side-fallback-2026-07-01` (refusal fallback; Haiku 5.5 has none); check `stop_reason` (`refusal` / `max_tokens` → error) before reading text blocks; request timeout 90 s (connect 10 s) because image analysis takes 10–30 s; image block first, then text.
 - System prompt → `src/main/resources/prompts/land-analysis.txt`:
 ```
 You are an agronomy assistant for the South Caucasus (Azerbaijan, Karabakh and East Zangezur).
@@ -125,6 +125,7 @@ Answer ONLY with valid JSON (no markdown) in Azerbaijani for all text fields, ma
 ```
 - User text: plot code/name/district/region/area/purpose, lat/lng, demining, water, irrigation, soil, road, electricity, climate values, allowed crop codes with names.
 - Disclaimer (always): "AI tövsiyəsidir: peyk görüntüsü və açıq iqlim məlumatlarına əsaslanır, torpaq analizi və aqronom rəyini əvəz etmir." Image credit: "Peyk görüntüsü: Esri World Imagery".
+- PlotClimate.fetchedAt = null means seeded test value (UI: "Sınaq dəyəri"); set when Open-Meteo data is stored (admin "İqlim məlumatını yenilə" on `/idare`, or automatically before an AI analysis). `app.external.enabled=false` disables Esri/Open-Meteo calls (tests/offline).
 - Cost control: one analysis per plot (cached); only logged-in users can trigger; max 5 per user per day; admin can re-run. Without `ANTHROPIC_API_KEY` the button is disabled, everything else works.
 
 ## Farm project (post-lease)

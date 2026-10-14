@@ -303,7 +303,7 @@ public class DataSeeder implements CommandLineRunner {
         x.setAbsMinTempC(absMin);
         x.setFrostDays(frostDays);
         x.setPrecipMm(precip);
-        x.setFetchedAt(LocalDateTime.now(BAKU));
+        x.setFetchedAt(null); // null = seeded test value; set when fetched from Open-Meteo
         climates.save(x);
     }
 

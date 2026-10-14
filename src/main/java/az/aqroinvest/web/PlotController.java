@@ -32,6 +32,8 @@ public class PlotController {
     private final CompetitionRepository competitions;
     private final StatusLabels labels;
     private final Fmt fmt;
+    private final az.aqroinvest.ai.AiAnalysisService aiService;
+    private final az.aqroinvest.ai.SatelliteImageService satellite;
 
     @GetMapping("/saheler")
     public String catalog(@ModelAttribute("filter") PlotFilter filter, Model model) {
@@ -58,7 +60,15 @@ public class PlotController {
         PlotCard card = plotService.card(plot);
         List<Crop> cropOptions = crops.findAll().stream().filter(c -> c.getActivityType() == plot.getPurpose()).toList();
         String firstRec = plot.getRecommendedCrops() == null ? null : plot.getRecommendedCrops().split(",")[0];
+        var analysis = aiService.latest(plot).orElse(null);
+        var aiView = analysis == null ? null : aiService.view(analysis).orElse(null);
+        boolean sample = analysis != null && az.aqroinvest.ai.AiAnalysisService.SAMPLE_MODEL.equals(analysis.getModel());
+        // ROI pre-selects the AI's top crop (real analyses only — the sample must not change the demo default)
+        String aiTop = aiView == null || sample || aiView.suitableCrops() == null ? null : aiView.suitableCrops().stream()
+                .filter(c -> c.code() != null && cropOptions.stream().anyMatch(o -> o.getCode().equals(c.code())))
+                .max(Comparator.comparing(c -> c.score() == null ? 0 : c.score())).map(c -> c.code()).orElse(null);
         Crop selected = cropOptions.stream().filter(c -> c.getCode().equals(crop)).findFirst()
+                .or(() -> cropOptions.stream().filter(c -> c.getCode().equals(aiTop)).findFirst())
                 .or(() -> cropOptions.stream().filter(c -> c.getCode().equals(firstRec)).findFirst())
                 .or(() -> cropOptions.stream().findFirst()).orElse(null);
         PlotClimate climate = climates.findByPlot(plot).orElse(null);
@@ -73,7 +83,37 @@ public class PlotController {
         model.addAttribute("cropOptions", cropOptions);
         model.addAttribute("selectedCrop", selected);
         model.addAttribute("matchScore", score);
+        model.addAttribute("ai", aiView);
+        model.addAttribute("aiAnalysis", analysis);
+        model.addAttribute("aiSample", sample);
+        model.addAttribute("aiConfigured", aiService.isConfigured());
         return "pasport";
+    }
+
+    /** Cached Esri image of the plot (fetched once). */
+    @GetMapping(value = "/saheler/{id}/peyk.jpg", produces = "image/jpeg")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.FileSystemResource> satelliteImage(@PathVariable Long id) {
+        Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        var path = satellite.image(plot);
+        if (path == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return org.springframework.http.ResponseEntity.ok()
+                .cacheControl(org.springframework.http.CacheControl.maxAge(java.time.Duration.ofDays(1)))
+                .body(new org.springframework.core.io.FileSystemResource(path));
+    }
+
+    @PostMapping("/saheler/{id}/ai-analiz")
+    public String aiAnalysis(@PathVariable Long id, @RequestParam(required = false) String yeniden,
+                             org.springframework.security.core.Authentication auth,
+                             org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        try {
+            aiService.analyze(plot, auth.getName(), yeniden != null);
+            ra.addFlashAttribute("success", "AI analizi hazırdır.");
+        } catch (az.aqroinvest.service.BusinessException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/saheler/" + id + "#ai";
     }
 
     @GetMapping("/muqayise")

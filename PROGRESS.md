@@ -7,7 +7,7 @@
 | 3 | Matching quiz | 0:40 | ✅ |
 | 4 | Application, review cycle, notifications | 1:30 | ✅ |
 | 5 | Competition approval, EKTİS mock, dashboard, audit, API | 0:50 | ✅ |
-| 6 | Satellite, real climate, AI land analysis | 1:00 | ⬜ |
+| 6 | Satellite, real climate, AI land analysis | 1:00 | ✅ |
 | 7 | Farm management + planting calendar | 0:50 | ⬜ |
 | 8 | OPTIONAL: co-investment shares (simulation) | 0:35 | ⬜ |
 | 9 | Polish, README, demo test | 0:30 | ⬜ |
@@ -45,3 +45,9 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - `CompetitionService` (create → PENDING_APPROVAL, approve/reject with comment, code `MUS-<year>-NN`), `/idare/musabiqeler`. `DashboardService` + `/idare` (5 KPIs, statuses, districts with CSS bars). `/idare/audit` (C/A, last 200).
 - REST `/api/v1` (DTO records): plots, plot detail with suitability, competitions, application status (owner/staff, 401 if anonymous), external decisions (`X-API-Key`). Swagger group `v1` shows only `/api/v1/**`.
 - Tests: `Step5AdminEktisTest` (own DB `step5`). Step 4 test now also expects the `EKTIS_SEND` audit row.
+
+### Step 6 — 2026-10-14
+- Map: Esri "Peyk" layer with required credit; passport mini map opens on Peyk, polygon outline only. `SatelliteImageService` (Esri export bbox+15% → `uploads/satellite/{code}.jpg`, `/saheler/{id}/peyk.jpg`), `ClimateService` (Open-Meteo elevation + 2025 archive → PlotClimate, recompute RULE; admin button on `/idare`). Shared `HttpClient` bean.
+- AI: `AiClient` / `ClaudeAiClient` (raw HTTP per CLAUDE.md; image first; effort low, max_tokens 4000, stop_reason checks, refusal fallback for Sonnet 5.5 — see SPEC), `AiAnalysisService` (cache per plot, 5/user/day via audit log, admin re-run, running-lock, AI suitability rows, audit `AI_ANALYSIS`). Passport: climate cards, "Peyk və AI analizi" section, ROI pre-selects AI top crop (real analyses only).
+- Verified live: satellite image, Open-Meteo refresh for 16 plots, demo filters unchanged. Real Claude call NOT verified (no `ANTHROPIC_API_KEY` in this environment) — covered by unit tests on request/response shape and a fake-client flow test.
+- Demo prep: admin → "İqlim məlumatını yenilə"; set key + `AI_MODEL=claude-sonnet-5-5`, run LCN-001 analysis once (cached).

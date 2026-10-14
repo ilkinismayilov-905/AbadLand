@@ -51,6 +51,23 @@
                 </div>
             </section>
 
+            <!-- Climate -->
+            <section th:if="${climate != null}" class="bg-white rounded-lg shadow p-5">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                    <h2 class="font-semibold">İqlim</h2>
+                    <span th:if="${climate.fetchedAt != null}" class="text-xs text-gray-500"
+                          th:text="'Mənbə: Open-Meteo (2025) · yeniləndi ' + ${@fmt.dateTime(climate.fetchedAt)}"></span>
+                    <span th:if="${climate.fetchedAt == null}" class="text-xs px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">Sınaq dəyəri — Open-Meteo ilə yenilənməyib</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                    <div class="rounded bg-blue-50 p-3"><div class="text-xs text-gray-500">Hündürlük</div><div class="text-xl font-bold" th:text="${climate.elevationM} + ' m'"></div></div>
+                    <div class="rounded bg-blue-50 p-3"><div class="text-xs text-gray-500">Orta temperatur</div><div class="text-xl font-bold" th:text="${@fmt.dec(climate.meanTempC)} + ' °C'"></div>
+                        <div class="text-xs text-gray-500" th:text="'min ' + ${@fmt.dec(climate.absMinTempC)} + ' °C'"></div></div>
+                    <div class="rounded bg-blue-50 p-3"><div class="text-xs text-gray-500">Şaxtalı günlər</div><div class="text-xl font-bold" th:text="${climate.frostDays}"></div></div>
+                    <div class="rounded bg-blue-50 p-3"><div class="text-xs text-gray-500">İllik yağıntı</div><div class="text-xl font-bold" th:text="${@fmt.num(climate.precipMm)} + ' mm'"></div></div>
+                </div>
+            </section>
+
             <!-- Suitability -->
             <section class="bg-white rounded-lg shadow p-5">
                 <h2 class="font-semibold mb-3">Uyğun meyvə və bitkilər</h2>
@@ -106,6 +123,67 @@
                 </div>
                 <p class="text-xs text-gray-500">Proqnoz sınaq parametrlərinə və açıq iqlim məlumatına əsaslanır — Nazirlik ekspertləri ilə dəqiqləşdiriləcək.</p>
             </section>
+
+            <!-- Satellite + AI -->
+            <section id="ai" class="bg-white rounded-lg shadow p-5 space-y-4">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="font-semibold">Peyk və AI analizi</h2>
+                    <span th:if="${aiSample}" class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">Nümunə analiz</span>
+                    <span th:if="${aiAnalysis != null and !aiSample}" class="text-xs text-gray-500"
+                          th:text="${aiAnalysis.model} + ' · ' + ${@fmt.dateTime(aiAnalysis.createdAt)}"></span>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <figure>
+                        <img th:src="@{/saheler/{id}/peyk.jpg(id=${plot.id})}" alt="Sahənin peyk görüntüsü" loading="lazy"
+                             class="w-full aspect-square object-cover rounded bg-gray-100"
+                             onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'w-full aspect-square rounded bg-gray-100 flex items-center justify-center text-sm text-gray-500',textContent:'Peyk görüntüsü əlçatan deyil'}))">
+                        <figcaption class="text-xs text-gray-500 mt-1">Peyk görüntüsü: Esri World Imagery (sahə sərhədi + 15%)</figcaption>
+                    </figure>
+                    <div class="space-y-3 text-sm">
+                        <form sec:authorize="isAuthenticated()" th:action="@{/saheler/{id}/ai-analiz(id=${plot.id})}" method="post"
+                              onsubmit="const b=this.querySelector('button');b.disabled=true;b.textContent='Analiz edilir… ~15 san';">
+                            <button th:disabled="${!aiConfigured}"
+                                    class="w-full px-4 py-2 rounded bg-blue-700 text-white font-semibold hover:bg-blue-800 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed"
+                                    th:text="${aiAnalysis != null and !aiSample} ? 'AI analizinə bax (keşdə)' : 'AI ilə analiz et'"></button>
+                        </form>
+                        <form sec:authorize="hasRole('ADMIN')" th:if="${aiConfigured and aiAnalysis != null and !aiSample}"
+                              th:action="@{/saheler/{id}/ai-analiz(id=${plot.id},yeniden=1)}" method="post"
+                              onsubmit="const b=this.querySelector('button');b.disabled=true;b.textContent='Analiz edilir… ~15 san';">
+                            <button class="w-full px-4 py-1.5 rounded border text-sm hover:bg-gray-50">Yenidən analiz et (admin)</button>
+                        </form>
+                        <p th:unless="${aiConfigured}" class="text-xs text-gray-500">AI açarı konfiqurasiya edilməyib.</p>
+                        <p sec:authorize="isAnonymous()" class="text-xs text-gray-500">AI analizi üçün <a th:href="@{/giris}" class="underline">daxil olun</a>.</p>
+                        <div th:if="${ai != null}" class="space-y-2">
+                            <p class="font-medium" th:text="${ai.summary}"></p>
+                            <div><span class="text-gray-500">Torpaq örtüyü:</span> <span th:text="${ai.landCover}"></span></div>
+                            <div><span class="text-gray-500">Relyef:</span> <span th:text="${ai.terrain}"></span></div>
+                            <div><span class="text-gray-500">Su əlamətləri:</span> <span th:text="${ai.waterSigns}"></span></div>
+                            <div><span class="text-gray-500">Etibarlılıq:</span> <b th:text="${ai.confidenceLabel()}"></b></div>
+                        </div>
+                        <p th:if="${ai == null}" class="text-gray-500">Bu sahə üçün hələ AI analizi aparılmayıb.</p>
+                    </div>
+                </div>
+                <div th:if="${ai != null}" class="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <h3 class="font-semibold mb-2">Uyğun bitkilər</h3>
+                        <div th:each="c : ${ai.suitableCrops}" class="mb-2" th:with="sc=${c.score} ?: 0">
+                            <div class="flex justify-between"><span th:text="${c.name}"></span><b th:text="${sc} + '%'"></b></div>
+                            <div class="h-2 rounded bg-gray-100"><div class="h-2 rounded bg-leaf-500" th:style="'width:' + ${sc} + '%'"></div></div>
+                            <div class="text-xs text-gray-500" th:text="${c.reason}"></div>
+                        </div>
+                        <h3 th:if="${ai.notRecommended != null and !ai.notRecommended.isEmpty()}" class="font-semibold mt-3 mb-1">Tövsiyə olunmur</h3>
+                        <ul class="space-y-1"><li th:each="n : ${ai.notRecommended}" class="text-red-700" th:text="'✗ ' + ${n.name} + ' — ' + ${n.reason}"></li></ul>
+                    </div>
+                    <div class="space-y-3">
+                        <div><h3 class="font-semibold mb-1">Risklər</h3>
+                            <ul class="list-disc ml-5"><li th:each="r : ${ai.risks}" th:text="${r}"></li></ul></div>
+                        <div><h3 class="font-semibold mb-1">Suvarma tövsiyəsi</h3><p th:text="${ai.irrigationAdvice}"></p></div>
+                        <div th:if="${ai.dataGaps != null and !ai.dataGaps.isEmpty()}"><h3 class="font-semibold mb-1">Məlumat çatışmazlıqları</h3>
+                            <ul class="list-disc ml-5 text-gray-600"><li th:each="g : ${ai.dataGaps}" th:text="${g}"></li></ul></div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 border-t pt-3">AI tövsiyəsidir: peyk görüntüsü və açıq iqlim məlumatlarına əsaslanır, torpaq analizi və aqronom rəyini əvəz etmir.</p>
+            </section>
         </div>
 
         <aside class="space-y-6">
@@ -137,8 +215,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script th:src="@{/js/map.js}"></script>
 <script th:inline="javascript">
-    const m = createMap('miniMap');
-    drawPlots(m, [{ id: /*[[${plot.id}]]*/ 0, purpose: /*[[${plot.purpose.name()}]]*/ '', geoJson: /*[[${plot.geoJson}]]*/ '{}' }], false);
+    const m = createMap('miniMap', true);
+    drawPlots(m, [{ id: /*[[${plot.id}]]*/ 0, purpose: /*[[${plot.purpose.name()}]]*/ '', geoJson: /*[[${plot.geoJson}]]*/ '{}' }], false, true);
 </script>
 </body>
 </html>

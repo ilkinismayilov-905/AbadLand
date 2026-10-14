@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{layout :: head('İdarəetmə')}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
     <nav th:replace="~{app-fragments :: staffNav('dashboard')}"></nav>
-    <h1 class="text-2xl font-bold">Dashboard</h1>
+    <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+        <form sec:authorize="hasRole('ADMIN')" th:action="@{/idare/iqlim-yenile}" method="post" class="ml-auto"
+              onsubmit="const b=this.querySelector('button');b.disabled=true;b.textContent='Yenilənir…';">
+            <button class="px-3 py-1.5 rounded border bg-white text-sm hover:bg-gray-50">İqlim məlumatını yenilə (Open-Meteo)</button>
+        </form>
+    </div>
     <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div class="bg-white rounded-lg shadow p-4"><div class="text-2xl font-bold text-leaf-700" th:text="${d.totalApplications}"></div><div class="text-sm text-gray-600">Ümumi müraciət</div></div>
         <div class="bg-white rounded-lg shadow p-4"><div class="text-2xl font-bold text-leaf-700" th:text="${@fmt.money(d.totalInvestment)}"></div><div class="text-sm text-gray-600">Ümumi investisiya</div></div>

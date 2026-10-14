@@ -35,11 +35,26 @@ public class AdminController {
     private final AuditService audit;
     private final ObjectMapper json;
     private final Fmt fmt;
+    private final az.aqroinvest.ai.ClimateService climate;
 
     @GetMapping("/idare")
     public String dashboard(Model model) {
         model.addAttribute("d", dashboard.build());
         return "idare";
+    }
+
+    /** Admin: refresh climate for all plots from Open-Meteo (then RULE suitability is recomputed). */
+    @PostMapping("/idare/iqlim-yenile")
+    public String refreshClimate(Authentication auth, RedirectAttributes ra) {
+        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            ra.addFlashAttribute("error", "Bu əməliyyat yalnız admin üçündür.");
+            return "redirect:/idare";
+        }
+        int n = climate.refreshAll();
+        audit.log("CLIMATE_REFRESH", "Plot", null, n + " plots");
+        if (n > 0) ra.addFlashAttribute("success", "İqlim məlumatı yeniləndi: " + n + " sahə (Open-Meteo).");
+        else ra.addFlashAttribute("error", "Open-Meteo əlçatan deyil — mövcud dəyərlər saxlanıldı.");
+        return "redirect:/idare";
     }
 
     @GetMapping("/idare/audit")
