@@ -1,2 +1,8 @@
 /* Small custom styles; Tailwind CDN covers the rest. */
 body { min-height: 100vh; }
+/* Quiz radio cards: hidden radio (peer) + highlighted label */
+.quiz-card { display: block; cursor: pointer; }
+.quiz-card span { display: block; text-align: center; padding: 1rem .75rem; border: 2px solid #e5e7eb; border-radius: .5rem; font-weight: 500; }
+.quiz-card:hover span { border-color: #4d8b31; }
+.quiz-card input:checked + span { border-color: #3d7326; background: #f1f8ee; color: #23431a; }
+.quiz-card input:focus-visible + span { outline: 2px solid #3d7326; outline-offset: 2px; }

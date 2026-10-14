@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Uyğunluq testi')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Quiz -->
+    <form th:unless="${matches != null}" th:action="@{/uygunluq}" method="get" class="space-y-6">
+        <div>
+            <h1 class="text-2xl font-bold">Sizə uyğun torpağı tapın</h1>
+            <p class="text-gray-600">5 sual — nəticədə açıq müsabiqələrdəki sahələr uyğunluq balına görə sıralanacaq.</p>
+        </div>
+        <fieldset class="bg-white rounded-lg shadow p-5">
+            <legend class="font-semibold px-1">1. Hansı fəaliyyətlə məşğul olmaq istəyirsiniz?</legend>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                <label th:each="x : ${activities}" class="quiz-card">
+                    <input type="radio" name="activity" th:value="${x}" th:checked="${x == a.activity}" class="sr-only peer" required>
+                    <span th:text="${@statusLabels.label(x)}"></span></label>
+            </div>
+        </fieldset>
+        <fieldset class="bg-white rounded-lg shadow p-5">
+            <legend class="font-semibold px-1">2. İnvestisiya büdcəniz (AZN)?</legend>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-2">
+                <label th:each="b : ${budgetOrder}" class="quiz-card">
+                    <input type="radio" name="budget" th:value="${b}" th:checked="${b == a.budget}" class="sr-only peer" required>
+                    <span th:text="${budgets[b]}"></span></label>
+            </div>
+        </fieldset>
+        <fieldset class="bg-white rounded-lg shadow p-5">
+            <legend class="font-semibold px-1">3. Nə qədər sahə lazımdır?</legend>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                <label th:each="s : ${sizes}" class="quiz-card">
+                    <input type="radio" name="size" th:value="${s}" th:checked="${s == a.size}" class="sr-only peer" required>
+                    <span th:text="${s.replace('-', '–')} + ' ha'"></span></label>
+            </div>
+        </fieldset>
+        <fieldset class="bg-white rounded-lg shadow p-5">
+            <legend class="font-semibold px-1">4. Hansı rayon?</legend>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                <label class="quiz-card">
+                    <input type="radio" name="district" value="" th:checked="${a.district == null or a.district.isEmpty()}" class="sr-only peer">
+                    <span>Fərqi yoxdur</span></label>
+                <label th:each="d : ${districts}" class="quiz-card">
+                    <input type="radio" name="district" th:value="${d}" th:checked="${d == a.district}" class="sr-only peer">
+                    <span th:text="${d}"></span></label>
+            </div>
+        </fieldset>
+        <fieldset class="bg-white rounded-lg shadow p-5">
+            <legend class="font-semibold px-1">5. Kənd təsərrüfatında təcrübəniz (il)?</legend>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                <label th:each="e : ${experiences}" class="quiz-card">
+                    <input type="radio" name="experience" th:value="${e}" th:checked="${e == a.experience}" class="sr-only peer" required>
+                    <span th:text="${e.replace('-', '–')} + ' il'"></span></label>
+            </div>
+        </fieldset>
+        <button class="w-full md:w-auto px-8 py-3 rounded-lg bg-leaf-600 text-white text-lg font-semibold hover:bg-leaf-700">Nəticələri göstər</button>
+    </form>
+
+    <!-- Results -->
+    <section th:if="${matches != null}" class="space-y-4">
+        <div class="flex flex-wrap items-end gap-3">
+            <div>
+                <h1 class="text-2xl font-bold">Sizə uyğun sahələr</h1>
+                <p class="text-sm text-gray-600" th:text="${@statusLabels.label(a.activity)} + ' · ' + ${budgets[a.budget]} + ' AZN · ' + ${a.size.replace('-', '–')} + ' ha · ' + (${a.district.isEmpty()} ? 'Fərqi yoxdur' : ${a.district}) + ' · təcrübə ' + ${a.experience.replace('-', '–')} + ' il'"></p>
+            </div>
+            <a th:href="@{/uygunluq(activity=${a.activity},budget=${a.budget},size=${a.size},district=${a.district},experience=${a.experience},edit=1)}"
+               class="ml-auto text-sm text-leaf-700 underline">Cavabları dəyiş</a>
+        </div>
+        <p th:if="${matches.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600">Hazırda açıq müsabiqədə sahə yoxdur.</p>
+        <form th:action="@{/muqayise}" method="get" id="compareForm" class="space-y-4">
+            <div th:each="m, st : ${matches}" class="bg-white rounded-lg shadow p-5 flex flex-wrap gap-5 items-start">
+                <div th:class="'w-24 h-24 shrink-0 rounded-full flex flex-col items-center justify-center text-white ' + (${m.score >= 80} ? 'bg-leaf-600' : (${m.score >= 60} ? 'bg-amber-500' : 'bg-gray-400'))">
+                    <span class="text-2xl font-bold" th:text="${m.score} + '%'"></span><span class="text-xs">uyğun</span>
+                </div>
+                <div class="flex-1 min-w-[240px] space-y-2">
+                    <div class="text-sm text-gray-500" th:text="'#' + ${st.count} + ' · ' + ${m.plot.code} + ' · ' + ${m.plot.district}"></div>
+                    <div class="text-lg font-semibold" th:text="${m.plot.name}"></div>
+                    <ul class="text-sm space-y-0.5">
+                        <li th:each="r : ${m.topReasons()}" th:class="${r.ok} ? 'text-green-700' : 'text-red-700'"
+                            th:text="(${r.ok} ? '✓ ' : '✗ ') + ${r.text}"></li>
+                    </ul>
+                    <details class="text-sm">
+                        <summary class="cursor-pointer text-leaf-700">Bal necə hesablanır?</summary>
+                        <table class="mt-2">
+                            <tr th:each="c : ${m.components}"><td class="pr-4 text-gray-600" th:text="${c.name}"></td>
+                                <td class="font-medium" th:text="${c.points} + ' / ' + ${c.max}"></td></tr>
+                            <tr class="border-t"><td class="pr-4 font-semibold">Cəmi</td><td class="font-semibold" th:text="${m.score} + ' / 100'"></td></tr>
+                        </table>
+                    </details>
+                </div>
+                <div class="text-sm space-y-2 w-full md:w-auto md:text-right">
+                    <div th:text="${m.competition.code}"></div>
+                    <div th:class="${m.daysLeft <= 7} ? 'text-red-600 font-semibold' : 'text-gray-700'"
+                         th:text="'Son tarix ' + ${@fmt.date(m.competition.deadline)} + ' (' + ${m.daysLeft} + ' gün qalıb)'"></div>
+                    <a th:href="@{/saheler/{id}(id=${m.plot.id},score=${m.score})}" class="inline-block px-4 py-1.5 rounded bg-leaf-600 text-white hover:bg-leaf-700">Pasport</a>
+                    <label class="flex md:justify-end items-center gap-2"><input type="checkbox" name="ids" th:value="${m.plot.id}"> Müqayisə</label>
+                </div>
+            </div>
+            <button th:unless="${matches.isEmpty()}" class="px-4 py-2 rounded bg-earth-500 text-white hover:bg-earth-700">Seçilənləri müqayisə et (2–3)</button>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+<script>
+    const cf = document.getElementById('compareForm');
+    if (cf) cf.addEventListener('submit', e => {
+        const n = cf.querySelectorAll('input[name=ids]:checked').length;
+        if (n < 2 || n > 3) { e.preventDefault(); alert('Müqayisə üçün 2 və ya 3 sahə seçin.'); }
+    });
+</script>
+</body>
+</html>

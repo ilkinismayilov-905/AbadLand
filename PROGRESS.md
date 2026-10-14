@@ -4,7 +4,7 @@
 |---|---|---|---|
 | 1 | Skeleton, full data model, seed, login | 0:45 | ✅ |
 | 2 | Map, catalog, fruit filter, passport, ROI + prediction, compare | 1:25 | ✅ |
-| 3 | Matching quiz | 0:40 | ⬜ |
+| 3 | Matching quiz | 0:40 | ✅ |
 | 4 | Application, review cycle, notifications | 1:30 | ⬜ |
 | 5 | Competition approval, EKTİS mock, dashboard, audit, API | 0:50 | ⬜ |
 | 6 | Satellite, real climate, AI land analysis | 1:00 | ⬜ |
@@ -27,3 +27,9 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - Pages: `/saheler` (filters + "Hansı meyvə üçün?" ≥ 60 sorted, compare checkboxes), `/xerite` (Leaflet, Xəritə/Peyk, legend, popups), `/saheler/{id}` passport (questions grid, chips, ROI box `?crop=`, `?score=` badge, mini map, competition card), `/muqayise`, `/musabiqeler`.
 - SPEC change: RULE gives −20 for non-recommended crops (instead of +10, which always clamped away) and scores only crops of the plot's activity; AI `notRecommended` names → score 20. FZL-001 chips: Nar 85 · Qoz 80 · Fındıq 78 · Üzüm 72 · Alma 20.
 - Thymeleaf 3.1 blocks `T(java.*)` in templates — put helpers in beans/records instead.
+
+### Step 3 — 2026-10-14
+- `MatchingService`: pure `score(plot, firstCrop, answers)` per SPEC table (6 components + ✓/✗ reasons in SPEC wording); `match()` over plots in open PUBLISHED competitions. Budget "2M+" = no limit; experience collected but not scored (SPEC has no component).
+- `/uygunluq` (GET, shareable URL): 5 radio-card questions → results with score circle, top 4 reasons, deadline, "Pasport" (`?score=`), compare checkbox, "Bal necə hesablanır?". `edit=1` reopens the filled quiz.
+- Demo answers → FZL-001 100, AGD-002 95, FZL-002 94, LCN-001 94. Tests: `MatchingServiceTest` (100, budget boundaries, FZL-002 reasons), `Step3QuizTest`.
+- Dev: `./mvnw spring-boot:run` uses DevTools live reload (templates from `src/`, Java restart on compile).
