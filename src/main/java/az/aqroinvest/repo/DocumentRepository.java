@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     java.util.List<Document> findByApplicationOrderByUploadedAtAsc(az.aqroinvest.domain.Application application);
+    java.util.List<Document> findByReportOrderByIdAsc(az.aqroinvest.domain.ProgressReport report);
 }

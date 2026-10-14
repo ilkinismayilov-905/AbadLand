@@ -53,6 +53,10 @@ public class StorageService {
     }
 
     public Document store(MultipartFile f, DocType type, Application application) {
+        return store(f, type, application, null);
+    }
+
+    public Document store(MultipartFile f, DocType type, Application application, az.aqroinvest.domain.ProgressReport report) {
         String error = check(f);
         if (error != null) throw new BusinessException(error);
         String stored = UUID.randomUUID() + "." + extension(f.getOriginalFilename());
@@ -65,6 +69,7 @@ public class StorageService {
         }
         Document d = new Document();
         d.setApplication(application);
+        d.setReport(report);
         d.setType(type);
         d.setOriginalName(safeName(f.getOriginalFilename()));
         d.setStoredName(stored);

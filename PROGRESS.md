@@ -9,7 +9,7 @@
 | 5 | Competition approval, EKTİS mock, dashboard, audit, API | 0:50 | ✅ |
 | 6 | Satellite, real climate, AI land analysis | 1:00 | ✅ |
 | 6b | 3D satellite view of a plot | 0:25 | ✅ |
-| 7 | Farm management + planting calendar | 0:50 | ⬜ |
+| 7 | Farm management + planting calendar | 0:50 | ✅ |
 | 8 | OPTIONAL: co-investment shares (simulation) | 0:35 | ⬜ |
 | 9 | Polish, README, demo test | 0:30 | ⬜ |
 
@@ -57,3 +57,9 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - Integrated the kit's `plot3d.js` (unchanged): `layout :: scripts3d` (three.js r128 + plot3d.js) on passport and `/xerite` only; `PlotController.viewerData` (name, subtitle, purpose, geoJson, applyUrl); `map.js` `open3d()` uses the Leaflet `ACTIVITY_COLORS`. Passport toggle "Xəritə | Peyk | 3D" (switch-back deferred one tick — Leaflet ignores changes during its own click); map popup "3D görünüş".
 - `app.css` fixes without editing the viewer: `.p3d [hidden]` (walk pad showed in orbit mode), phone spacing for hint/pad (`.p3d.p3d` to beat the injected style).
 - Verified in Chrome (playwright-cli): FZL-001 terrain + outline + label + orbit, LCN-001 mountains (centre 863 m — the SPEC polygon lies in the river valley, not ~1 400 m), walk W/Shift/pad, Gün/Qürub, Esc/Bağla restore scroll, "Müraciət et" → login → form, map popup, blocked tiles → offline message.
+
+### Step 7 — 2026-10-14
+- `FarmService`: progress (investment/jobs/time/local %) + SPEC risk rule with reasons, status saved on read; task status on read with one notification on first DELAYED; crop plan (≤ plot area → `CalendarService.generate`), mark done (date ≤ today), workforce, quarterly report (`YYYY-Qn`, ≤ 3 JPG/PNG), staff review (accept / needs fix + comment). All audited + notified. Approval now notifies "Təsərrüfat layihəniz yaradıldı".
+- Pages: `/kabinet/teserrufat/{id}` (5 sections, shared `farm-fragments.html`), Kabinet "Təsərrüfatlarım", link from approved application; `/idare/monitorinq` (+ detail with satellite image, report review); dashboard +3 farm KPIs.
+- Timeline = one CSS grid per task row (auto-placement mixed rows). "İcra olundu" only for tasks already started.
+- Tests: `FarmProgressTest` (percentages, risk, 14-day grace), `Step7FarmTest` (demo steps 10–11 on DB `step7`).

@@ -184,6 +184,8 @@ public class ApplicationService {
         f.setCommittedMonths(a.getMonths());
         farms.save(f);
         audit.log("FARM_CREATE", "FarmProject", f.getId(), a.getNumber());
+        notifications.notify(a.getInvestor(), "Təsərrüfat layihəniz yaradıldı: " + a.getPlot().getCode()
+                + " — əkin planını və işçi heyətini əlavə edin.", "/kabinet/teserrufat/" + f.getId());
     }
 
     // ---------------------------------------------------------------- helpers

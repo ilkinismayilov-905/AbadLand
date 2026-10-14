@@ -43,7 +43,20 @@
             </table>
         </section>
     </div>
-    <p class="text-sm text-gray-500">Təsərrüfatlarım və pay layihələri növbəti mərhələlərdə əlavə olunacaq.</p>
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="font-semibold mb-3">Təsərrüfatlarım</h2>
+        <p th:if="${farms.isEmpty()}" class="text-sm text-gray-600">Müsbət qərar verilmiş müraciətdən sonra təsərrüfat layihəniz burada görünəcək.</p>
+        <div class="grid md:grid-cols-2 gap-3">
+            <a th:each="f : ${farms}" th:href="@{/kabinet/teserrufat/{id}(id=${f.id})}" class="block border rounded-lg p-4 hover:bg-leaf-50">
+                <div class="flex items-center gap-2">
+                    <b th:text="${f.plot.code} + ' — ' + ${f.plot.name}"></b>
+                    <span th:if="${f.status.name() == 'ACTIVE'}" class="ml-auto inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Plan üzrə</span>
+                    <span th:unless="${f.status.name() == 'ACTIVE'}" class="ml-auto" th:classappend="${@statusLabels.badge(f.status)}" th:text="${@statusLabels.label(f.status)}"></span>
+                </div>
+                <div class="text-sm text-gray-600" th:text="${f.application.number} + ' · başlanğıc ' + ${@fmt.date(f.startDate)}"></div>
+            </a>
+        </div>
+    </section>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>
 </body>

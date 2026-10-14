@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Təsərrüfatım')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div class="flex flex-wrap items-center gap-3">
+        <div>
+            <div class="text-sm text-gray-500" th:text="${v.project.application.number} + ' · ' + ${v.project.plot.code}"></div>
+            <h1 class="text-2xl font-bold" th:text="'Təsərrüfatım: ' + ${v.project.plot.name}"></h1>
+            <div class="text-sm text-gray-600" th:text="${v.project.plot.district} + ' · ' + ${@fmt.dec(v.project.plot.areaHa)} + ' ha'"></div>
+        </div>
+        <a th:href="@{/kabinet}" class="ml-auto text-sm text-leaf-700 underline">← Kabinet</a>
+    </div>
+    <section th:replace="~{farm-fragments :: commitments(${v})}"></section>
+    <section th:replace="~{farm-fragments :: plan(${v}, ${editable}, ${crops})}"></section>
+    <section th:replace="~{farm-fragments :: calendar(${v}, ${editable}, ${today})}"></section>
+    <section th:replace="~{farm-fragments :: workforce(${v}, ${editable}, ${roles})}"></section>
+    <section th:replace="~{farm-fragments :: reports(${v}, ${editable}, false)}"></section>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

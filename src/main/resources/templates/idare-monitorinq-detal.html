@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Monitorinq — ' + ${v.project.plot.code})}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <nav th:replace="~{app-fragments :: staffNav('monitor')}"></nav>
+    <div class="flex flex-wrap items-center gap-3">
+        <div>
+            <div class="text-sm text-gray-500">
+                <a th:href="@{/idare/muracietler/{id}(id=${v.project.application.id})}" class="underline" th:text="${v.project.application.number}"></a>
+                <span th:text="' · ' + ${v.project.investor.fullName}"></span></div>
+            <h1 class="text-2xl font-bold" th:text="${v.project.plot.code} + ' — ' + ${v.project.plot.name}"></h1>
+        </div>
+        <a th:href="@{/idare/monitorinq}" class="ml-auto text-sm text-leaf-700 underline">← Siyahı</a>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-2"><section th:replace="~{farm-fragments :: commitments(${v})}"></section></div>
+        <figure class="bg-white rounded-lg shadow p-2">
+            <img th:src="@{/saheler/{id}/peyk.jpg(id=${v.project.plot.id})}" alt="Sahənin peyk görüntüsü" loading="lazy"
+                 class="w-full aspect-square object-cover rounded bg-gray-100">
+            <figcaption class="text-xs text-gray-500 mt-1 px-1">Peyk görüntüsü: Esri World Imagery</figcaption>
+        </figure>
+    </div>
+    <section th:replace="~{farm-fragments :: plan(${v}, false, null)}"></section>
+    <section th:replace="~{farm-fragments :: calendar(${v}, false, null)}"></section>
+    <section th:replace="~{farm-fragments :: workforce(${v}, false, null)}"></section>
+    <section th:replace="~{farm-fragments :: reports(${v}, false, true)}"></section>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

@@ -34,6 +34,8 @@ public class InvestorController {
     private final ApplicationService service;
     private final StorageService storage;
     private final AuditService audit;
+    private final az.aqroinvest.farm.FarmService farmService;
+    private final FarmProjectRepository farmRepo;
 
     @GetMapping("/kabinet")
     public String cabinet(Authentication auth, Model model) {
@@ -47,6 +49,7 @@ public class InvestorController {
             model.addAttribute("profile", p);
         }
         model.addAttribute("applications", applications.findByInvestorEmailIgnoreCaseOrderByCreatedAtDesc(auth.getName()));
+        model.addAttribute("farms", farmService.mine(auth.getName()));
         return "kabinet";
     }
 
@@ -123,6 +126,7 @@ public class InvestorController {
         model.addAttribute("documents", documents.findByApplicationOrderByUploadedAtAsc(a));
         model.addAttribute("cropName", crops.findByCode(a.getPlannedCrop()).map(Crop::getNameAz).orElse(a.getPlannedCrop()));
         model.addAttribute("replyTypes", List.of(DocType.SOIL_ANALYSIS, DocType.IDENTITY, DocType.OTHER));
+        model.addAttribute("farm", farmRepo.findByApplication(a).orElse(null));
         return "muraciet";
     }
 

@@ -36,10 +36,12 @@ public class AdminController {
     private final ObjectMapper json;
     private final Fmt fmt;
     private final az.aqroinvest.ai.ClimateService climate;
+    private final az.aqroinvest.farm.FarmService farmService;
 
     @GetMapping("/idare")
     public String dashboard(Model model) {
         model.addAttribute("d", dashboard.build());
+        model.addAttribute("farmTotals", farmService.totals());
         return "idare";
     }
 

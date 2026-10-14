@@ -4,4 +4,5 @@ import az.aqroinvest.domain.WorkforceItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WorkforceItemRepository extends JpaRepository<WorkforceItem, Long> {
+    java.util.List<WorkforceItem> findByProjectOrderByIdAsc(az.aqroinvest.domain.FarmProject project);
 }
