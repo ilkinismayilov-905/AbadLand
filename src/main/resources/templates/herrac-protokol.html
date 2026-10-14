@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${a.code} + ' — Protokol')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<main class="max-w-4xl mx-auto px-4 py-6 space-y-4">
+    <div class="flex items-center gap-3 no-print">
+        <a th:href="@{/herraclar/{id}(id=${a.id})}" class="text-sm text-leaf-700 underline">← Hərrac</a>
+        <button onclick="window.print()" class="ml-auto px-3 py-1.5 rounded border text-sm bg-white">Çap et</button>
+    </div>
+    <article class="bg-white rounded-lg shadow p-6 space-y-4 print-plain">
+        <h1 class="text-2xl font-bold" th:text="'Hərrac protokolu ' + ${a.code}"></h1>
+        <p th:if="${a.status.name() != 'CONFIRMED'}" class="text-sm text-amber-800">İlkin protokol (yalnız işçilər üçün) — nəticə hələ təsdiqlənməyib.</p>
+        <table class="w-full text-sm">
+            <tr class="border-t"><td class="py-1.5 text-gray-500 w-56">Sahə</td><td th:text="${a.plot.code} + ' — ' + ${a.plot.name} + ', ' + ${a.plot.district} + ', ' + ${@fmt.dec(a.plot.areaHa)} + ' ha'"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Əqd növü</td><td th:text="${@statusLabels.label(a.dealType)} + (${a.leaseYears != null} ? ', ' + ${a.leaseYears} + ' il' : '')"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Vaxt</td><td th:text="${@fmt.dateTime(a.startsAt)} + ' – ' + ${@fmt.dateTime(a.endsAt)}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Başlanğıc qiymət</td><td th:text="${@fmt.money(a.startPrice)}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Yekun qiymət</td><td class="font-semibold" th:text="${@fmt.money(a.finalPrice)}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Artım</td><td th:text="${a.upliftPct() == null} ? '—' : '+' + ${@fmt.dec(a.upliftPct())} + '%'"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">İştirakçılar / təkliflər</td><td th:text="${participants} + ' / ' + ${bids.size()}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Vaxt uzadılması</td><td th:text="${a.extensions} + ' dəfə'"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Qalib</td>
+                <td><span th:text="${winnerNo == null} ? '—' : 'İştirakçı #' + ${winnerNo}"></span>
+                    <span th:if="${staff and a.winner != null}" class="text-gray-600" th:text="' — ' + ${a.winner.fullName}"></span></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500">Təsdiq</td>
+                <td th:text="${a.confirmedBy == null} ? '—' : ${a.confirmedBy.fullName} + ', ' + ${@fmt.dateTime(a.confirmedAt)}"></td></tr>
+        </table>
+        <h2 class="font-semibold">Təkliflər</h2>
+        <table class="w-full text-sm">
+            <tr class="text-left text-gray-500"><th class="py-1">Vaxt</th><th>İştirakçı</th><th class="text-right">Məbləğ</th><th></th></tr>
+            <tr th:each="b : ${bids}" class="border-t">
+                <td class="py-1" th:text="${@fmt.dateTime(b.createdAt)}"></td>
+                <td th:text="'#' + ${b.participant.number}"></td>
+                <td class="text-right" th:text="${@fmt.money(b.amount)}"></td>
+                <td class="text-xs text-gray-500 pl-2" th:text="${b.extended} ? 'vaxt +2 dəq' : ''"></td>
+            </tr>
+        </table>
+        <p class="text-xs text-gray-500" th:text="${legalNote}"></p>
+    </article>
+</main>
+</body>
+</html>

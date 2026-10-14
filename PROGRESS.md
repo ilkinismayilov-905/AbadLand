@@ -10,6 +10,7 @@
 | 6 | Satellite, real climate, AI land analysis | 1:00 | ✅ |
 | 6b | 3D satellite view of a plot | 0:25 | ✅ |
 | 7 | Farm management + planting calendar | 0:50 | ✅ |
+| 7b | Open ascending auctions (lease / sale, simulation) | 1:00 | ✅ |
 | 8 | OPTIONAL: co-investment shares (simulation) | 0:35 | ⏭ skipped (nav link hidden; seed offering kept) |
 | 9 | Polish, README, demo test | 0:30 | ✅ |
 
@@ -69,3 +70,14 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - `DemoPathTest`: SPEC demo steps 1–11 through services (fake AI). 40 tests green. README rewritten (run, env, accounts, pages, mermaid, PostgreSQL/EKTİS, roadmap). `spring-boot.run.profiles` is now a pom property → `-Dspring-boot.run.profiles=pg` works.
 - HTTP demo walk on the running app: every step OK; slowest = approve 0.31 s (mock EKTİS 300 ms). No FİN/VÖEN/key in logs. Real Claude call still unverified here (no key).
 - Note: after adding a NEW file under `src/main/resources` (e.g. messages.properties) do a full restart, not a DevTools restart (Boot caches the "file missing" check).
+
+### Extra — Admin user management (2026-10-14)
+- `/idare/istifadeciler` (ADMIN only, SecurityConfig + service check): users table (role, active, last login), "Yeni işçi" (OPERATOR/COMMISSION/ADMIN; 12-char temp password via SecureRandom, shown once as flash, never logged/audited), activate/deactivate (not self). Audit `USER_CREATED` / `USER_DISABLED` / `USER_ENABLED`.
+- `User.active` + `lastLoginAt`; disabled users can't log in (`/giris?deaktiv`) and their open sessions are expired via `SessionRegistry`. `/qeydiyyat` `@InitBinder` disallows `role`, `id`, `passwordHash`, `active`.
+- `UserAdminTest` (DB `useradmin`): 44 tests green. SPEC Pages + User entity updated.
+
+### Step 7b — 2026-10-14
+- SPEC "Open auction" appended (seed deviation: new plots `AGD-003`, `TRT-003` (sale, our TRT-002 is in a PUBLISHED competition), `CBR-003` (confirmed last week)). `Auction`, `AuctionParticipant`, `Bid`, `DealType`, `AuctionStatus`, `PlotStatus` (+ `Plot.status`); `FarmProject.application` optional + `auction` (`sourceLabel()`).
+- `AuctionService` owns all status changes: `tick(now)` on read + `@Scheduled` 30 s; create/approve/reject/cancel/confirm (EKTİS `SEND_AUCTION_RESULT`, plot LEASED/SOLD, LEASE → FarmProject); register + simulated deposit; `placeBid` under `PESSIMISTIC_WRITE` lock (min, self-outbid, deposit, LIVE, anti-sniping +120 s, "Təklifiniz keçildi"); demo bot (`app.auction.demo-bot`, dev profile only).
+- Pages `/herraclar`, `/herraclar/{id}` (live panel, `auction-live.js` polls `/api/v1/auctions/{id}/state` every 2 s, CSRF meta), `/protokol` (print CSS, winner name staff-only), `/kabinet/herraclarim`, `/idare/herraclar`; nav + staff nav; passport auction card; dashboard KPIs. 3D viewer data moved to `Viewer3dData`.
+- Tests: `AuctionTest` (5, fresh DB each) + seed-count fixes → 49 green. Verified live in two Chrome sessions: deposit → +1 step → other window updates ~2 s, "Təklifiniz keçildi", demo bot answers.

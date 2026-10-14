@@ -13,3 +13,9 @@ body { min-height: 100vh; }
     .p3d.p3d .hint { bottom: calc(118px + env(safe-area-inset-bottom, 0px)); }
     .p3d.p3d .pad { bottom: calc(190px + env(safe-area-inset-bottom, 0px)); }
 }
+/* Auction protocol: clean print */
+@media print {
+    header, footer, nav, .no-print { display: none !important; }
+    body { background: #fff !important; }
+    .print-plain { box-shadow: none !important; }
+}

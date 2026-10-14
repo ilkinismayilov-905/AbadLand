@@ -14,7 +14,7 @@
                 <th class="text-right">Gecikən</th><th class="pl-4">Son hesabat</th><th>Risk</th></tr>
             <tr th:if="${views.isEmpty()}"><td colspan="10" class="p-4 text-gray-500">Layihə yoxdur.</td></tr>
             <tr th:each="v : ${views}" th:with="p=${v.progress}" class="border-t hover:bg-gray-50">
-                <td class="p-3"><a th:href="@{/idare/monitorinq/{id}(id=${v.project.id})}" class="text-leaf-700 font-medium underline" th:text="${v.project.application.number}"></a></td>
+                <td class="p-3"><a th:href="@{/idare/monitorinq/{id}(id=${v.project.id})}" class="text-leaf-700 font-medium underline" th:text="${v.project.sourceLabel()}"></a></td>
                 <td th:text="${v.project.investor.fullName}"></td>
                 <td th:text="${v.project.plot.code}"></td>
                 <td th:text="${v.project.plot.district}"></td>

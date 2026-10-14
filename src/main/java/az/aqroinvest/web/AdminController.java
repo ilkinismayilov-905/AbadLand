@@ -37,11 +37,13 @@ public class AdminController {
     private final Fmt fmt;
     private final az.aqroinvest.ai.ClimateService climate;
     private final az.aqroinvest.farm.FarmService farmService;
+    private final az.aqroinvest.auction.AuctionService auctionService;
 
     @GetMapping("/idare")
     public String dashboard(Model model) {
         model.addAttribute("d", dashboard.build());
         model.addAttribute("farmTotals", farmService.totals());
+        model.addAttribute("auctionKpis", auctionService.kpis());
         return "idare";
     }
 

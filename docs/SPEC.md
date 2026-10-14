@@ -40,9 +40,10 @@
 - `FarmStatus`: ACTIVE (Aktiv), AT_RISK (Risk var), COMPLETED (Tamamlanıb)
 - `ReportStatus`: SUBMITTED (Göndərilib), ACCEPTED (Qəbul edilib), NEEDS_FIX (Düzəliş tələb olunur)
 - `OfferingStatus`: OPEN (Açıq), FUNDED (Toplandı), CLOSED (Bağlandı)
+- `DealType`: LEASE (İcarə), SALE (Satış) · `AuctionStatus`: PENDING_APPROVAL, SCHEDULED, LIVE, ENDED, CONFIRMED, FAILED, REJECTED, CANCELLED · `PlotStatus`: AVAILABLE (Boşdur), IN_AUCTION (Hərracda), LEASED (İcarəyə verilib), SOLD (Satılıb)
 
 ## Entities (JPA, Long ids are fine; application uses public `number`)
-- **User**: email, passwordHash, fullName, phone, role, investorType (INDIVIDUAL/LEGAL), fin, voen, companyName, experienceYears
+- **User**: email, passwordHash, fullName, phone, role, investorType (INDIVIDUAL/LEGAL), fin, voen, companyName, experienceYears, active (default true; false → login refused with "Hesabınız deaktiv edilib", open sessions expired), lastLoginAt. `/qeydiyyat` always creates INVESTOR (role/active never bound from the request); staff accounts only via `/idare/istifadeciler`.
 - **Crop**: code, nameAz, activityType, isFruit, investmentPerHa, revenuePerHa, opexPerHa, firstHarvestYear, yieldTPerHa, frostToleranceC, maxElevationM, waterNeed
 - **CropCalendarTemplate**: crop, stage, startMonth, endMonth, yearOffset (0 = planting year; HARVEST uses firstHarvestYear − 1)
 - **Plot**: code, name, district (String), economicRegion, village, areaHa, purpose, demining, waterSource (String), irrigation, soilType, roadKm, electricity, leaseYears, feePerHa, recommendedCrops (comma-separated codes), description, geoJson (TEXT, Polygon), lat, lng
@@ -135,6 +136,76 @@ Answer ONLY with valid JSON (no markdown) in Azerbaijani for all text fields, ma
 - "Müraciət et" inside the viewer only when the plot is in an open PUBLISHED competition and the viewer is not staff; anonymous users go through login back to the form.
 - Offline: "Peyk şəkli yüklənmədi. İnternet bağlantısını yoxlayın."; it still closes cleanly.
 
+## Open auction (Step 7b)
+
+Purpose: besides the investment competition (commission evaluates business plans), the state can lease or sell a plot through a transparent **open ascending auction** ("açıq artırma"): the highest valid bid at the end wins.
+
+### Entities
+- **Auction**: code (`HRC-2026-01`), plot, dealType (`LEASE` İcarə / `SALE` Satış), startPrice, step (min increment), deposit (zaminat, simulated), leaseYears (LEASE only), rules (TEXT), startsAt, endsAt, extendSeconds (default 120), status, currentPrice, winner (User, nullable), finalPrice, createdBy, approvedBy, confirmedBy, createdAt, version
+- **AuctionParticipant**: auction, user, number (1..n, shown as "İştirakçı #3"), depositConfirmed (bool, simulated), registeredAt — unique (auction, user)
+- **Bid**: auction, participant, amount, createdAt
+
+### Enums
+- `DealType`: LEASE (İcarə — illik icarə haqqı), SALE (Satış — ümumi qiymət)
+- `AuctionStatus`: PENDING_APPROVAL (Təsdiq gözləyir), SCHEDULED (Planlaşdırılıb), LIVE (Gedir), ENDED (Başa çatıb), CONFIRMED (Nəticə təsdiqlənib), FAILED (Baş tutmadı), REJECTED (Rədd edilib), CANCELLED (Ləğv edilib)
+
+### Price meaning
+- LEASE: bid = **annual rent for the whole plot, AZN/year**; UI also shows AZN/ha/year.
+- SALE: bid = **total price, AZN**. SALE auctions are created only when `app.auction.sale-enabled=true` (default true in demo; legal model to be confirmed — see note).
+
+### Lifecycle
+| From → To | Who / when | Rule |
+|---|---|---|
+| (new) → PENDING_APPROVAL | OPERATOR | plot not in a PUBLISHED competition or another open auction; startPrice > 0; step > 0; startsAt < endsAt |
+| PENDING_APPROVAL → SCHEDULED / REJECTED | COMMISSION | reject needs comment |
+| SCHEDULED → LIVE | system, now ≥ startsAt | computed on read + `@Scheduled` every 30 s |
+| LIVE → ENDED | system, now ≥ endsAt and ≥ 1 bid | winner = highest bid |
+| LIVE → FAILED | system, now ≥ endsAt and no bids | "Baş tutmadı" |
+| ENDED → CONFIRMED | COMMISSION | signs the protocol; winner notified; EKTİS `SEND_AUCTION_RESULT`; LEASE → FarmProject for the winner (commitments: investment 0, jobs 0, months = leaseYears × 12 — investor edits later) |
+| SCHEDULED → CANCELLED | OPERATOR | comment required |
+Plot status: SCHEDULED/LIVE → `IN_AUCTION`, CONFIRMED → `LEASED` or `SOLD`, FAILED/CANCELLED → `AVAILABLE`.
+
+### Participation
+- INVESTOR with verified FİN/VÖEN registers before `endsAt`: accepts rules (checkbox) + "Zaminat ödənildi" (simulated button, sets depositConfirmed). Gets the next participant number.
+- Staff users and the plot creator cannot bid.
+
+### Bidding rules (`AuctionService.placeBid`, one transaction, pessimistic lock on the auction row)
+1. Auction LIVE and now < endsAt.
+2. Bidder is a participant with depositConfirmed.
+3. amount ≥ (currentPrice == null ? startPrice : currentPrice + step).
+4. Bidder is not already the highest bidder ("Ən yüksək təklif artıq sizindir").
+5. **Anti-sniping:** if endsAt − now < extendSeconds → endsAt = now + extendSeconds (UI shows "Vaxt 2 dəqiqə uzadıldı").
+6. Save Bid, update currentPrice, audit `AUCTION_BID`, notify the previously highest bidder "Təklifiniz keçildi".
+Errors return Azerbaijani messages; amounts are whole AZN.
+
+### Live page data (polling, no websockets)
+`GET /api/v1/auctions/{id}/state` (public) → `{status, startPrice, currentPrice, step, minNextBid, endsAt, serverNow, participants, bids:[{participantNo, amount, at}] (last 20, newest first), me:{participantNo, depositConfirmed, isHighest} | null}`. Page polls every 2 s, countdown uses `serverNow` offset. Bids from the page: `POST /herraclar/{id}/teklif` via fetch with CSRF header (token from `<meta name="_csrf">`).
+
+### Transparency
+- Anyone can watch a LIVE auction read-only; bidders are shown only as "İştirakçı #n".
+- **Protocol** `/herraclar/{id}/protokol` (public after CONFIRMED, staff always): plot, deal type, start price, final price, uplift %, participants count, bid count, full bid list (participant numbers + times), extensions, winner (participant number; full name visible to staff only), confirmed by/at. Printable (CSS `@media print`).
+
+### Pages
+| URL | Who | Content |
+|---|---|---|
+| `/herraclar` | all | cards: plot, deal type badge, start / current price, status, countdown or start time; filter by status and deal type |
+| `/herraclar/{id}` | all (bid: participants) | plot summary + passport link + 3D button, rules, **live panel**: big current price, "Növbəti minimum təklif", countdown, quick buttons (+1, +2, +5 step), custom amount, bid history, participants count; register / deposit buttons |
+| `/herraclar/{id}/protokol` | all after CONFIRMED | protocol |
+| `/kabinet/herraclarim` | INVESTOR | my auctions: status, my last bid, highest? won? |
+| `/idare/herraclar` | O, C, A | list; create form (O); approve / reject (C); confirm result (C); cancel (O) |
+Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". Passport: if the plot has an auction, show an auction card with status and link. Dashboard: KPIs "Aktiv hərrac", "Hərraclarda qiymət artımı (orta %)".
+
+### Seed
+- `HRC-2026-01` LEASE, plot `AGD-003` (add: Ağdam, CROP_FARMING, 70 ha, CLEARED), startPrice 3 500 AZN/year, step 250, deposit 1 000, leaseYears 15, LIVE: startsAt = now − 10 min, endsAt = now + 25 min; participants: rashad (#1), 2 other demo investors (#2, #3) with 4 bids up to 4 500; Elvin **registered but deposit not confirmed** (so the demo shows the deposit step).
+- `HRC-2026-02` SALE, plot `TRT-003` (add: Tərtər, CROP_FARMING, 25 ha — our `TRT-002` is 55 ha and in the PUBLISHED `MUS-2026-04`, which the create rule forbids), SCHEDULED: starts tomorrow 11:00, startPrice 60 000, step 2 000.
+- `HRC-2026-00` LEASE, plot `CBR-003` (add: Cəbrayıl, CROP_FARMING, 40 ha), CONFIRMED last week with a full protocol (start 2 000 → final 3 250, +62,5%), winner kamran@demo.az with a FarmProject.
+- Demo bot (`app.auction.demo-bot=true`, set in `application-dev.properties` = `./mvnw spring-boot:run`; off in tests/prod) → when Elvin bids on `HRC-2026-01`, participant #1 automatically outbids once after ~8 s (makes the live demo feel real). Mark bot bids in audit as `AUCTION_BID_DEMO_BOT`.
+
+### Legal note (show on auction rules and say in the pitch)
+"Hərrac simulyasiyadır: zaminat və ödəniş real aparılmır. Dövlət torpaqlarının satışı və icarəsi qanunvericiliyə və aidiyyəti qurumun qaydalarına uyğun aparılmalıdır; real tətbiqdə mövcud dövlət hərrac platforması ilə inteqrasiya nəzərdə tutulur."
+- Implementation notes: "verified FİN/VÖEN" = the investor profile has a FİN (individual) or VÖEN (legal) — no real verification in the MVP. `Plot.status` (`PlotStatus`: AVAILABLE, IN_AUCTION, LEASED, SOLD) added. `FarmProject.application` is optional; an auction-won farm has `auction` set instead.
+
+
 ## Farm project (post-lease)
 - Created on APPROVED. Commitments copied from the application.
 - Progress: investment% = latest investedToDate / committed; jobs% = Σ workforce / committedJobs; time% = months elapsed / committedMonths; local% = local / total.
@@ -180,6 +251,10 @@ Answer ONLY with valid JSON (no markdown) in Azerbaijani for all text fields, ma
 | `/idare/monitorinq` + `/{id}` | O, C, A | farm projects, risk, calendar delays, report review |
 | `/idare/inteqrasiya` | O, C, A | EKTİS log + retry (A) |
 | `/idare/audit` | C, A | audit table |
+| `/herraclar`, `/herraclar/{id}`, `/herraclar/{id}/protokol` | all (bid: participants) | open auctions — see "Open auction" |
+| `/kabinet/herraclarim` | INVESTOR | my auctions |
+| `/idare/herraclar` | O, C, A | create (O), approve / reject / confirm (C), cancel (O) |
+| `/idare/istifadeciler` | A | users table (name, email, role, active, last login); "Yeni işçi" (OPERATOR / COMMISSION / ADMIN only, temporary password generated and shown once); activate / deactivate (not self). Audit `USER_CREATED`, `USER_DISABLED`, `USER_ENABLED`. |
 
 ## REST (Swagger at `/swagger-ui.html`)
 `GET /api/v1/plots`, `GET /api/v1/plots/{code}` (incl. suitability), `GET /api/v1/competitions`, `GET /api/v1/applications/{number}/status` (auth), `GET /api/v1/external/decisions` (header `X-API-Key`).

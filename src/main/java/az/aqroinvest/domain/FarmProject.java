@@ -18,8 +18,12 @@ public class FarmProject {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(optional = false)
+    /** Competition route; null for a lease won at auction. */
+    @OneToOne
     private Application application;
+    /** Auction route (LEASE won at an open auction). */
+    @ManyToOne
+    private Auction auction;
     @ManyToOne(optional = false)
     private Plot plot;
     @ManyToOne(optional = false)
@@ -30,4 +34,9 @@ public class FarmProject {
     private long committedInvestment;
     private int committedJobs;
     private int committedMonths;
+
+    /** "QAR-2026-000007" or "HRC-2026-00" — where the project came from. */
+    public String sourceLabel() {
+        return application != null ? application.getNumber() : auction != null ? auction.getCode() : "—";
+    }
 }

@@ -8,6 +8,7 @@
     <form th:action="@{/giris}" method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
         <h1 class="text-2xl font-bold">Daxil ol</h1>
         <div th:if="${param.xeta}" class="p-3 rounded bg-red-100 text-red-800">E-poçt və ya şifrə yanlışdır.</div>
+        <div th:if="${param.deaktiv}" class="p-3 rounded bg-red-100 text-red-800">Hesabınız deaktiv edilib. Administratorla əlaqə saxlayın.</div>
         <div th:if="${param.logout}" class="p-3 rounded bg-green-100 text-green-800">Sistemdən çıxdınız.</div>
         <label class="block">
             <span class="text-sm font-medium">E-poçt</span>

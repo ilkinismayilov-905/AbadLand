@@ -44,5 +44,7 @@ public class Plot {
     @Lob
     private String geoJson;
     private double lat;
+    @Enumerated(EnumType.STRING)
+    private PlotStatus status = PlotStatus.AVAILABLE;
     private double lng;
 }

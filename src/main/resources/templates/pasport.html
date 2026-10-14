@@ -198,6 +198,15 @@
                     <a sec:authorize="!hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/kabinet/muraciet/yeni(plotId=${plot.id})}" class="block text-center mt-3 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Müraciət et</a>
                 </div>
             </section>
+            <section th:unless="${plotAuctions.isEmpty()}" class="bg-white rounded-lg shadow p-5 text-sm space-y-2">
+                <h2 class="font-semibold">Hərrac</h2>
+                <a th:each="x : ${plotAuctions}" th:href="@{/herraclar/{id}(id=${x.id})}" class="flex items-center gap-2 hover:underline">
+                    <span th:text="${x.code}"></span>
+                    <span th:class="${@statusLabels.badge(x.dealType)}" th:text="${@statusLabels.label(x.dealType)}"></span>
+                    <span th:class="${@statusLabels.badge(x.status)}" th:text="${@statusLabels.label(x.status)}"></span>
+                    <span class="ml-auto" th:text="${@fmt.money(x.currentPrice != null ? x.currentPrice : x.startPrice)}"></span>
+                </a>
+            </section>
             <section class="bg-white rounded-lg shadow p-5 text-sm space-y-1">
                 <h2 class="font-semibold mb-2">İstifadə şərtləri</h2>
                 <div>İcarə müddəti: <b th:text="${plot.leaseYears} + ' il'"></b></div>

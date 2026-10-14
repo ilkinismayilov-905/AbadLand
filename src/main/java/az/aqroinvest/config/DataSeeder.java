@@ -47,6 +47,9 @@ public class DataSeeder implements CommandLineRunner {
     private final ProgressReportRepository reports;
     private final ShareOfferingRepository offerings;
     private final ShareHoldingRepository holdings;
+    private final AuctionRepository auctionRepo;
+    private final AuctionParticipantRepository auctionParticipants;
+    private final BidRepository bidRepo;
 
     private final Map<String, User> u = new HashMap<>();
     private final Map<String, Crop> c = new HashMap<>();
@@ -64,6 +67,7 @@ public class DataSeeder implements CommandLineRunner {
         seedClimate();
         Map<String, Competition> comp = seedCompetitions(today);
         seedApplicationsAndFarms(comp, today);
+        seedAuctions();
         seedAiSample();
         suitabilityService.recomputeAll();
         logCounts();
@@ -227,6 +231,15 @@ public class DataSeeder implements CommandLineRunner {
         plot("XCL-001", "Xocalı üzüm bağı", "Xocalı", EconomicRegion.QARABAG, "Ballıca", 22,
                 ActivityType.HORTICULTURE, DeminingStatus.CLEARED, "Bulaq + damcı", true, "Boz-qəhvəyi", 4, true, 80,
                 "GRAPE,APPLE", "Kiçik bağ sahəsi, damcı suvarma var.", 46.80, 39.91);
+        plot("AGD-003", "Ağdam əkin sahəsi №3", "Ağdam", EconomicRegion.QARABAG, "Xıdırlı", 70,
+                ActivityType.CROP_FARMING, DeminingStatus.CLEARED, "Tərtər kanalı", true, "Şabalıdı", 4, true, 50,
+                "WHEAT,BARLEY", "Hərrac yolu ilə icarəyə verilən düzən sahə.", 47.05, 39.95);
+        plot("TRT-003", "Tərtər satış sahəsi", "Tərtər", EconomicRegion.QARABAG, "Qapanlı", 25,
+                ActivityType.CROP_FARMING, DeminingStatus.CLEARED, "Tərtərçay", true, "Şabalıdı", 3, true, 40,
+                "WHEAT", "Satış hərracı üçün kiçik sahə.", 46.90, 40.36);
+        plot("CBR-003", "Cəbrayıl əkin sahəsi №3", "Cəbrayıl", EconomicRegion.QARABAG, "Soltanlı", 40,
+                ActivityType.CROP_FARMING, DeminingStatus.CLEARED, "Araz kanalı", true, "Boz", 7, true, 35,
+                "WHEAT,BARLEY", "Keçən həftə hərracla icarəyə verilib.", 47.17, 39.38);
         plots.saveAll(p.values());
     }
 
@@ -293,6 +306,9 @@ public class DataSeeder implements CommandLineRunner {
         climate("KLB-002", 1900, 6.0, -24.0, 145, 720);
         climate("CBR-002", 280, 15.4, -8.5, 24, 310);
         climate("XCL-001", 800, 12.0, -14.5, 65, 520);
+        climate("AGD-003", 310, 14.6, -11.0, 36, 410);
+        climate("TRT-003", 290, 14.2, -13.0, 43, 395);
+        climate("CBR-003", 290, 15.2, -8.5, 25, 315);
     }
 
     private void climate(String plot, int elev, double mean, double absMin, int frostDays, double precip) {
@@ -545,6 +561,109 @@ public class DataSeeder implements CommandLineRunner {
         r.setStatus(status);
         r.setSubmittedAt(at);
         reports.save(r);
+    }
+
+    // ---------------------------------------------------------------- auctions (simulation)
+
+    private void seedAuctions() {
+        LocalDateTime now = LocalDateTime.now(BAKU).withNano(0);
+        // HRC-2026-01 LEASE, LIVE: rashad #1 leads with 4 500; Elvin registered without deposit
+        Auction live = auction("HRC-2026-01", "AGD-003", DealType.LEASE, 3_500, 250, 1_000, 15,
+                now.minusMinutes(10), now.plusMinutes(25), AuctionStatus.LIVE);
+        AuctionParticipant r = participant(live, "rashad", 1, true, now.minusMinutes(30));
+        AuctionParticipant n = participant(live, "nigar", 2, true, now.minusMinutes(28));
+        AuctionParticipant l = participant(live, "leyla", 3, true, now.minusMinutes(20));
+        participant(live, "elvin", 4, false, now.minusMinutes(5));
+        bid(live, n, 3_500, now.minusMinutes(9), false);
+        bid(live, r, 4_000, now.minusMinutes(7), false);
+        bid(live, l, 4_250, now.minusMinutes(5), false);
+        bid(live, r, 4_500, now.minusMinutes(3), false);
+        live.setCurrentPrice(4_500L);
+        p.get("AGD-003").setStatus(PlotStatus.IN_AUCTION);
+
+        // HRC-2026-02 SALE, SCHEDULED tomorrow 11:00
+        Auction sale = auction("HRC-2026-02", "TRT-003", DealType.SALE, 60_000, 2_000, 5_000, null,
+                now.toLocalDate().plusDays(1).atTime(11, 0), now.toLocalDate().plusDays(1).atTime(12, 0), AuctionStatus.SCHEDULED);
+        p.get("TRT-003").setStatus(PlotStatus.IN_AUCTION);
+
+        // HRC-2026-00 LEASE, CONFIRMED last week: 2 000 → 3 250 (+62,5 %), one anti-sniping extension
+        LocalDateTime start = now.minusDays(8).withHour(11).withMinute(0).withSecond(0);
+        Auction done = auction("HRC-2026-00", "CBR-003", DealType.LEASE, 2_000, 250, 500, 15, start, start.plusMinutes(32), AuctionStatus.CONFIRMED);
+        AuctionParticipant k = participant(done, "kamran", 1, true, start.minusDays(1));
+        AuctionParticipant t = participant(done, "tural", 2, true, start.minusDays(1));
+        AuctionParticipant g = participant(done, "nigar", 3, true, start.minusHours(5));
+        bid(done, t, 2_000, start.plusMinutes(3), false);
+        bid(done, k, 2_250, start.plusMinutes(6), false);
+        bid(done, g, 2_500, start.plusMinutes(11), false);
+        bid(done, k, 2_750, start.plusMinutes(17), false);
+        bid(done, t, 3_000, start.plusMinutes(29), true);
+        bid(done, k, 3_250, start.plusMinutes(31), false);
+        done.setCurrentPrice(3_250L);
+        done.setFinalPrice(3_250L);
+        done.setExtensions(1);
+        done.setWinner(u.get("kamran"));
+        done.setConfirmedBy(u.get("komissiya"));
+        done.setConfirmedAt(start.plusDays(1).withHour(10));
+        p.get("CBR-003").setStatus(PlotStatus.LEASED);
+        IntegrationLog log = new IntegrationLog();
+        log.setApplicationNumber("HRC-2026-00");
+        log.setOperation("SEND_AUCTION_RESULT");
+        log.setRequestJson("{\"schemaVersion\":\"1.0\",\"operation\":\"SEND_AUCTION_RESULT\",\"auctionCode\":\"HRC-2026-00\",\"finalPrice\":3250}");
+        log.setResponseJson("{\"status\":\"ACCEPTED\",\"ektisReference\":\"EKTIS-INV-2026-000900\"}");
+        log.setStatus(IntegrationStatus.SUCCESS);
+        log.setEktisRef("EKTIS-INV-2026-000900");
+        log.setDurationMs(305);
+        log.setAt(done.getConfirmedAt().plusSeconds(1));
+        integrationLogs.save(log);
+        FarmProject f = new FarmProject();
+        f.setAuction(done);
+        f.setPlot(p.get("CBR-003"));
+        f.setInvestor(u.get("kamran"));
+        f.setStatus(FarmStatus.ACTIVE);
+        f.setStartDate(done.getConfirmedAt().toLocalDate());
+        f.setCommittedMonths(15 * 12);
+        farms.save(f);
+        auctionRepo.saveAll(List.of(live, sale, done));
+    }
+
+    private Auction auction(String code, String plot, DealType type, long start, long step, long deposit, Integer leaseYears,
+                            LocalDateTime startsAt, LocalDateTime endsAt, AuctionStatus status) {
+        Auction a = new Auction();
+        a.setCode(code);
+        a.setPlot(p.get(plot));
+        a.setDealType(type);
+        a.setStartPrice(start);
+        a.setStep(step);
+        a.setDeposit(deposit);
+        a.setLeaseYears(leaseYears);
+        a.setRules(az.aqroinvest.auction.AuctionService.defaultRules(type));
+        a.setStartsAt(startsAt);
+        a.setEndsAt(endsAt);
+        a.setStatus(status);
+        a.setCreatedBy(u.get("operator"));
+        a.setApprovedBy(u.get("komissiya"));
+        a.setCreatedAt(startsAt.minusDays(3));
+        return auctionRepo.save(a);
+    }
+
+    private AuctionParticipant participant(Auction a, String user, int number, boolean deposit, LocalDateTime at) {
+        AuctionParticipant x = new AuctionParticipant();
+        x.setAuction(a);
+        x.setUser(u.get(user));
+        x.setNumber(number);
+        x.setDepositConfirmed(deposit);
+        x.setRegisteredAt(at);
+        return auctionParticipants.save(x);
+    }
+
+    private void bid(Auction a, AuctionParticipant who, long amount, LocalDateTime at, boolean extended) {
+        Bid b = new Bid();
+        b.setAuction(a);
+        b.setParticipant(who);
+        b.setAmount(amount);
+        b.setCreatedAt(at);
+        b.setExtended(extended);
+        bidRepo.save(b);
     }
 
     // ---------------------------------------------------------------- AI sample

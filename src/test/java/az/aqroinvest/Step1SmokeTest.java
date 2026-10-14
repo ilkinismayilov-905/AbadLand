@@ -31,7 +31,7 @@ class Step1SmokeTest {
     void seedIsLoaded() {
         assertThat(plots.count()).isGreaterThanOrEqualTo(15);
         assertThat(applications.count()).isEqualTo(8);
-        assertThat(farms.count()).isEqualTo(2);
+        assertThat(farms.count()).isEqualTo(3); // 2 from applications + 1 auction winner (HRC-2026-00)
         assertThat(tasks.count()).isGreaterThan(0);
     }
 

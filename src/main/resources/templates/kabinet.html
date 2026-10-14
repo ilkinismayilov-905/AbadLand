@@ -5,7 +5,10 @@
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
-    <h1 class="text-2xl font-bold" th:text="'Xoş gəlmisiniz, ' + ${user.fullName}"></h1>
+    <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-2xl font-bold" th:text="'Xoş gəlmisiniz, ' + ${user.fullName}"></h1>
+        <a th:href="@{/kabinet/herraclarim}" class="ml-auto px-3 py-1.5 rounded border bg-white text-sm hover:bg-leaf-50">Hərraclarım</a>
+    </div>
     <div class="grid lg:grid-cols-3 gap-6">
         <section class="bg-white rounded-lg shadow p-5 text-sm space-y-3">
             <h2 class="font-semibold">Profil</h2>
@@ -53,7 +56,7 @@
                     <span th:if="${f.status.name() == 'ACTIVE'}" class="ml-auto inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Plan üzrə</span>
                     <span th:unless="${f.status.name() == 'ACTIVE'}" class="ml-auto" th:classappend="${@statusLabels.badge(f.status)}" th:text="${@statusLabels.label(f.status)}"></span>
                 </div>
-                <div class="text-sm text-gray-600" th:text="${f.application.number} + ' · başlanğıc ' + ${@fmt.date(f.startDate)}"></div>
+                <div class="text-sm text-gray-600" th:text="${f.sourceLabel()} + ' · başlanğıc ' + ${@fmt.date(f.startDate)}"></div>
             </a>
         </div>
     </section>

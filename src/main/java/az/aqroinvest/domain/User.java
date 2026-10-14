@@ -31,4 +31,7 @@ public class User {
     private String voen;
     private String companyName;
     private Integer experienceYears;
+    /** false = deactivated by admin: cannot log in, open sessions are expired. */
+    private boolean active = true;
+    private java.time.LocalDateTime lastLoginAt;
 }

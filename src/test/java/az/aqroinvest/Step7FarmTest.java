@@ -101,7 +101,7 @@ class Step7FarmTest {
                 .andExpect(flash().attribute("error", containsString("artıq")));
 
         // seeded AT_RISK project: red delayed task; dashboard KPIs
-        FarmProject tural = farms.findAll().stream().filter(f -> f.getApplication().getNumber().equals("QAR-2025-000031")).findFirst().orElseThrow();
+        FarmProject tural = farms.findAll().stream().filter(f -> "QAR-2025-000031".equals(f.sourceLabel())).findFirst().orElseThrow();
         mvc.perform(get("/idare/monitorinq/" + tural.getId()).with(OPERATOR)).andExpect(content().string(allOf(
                 containsString("bg-red-500"), containsString("Gecikir"), containsString("Risk var"))));
         mvc.perform(get("/idare").with(OPERATOR)).andExpect(content().string(allOf(

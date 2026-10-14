@@ -25,6 +25,10 @@
         <a th:href="@{/idare/monitorinq}" class="bg-white rounded-lg shadow p-4 hover:bg-leaf-50"><div class="text-2xl font-bold text-leaf-700" th:text="${farmTotals.actualJobs} + ' / ' + ${farmTotals.promisedJobs}"></div><div class="text-sm text-gray-600">Faktiki iş yerləri / vəd edilən</div></a>
         <a th:href="@{/idare/monitorinq}" class="bg-white rounded-lg shadow p-4 hover:bg-leaf-50"><div class="text-2xl font-bold" th:classappend="${farmTotals.delayedTasks > 0} ? 'text-red-600' : 'text-leaf-700'" th:text="${farmTotals.delayedTasks}"></div><div class="text-sm text-gray-600">Gecikən əkin tapşırıqları</div></a>
     </section>
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a th:href="@{/idare/herraclar}" class="bg-white rounded-lg shadow p-4 hover:bg-leaf-50"><div class="text-2xl font-bold text-leaf-700" th:text="${auctionKpis[0]}"></div><div class="text-sm text-gray-600">Aktiv hərrac</div></a>
+        <a th:href="@{/idare/herraclar}" class="bg-white rounded-lg shadow p-4 hover:bg-leaf-50"><div class="text-2xl font-bold text-leaf-700" th:text="'+' + ${auctionKpis[1]} + '%'"></div><div class="text-sm text-gray-600">Hərraclarda qiymət artımı (orta)</div></a>
+    </section>
     <div class="grid lg:grid-cols-3 gap-6">
         <section class="bg-white rounded-lg shadow p-5">
             <h2 class="font-semibold mb-3">Statuslar üzrə</h2>

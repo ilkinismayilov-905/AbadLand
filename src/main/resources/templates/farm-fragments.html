@@ -46,7 +46,7 @@
         <label>Bitki
             <select name="crop" class="block mt-1 border rounded px-2 py-1.5">
                 <option th:each="c : ${crops}" th:value="${c.code}" th:text="${c.nameAz}"
-                        th:selected="${v.plan.isEmpty() and c.code == v.project.application.plannedCrop}"></option>
+                        th:selected="${v.plan.isEmpty() and v.project.application != null and c.code == v.project.application.plannedCrop}"></option>
             </select></label>
         <label>Sahə, ha <span class="text-gray-500" th:text="'(boş: ' + ${@fmt.dec(v.freeArea())} + ')'"></span>
             <input name="areaHa" type="number" step="0.1" min="0.1" th:max="${v.freeArea()}" th:value="${v.freeArea()}" required class="block mt-1 w-28 border rounded px-2 py-1.5"></label>

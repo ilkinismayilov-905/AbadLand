@@ -109,7 +109,7 @@ class Step4ApplicationFlowTest {
         Application decided = applications.findById(id).orElseThrow();
         assertThat(decided.getStatus()).isEqualTo(ApplicationStatus.DECIDED);
         assertThat(decided.getDecision()).isEqualTo(Decision.APPROVED);
-        assertThat(farms.findAll()).anyMatch(f -> f.getApplication().getId().equals(id) && f.getCommittedJobs() == 24);
+        assertThat(farms.findAll()).anyMatch(f -> f.getApplication() != null && f.getApplication().getId().equals(id) && f.getCommittedJobs() == 24);
         assertThat(history.findByApplicationOrderByAtAscIdAsc(decided)).hasSize(5);
         assertThat(audit.findAll()).filteredOn(a -> "QAR-2026-000008".equals(a.getEntityId()))
                 .extracting(a -> a.getAction()).containsExactly("APPLICATION_SUBMIT", "STATUS_CHANGE", "STATUS_CHANGE",

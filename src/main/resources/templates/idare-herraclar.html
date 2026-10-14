@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head('Hərraclar — idarəetmə')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <nav th:replace="~{app-fragments :: staffNav('auctions')}"></nav>
+    <h1 class="text-2xl font-bold">Hərraclar</h1>
+
+    <details sec:authorize="hasAnyRole('OPERATOR','ADMIN')" class="bg-white rounded-lg shadow p-5">
+        <summary class="cursor-pointer font-semibold text-leaf-700">+ Yeni hərrac</summary>
+        <form th:action="@{/idare/herraclar}" method="post" class="mt-4 grid sm:grid-cols-3 gap-4 text-sm">
+            <label class="block sm:col-span-2">Sahə (boş, müsabiqədə olmayan)
+                <select name="plotId" required class="mt-1 w-full border rounded px-2 py-1.5">
+                    <option th:each="p : ${freePlots}" th:value="${p.id}" th:text="${p.code} + ' · ' + ${p.district} + ' · ' + ${@fmt.dec(p.areaHa)} + ' ha'"></option>
+                </select></label>
+            <label class="block">Əqd növü
+                <select name="dealType" class="mt-1 w-full border rounded px-2 py-1.5">
+                    <option th:each="d : ${dealTypes}" th:value="${d}" th:text="${@statusLabels.label(d)}"></option>
+                </select></label>
+            <label class="block">Başlanğıc qiymət, AZN (icarə: il üçün)<input name="startPrice" type="number" min="1" required class="mt-1 w-full border rounded px-2 py-1.5"></label>
+            <label class="block">Addım, AZN<input name="step" type="number" min="1" required class="mt-1 w-full border rounded px-2 py-1.5"></label>
+            <label class="block">Zaminat, AZN<input name="deposit" type="number" min="0" value="0" required class="mt-1 w-full border rounded px-2 py-1.5"></label>
+            <label class="block">İcarə müddəti, il (yalnız icarə)<input name="leaseYears" type="number" min="1" max="49" value="15" class="mt-1 w-full border rounded px-2 py-1.5"></label>
+            <label class="block">Başlama<input name="startsAt" type="datetime-local" required th:value="${defaultStart}" class="mt-1 w-full border rounded px-2 py-1.5"></label>
+            <label class="block">Bitmə<input name="endsAt" type="datetime-local" required th:value="${defaultStart.plusHours(1)}" class="mt-1 w-full border rounded px-2 py-1.5"></label>
+            <label class="block sm:col-span-3">Qaydalar (boş qalsa standart mətn)<textarea name="rules" rows="2" maxlength="3000" class="mt-1 w-full border rounded px-2 py-1.5"></textarea></label>
+            <div class="sm:col-span-3"><button class="px-5 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Yarat və təsdiqə göndər</button></div>
+        </form>
+    </details>
+
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <table class="w-full text-sm min-w-[900px]">
+            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3">Kod</th><th>Sahə</th><th>Növ</th><th class="text-right">Başlanğıc</th><th class="text-right">Cari / yekun</th>
+                <th class="pl-4">Vaxt</th><th>Status</th><th class="w-72"></th></tr>
+            <tr th:each="a : ${auctions}" class="border-t align-top">
+                <td class="p-3"><a th:href="@{/herraclar/{id}(id=${a.id})}" class="text-leaf-700 underline" th:text="${a.code}"></a></td>
+                <td th:text="${a.plot.code}"></td>
+                <td><span th:class="${@statusLabels.badge(a.dealType)}" th:text="${@statusLabels.label(a.dealType)}"></span></td>
+                <td class="text-right" th:text="${@fmt.money(a.startPrice)}"></td>
+                <td class="text-right" th:text="${a.finalPrice != null} ? ${@fmt.money(a.finalPrice)} : (${a.currentPrice != null} ? ${@fmt.money(a.currentPrice)} : '—')"></td>
+                <td class="pl-4 text-xs" th:text="${@fmt.dateTime(a.startsAt)} + ' – ' + ${@fmt.dateTime(a.endsAt)}"></td>
+                <td><span th:class="${@statusLabels.badge(a.status)}" th:text="${@statusLabels.label(a.status)}"></span>
+                    <div th:if="${a.comment != null}" class="text-xs text-gray-600" th:text="${a.comment}"></div></td>
+                <td class="py-2 pr-3 space-y-1">
+                    <th:block sec:authorize="hasAnyRole('COMMISSION','ADMIN')">
+                        <form th:if="${a.status.name() == 'PENDING_APPROVAL'}" th:action="@{/idare/herraclar/{id}/tesdiq(id=${a.id})}" method="post">
+                            <button class="px-3 py-1 rounded bg-green-600 text-white text-xs">Təsdiqlə</button></form>
+                        <form th:if="${a.status.name() == 'PENDING_APPROVAL'}" th:action="@{/idare/herraclar/{id}/redd(id=${a.id})}" method="post" class="flex gap-1">
+                            <input name="comment" required placeholder="Rədd səbəbi" aria-label="Rədd səbəbi" class="flex-1 border rounded px-2 py-1 text-xs">
+                            <button class="px-3 py-1 rounded bg-red-600 text-white text-xs">Rədd et</button></form>
+                        <form th:if="${a.status.name() == 'ENDED'}" th:action="@{/idare/herraclar/{id}/netice(id=${a.id})}" method="post">
+                            <button class="px-3 py-1 rounded bg-green-600 text-white text-xs">Nəticəni təsdiqlə (protokol)</button></form>
+                    </th:block>
+                    <form sec:authorize="hasAnyRole('OPERATOR','ADMIN')" th:if="${a.status.name() == 'SCHEDULED'}" th:action="@{/idare/herraclar/{id}/legv(id=${a.id})}" method="post" class="flex gap-1">
+                        <input name="comment" required placeholder="Ləğv səbəbi" aria-label="Ləğv səbəbi" class="flex-1 border rounded px-2 py-1 text-xs">
+                        <button class="px-3 py-1 rounded border text-xs">Ləğv et</button></form>
+                    <a th:if="${a.status.name() == 'ENDED' or a.status.name() == 'CONFIRMED'}" th:href="@{/herraclar/{id}/protokol(id=${a.id})}" class="text-xs text-leaf-700 underline">Protokol</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

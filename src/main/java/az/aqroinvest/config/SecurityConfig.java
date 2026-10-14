@@ -37,16 +37,33 @@ public class SecurityConfig {
                 .map(u -> org.springframework.security.core.userdetails.User.withUsername(u.getEmail())
                         .password(u.getPasswordHash())
                         .roles(u.getRole().name())
+                        .disabled(!u.isActive())
                         .build())
                 .orElseThrow(() -> new UsernameNotFoundException(email));
     }
 
+    /** Tracks sessions so a deactivated user's open sessions can be expired. */
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, AuditService audit,
+    org.springframework.security.core.session.SessionRegistry sessionRegistry() {
+        return new org.springframework.security.core.session.SessionRegistryImpl();
+    }
+
+    @Bean
+    org.springframework.security.web.session.HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new org.springframework.security.web.session.HttpSessionEventPublisher();
+    }
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http, AuditService audit, UserRepository users,
+                                    org.springframework.security.core.session.SessionRegistry sessionRegistry,
                                     @Value("${app.external-api-key}") String externalApiKey) throws Exception {
         AuthenticationSuccessHandler onLogin = (req, res, auth) -> {
             String role = auth.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
             audit.log(auth.getName(), role, "LOGIN", "User", auth.getName(), null);
+            users.findByEmailIgnoreCase(auth.getName()).ifPresent(u -> {
+                u.setLastLoginAt(java.time.LocalDateTime.now(AuditService.BAKU));
+                users.save(u);
+            });
             // back to the page that required login (e.g. "Müraciət et"), else the role's home
             var saved = new org.springframework.security.web.savedrequest.HttpSessionRequestCache().getRequest(req, res);
             String path = saved == null ? "" : java.net.URI.create(saved.getRedirectUrl()).getPath();
@@ -59,6 +76,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.POST, "/saheler/*/ai-analiz").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/herraclar/**").hasRole("INVESTOR")
+                        .requestMatchers(HttpMethod.GET, "/herraclar", "/herraclar/*", "/herraclar/*/protokol", "/api/v1/auctions/**").permitAll()
                         .requestMatchers("/", "/xerite", "/saheler/**", "/muqayise", "/musabiqeler", "/uygunluq/**",
                                 "/qeydiyyat", "/giris", "/error", "/css/**", "/js/**", "/favicon.ico",
                                 "/api/v1/plots/**", "/api/v1/competitions", "/api/v1/external/**",
@@ -66,9 +85,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/pay-layiheleri", "/pay-layiheleri/*").permitAll()
                         .requestMatchers("/kabinet/**").hasRole("INVESTOR")
                         .requestMatchers("/idare/audit").hasAnyRole("COMMISSION", "ADMIN")
+                        .requestMatchers("/idare/istifadeciler", "/idare/istifadeciler/**").hasRole("ADMIN")
                         .requestMatchers("/idare/**").hasAnyRole("OPERATOR", "COMMISSION", "ADMIN")
                         .anyRequest().authenticated())
-                .formLogin(f -> f.loginPage("/giris").successHandler(onLogin).failureUrl("/giris?xeta").permitAll())
+                .formLogin(f -> f.loginPage("/giris").successHandler(onLogin).permitAll()
+                        .failureHandler((req, res, ex) -> res.sendRedirect(req.getContextPath()
+                                + (ex instanceof org.springframework.security.authentication.DisabledException ? "/giris?deaktiv" : "/giris?xeta"))))
+                .sessionManagement(s -> s.maximumSessions(-1).sessionRegistry(sessionRegistry).expiredUrl("/giris?deaktiv"))
                 .logout(l -> l.logoutUrl("/cixis").logoutSuccessUrl("/").permitAll())
                 // REST: 401 instead of a redirect to the login page
                 .exceptionHandling(e -> e.defaultAuthenticationEntryPointFor(

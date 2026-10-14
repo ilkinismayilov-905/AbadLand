@@ -34,6 +34,8 @@ public class PlotController {
     private final Fmt fmt;
     private final az.aqroinvest.ai.AiAnalysisService aiService;
     private final az.aqroinvest.ai.SatelliteImageService satellite;
+    private final Viewer3dData viewer3d;
+    private final az.aqroinvest.auction.AuctionService auctionService;
 
     @GetMapping("/saheler")
     public String catalog(@ModelAttribute("filter") PlotFilter filter, Model model) {
@@ -56,22 +58,8 @@ public class PlotController {
         return "xerite";
     }
 
-    /**
-     * Data for Leaflet popups and the 3D viewer (Plot3D.open). Colour comes from ACTIVITY_COLORS in map.js (same as polygons).
-     * applyUrl only for an open competition and non-staff; anonymous users are sent to login and back to the form.
-     */
     private Map<String, Object> viewerData(PlotCard c, org.springframework.security.core.Authentication auth) {
-        Plot p = c.plot();
-        boolean staff = auth != null && auth.getAuthorities().stream().anyMatch(a -> !a.getAuthority().equals("ROLE_INVESTOR"));
-        Map<String, Object> m = new LinkedHashMap<>();
-        m.put("id", p.getId());
-        m.put("code", p.getCode());
-        m.put("name", p.getName());
-        m.put("subtitle", p.getDistrict() + " · " + fmt.dec(p.getAreaHa()) + " ha · " + labels.label(p.getPurpose()));
-        m.put("purpose", p.getPurpose().name());
-        m.put("geoJson", p.getGeoJson());
-        m.put("applyUrl", c.competition() != null && !staff ? "/kabinet/muraciet/yeni?plotId=" + p.getId() : null);
-        return m;
+        return viewer3d.of(c.plot(), c.competition() != null, auth);
     }
 
     @GetMapping("/saheler/{id}")
@@ -101,6 +89,7 @@ public class PlotController {
         }
         model.addAttribute("card", card);
         model.addAttribute("plot3d", viewerData(card, auth));
+        model.addAttribute("plotAuctions", auctionService.forPlot(plot));
         model.addAttribute("plot", plot);
         model.addAttribute("climate", climate);
         model.addAttribute("cropOptions", cropOptions);

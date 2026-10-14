@@ -41,8 +41,10 @@
     <a th:href="@{/idare}" th:class="'px-3 py-1.5 rounded ' + (${active == 'dashboard'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Dashboard</a>
     <a th:href="@{/idare/muracietler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'apps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Müraciətlər</a>
     <a th:href="@{/idare/musabiqeler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'comps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Müsabiqələr</a>
+    <a th:href="@{/idare/herraclar}" th:class="'px-3 py-1.5 rounded ' + (${active == 'auctions'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Hərraclar</a>
     <a th:href="@{/idare/monitorinq}" th:class="'px-3 py-1.5 rounded ' + (${active == 'monitor'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Monitorinq</a>
     <a th:href="@{/idare/inteqrasiya}" th:class="'px-3 py-1.5 rounded ' + (${active == 'ektis'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">EKTİS inteqrasiyası</a>
+    <a sec:authorize="hasRole('ADMIN')" th:href="@{/idare/istifadeciler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'users'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">İstifadəçilər</a>
     <a sec:authorize="hasAnyRole('COMMISSION','ADMIN')" th:href="@{/idare/audit}" th:class="'px-3 py-1.5 rounded ' + (${active == 'audit'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Audit</a>
     <a th:href="@{/swagger-ui.html}" target="_blank" class="px-3 py-1.5 rounded bg-white shadow hover:bg-leaf-50">API ↗</a>
 </nav>

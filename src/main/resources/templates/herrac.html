@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head(${a.code} + ' — Hərrac')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+        <section class="bg-white rounded-lg shadow p-5 space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm text-gray-500" th:text="${a.code}"></span>
+                <span th:class="${@statusLabels.badge(a.dealType)}" th:text="${@statusLabels.label(a.dealType)}"></span>
+                <span th:class="${@statusLabels.badge(a.status)}" th:text="${@statusLabels.label(a.status)}"></span>
+                <a th:if="${a.status.name() == 'CONFIRMED'}" th:href="@{/herraclar/{id}/protokol(id=${a.id})}" class="ml-auto text-sm text-leaf-700 underline">Protokol →</a>
+            </div>
+            <h1 class="text-2xl font-bold" th:text="${a.plot.name}"></h1>
+            <div class="text-gray-600 text-sm" th:text="${a.plot.district} + ' · ' + ${@fmt.dec(a.plot.areaHa)} + ' ha · ' + ${@statusLabels.label(a.plot.purpose)} + ' · ' + ${@statusLabels.label(a.plot.demining)}"></div>
+            <div class="flex flex-wrap gap-2 pt-1">
+                <a th:href="@{/saheler/{id}(id=${a.plot.id})}" class="px-3 py-1.5 rounded border text-sm hover:bg-gray-50">Pasport</a>
+                <button type="button" id="open3d" class="px-3 py-1.5 rounded border text-sm hover:bg-gray-50">3D görünüş</button>
+            </div>
+            <div class="grid sm:grid-cols-4 gap-3 text-sm pt-2">
+                <div><div class="text-gray-500">Başlanğıc</div><b th:text="${@fmt.money(a.startPrice)}"></b></div>
+                <div><div class="text-gray-500">Addım</div><b th:text="${@fmt.money(a.step)}"></b></div>
+                <div><div class="text-gray-500">Zaminat</div><b th:text="${@fmt.money(a.deposit)}"></b></div>
+                <div th:if="${a.leaseYears != null}"><div class="text-gray-500">İcarə müddəti</div><b th:text="${a.leaseYears} + ' il'"></b></div>
+            </div>
+            <p th:if="${a.dealType.name() == 'LEASE'}" class="text-xs text-gray-500">Təklif — bütün sahə üçün illik icarə haqqıdır (AZN/il).</p>
+        </section>
+
+        <section class="bg-white rounded-lg shadow p-5 space-y-2 text-sm">
+            <h2 class="font-semibold">Qaydalar</h2>
+            <p th:text="${a.rules}"></p>
+            <p class="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded p-2" th:text="${legalNote}"></p>
+        </section>
+    </div>
+
+    <!-- Live panel -->
+    <aside class="space-y-4">
+        <section id="auction-live" th:attr="data-id=${a.id},data-area=${a.plot.areaHa}" class="bg-white rounded-lg shadow p-5 space-y-3">
+            <div class="flex items-center justify-between text-sm">
+                <span class="font-semibold">Canlı panel</span>
+                <span class="text-gray-500"><span data-status th:text="${@statusLabels.label(a.status)}"></span> · <span data-participants></span> iştirakçı</span>
+            </div>
+            <div>
+                <div class="text-xs text-gray-500" data-price-label>Cari qiymət</div>
+                <div data-price class="text-4xl font-bold text-leaf-700 rounded transition-colors" th:text="${@fmt.money(a.currentPrice != null ? a.currentPrice : a.startPrice)}"></div>
+                <div th:if="${a.dealType.name() == 'LEASE'}" data-per-ha class="text-xs text-gray-500"></div>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span>Növbəti minimum təklif: <b data-min th:text="${@fmt.money(a.minNextBid())}"></b></span>
+                <span class="font-mono text-lg" data-countdown aria-live="polite">—</span>
+            </div>
+            <div class="text-sm text-green-700 font-medium" data-mine></div>
+
+            <div data-controls hidden class="space-y-2">
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" data-steps="1" class="py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700 disabled:opacity-50">+1 addım</button>
+                    <button type="button" data-steps="2" class="py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700 disabled:opacity-50">+2 addım</button>
+                    <button type="button" data-steps="5" class="py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700 disabled:opacity-50">+5 addım</button>
+                </div>
+                <form data-custom class="flex gap-2">
+                    <input name="amount" type="number" min="1" step="1" placeholder="Məbləğ, AZN" aria-label="Təklif məbləği" class="flex-1 border rounded px-2 py-1.5 text-sm">
+                    <button class="px-3 py-1.5 rounded border text-sm disabled:opacity-50">Təklif ver</button>
+                </form>
+            </div>
+            <p data-msg class="text-sm"></p>
+
+            <!-- Participation (server-rendered) -->
+            <div sec:authorize="hasRole('INVESTOR')" th:if="${a.status.name() == 'LIVE' or a.status.name() == 'SCHEDULED'}" class="border-t pt-3 space-y-2 text-sm">
+                <form th:if="${me == null}" th:action="@{/herraclar/{id}/qeydiyyat(id=${a.id})}" method="post" class="space-y-2">
+                    <label class="flex gap-2"><input type="checkbox" name="rules" value="true" required> <span>Hərrac qaydalarını oxudum və qəbul edirəm.</span></label>
+                    <button class="w-full py-2 rounded bg-blue-700 text-white font-semibold hover:bg-blue-800">Hərraca qeydiyyat</button>
+                </form>
+                <div th:if="${me != null}">Siz: <b th:text="'İştirakçı #' + ${me.number}"></b></div>
+                <form th:if="${me != null and !me.depositConfirmed}" th:action="@{/herraclar/{id}/zaminat(id=${a.id})}" method="post">
+                    <button class="w-full py-2 rounded bg-amber-600 text-white font-semibold hover:bg-amber-700"
+                            th:text="'Zaminat ödənildi (' + ${@fmt.money(a.deposit)} + ', simulyasiya)'"></button>
+                </form>
+            </div>
+            <p sec:authorize="isAnonymous()" class="text-xs text-gray-500 border-t pt-3">Təklif vermək üçün <a th:href="@{/giris}" class="underline">daxil olun</a>.</p>
+            <p sec:authorize="hasAnyRole('OPERATOR','COMMISSION','ADMIN')" class="text-xs text-gray-500 border-t pt-3">İşçilər yalnız izləyə bilər.</p>
+
+            <div class="border-t pt-3">
+                <h3 class="text-sm font-semibold mb-1">Təkliflər tarixçəsi</h3>
+                <ol data-bids class="text-sm"></ol>
+            </div>
+        </section>
+        <section th:if="${a.winner != null}" class="bg-white rounded-lg shadow p-5 text-sm">
+            <b th:text="'Qalib təklif: ' + ${@fmt.money(a.finalPrice)}"></b>
+            <span th:if="${a.upliftPct() != null}" th:text="' (+' + ${@fmt.dec(a.upliftPct())} + '%)'"></span>
+        </section>
+    </aside>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+<script th:src="@{/js/map.js}"></script>
+<th:block th:replace="~{layout :: scripts3d}"></th:block>
+<script th:inline="javascript">
+    const p3 = /*[[${plot3d}]]*/ null;
+    document.getElementById('open3d').addEventListener('click', () => open3d(p3));
+</script>
+<script th:src="@{/js/auction-live.js}"></script>
+</body>
+</html>

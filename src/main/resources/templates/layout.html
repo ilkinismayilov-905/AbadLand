@@ -3,6 +3,8 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:text="${title} + ' · AqroInvest Qarabağ'">AqroInvest Qarabağ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -22,6 +24,7 @@
             <a th:href="@{/saheler}" class="hover:underline">Sahələr</a>
             <a th:href="@{/musabiqeler}" class="hover:underline">Müsabiqələr</a>
             <a th:href="@{/uygunluq}" class="hover:underline">Uyğunluq testi</a>
+            <a th:href="@{/herraclar}" class="hover:underline">Hərraclar</a>
             <!-- "Pay layihələri" (/pay-layiheleri) comes back with Step 8 -->
             <a sec:authorize="hasRole('INVESTOR')" th:href="@{/kabinet}" class="hover:underline font-semibold">Kabinet</a>
             <a sec:authorize="hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/idare}" class="hover:underline font-semibold">İdarəetmə</a>

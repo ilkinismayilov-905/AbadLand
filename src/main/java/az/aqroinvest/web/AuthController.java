@@ -23,6 +23,12 @@ public class AuthController {
     private final PasswordEncoder encoder;
     private final AuditService audit;
 
+    /** /qeydiyyat always creates an INVESTOR: privileged fields are never bound from the request. */
+    @org.springframework.web.bind.annotation.InitBinder("form")
+    void registrationFields(org.springframework.web.bind.WebDataBinder binder) {
+        binder.setDisallowedFields("role", "id", "passwordHash", "active");
+    }
+
     @GetMapping("/giris")
     public String login() {
         return "giris";
