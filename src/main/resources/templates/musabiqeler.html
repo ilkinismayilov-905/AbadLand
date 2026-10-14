@@ -5,7 +5,7 @@
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
     <h1 class="text-2xl font-bold">Açıq müsabiqələr</h1>
-    <p th:if="${competitions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600">Hazırda dərc edilmiş müsabiqə yoxdur.</p>
+    <div th:if="${competitions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Hazırda dərc edilmiş müsabiqə yoxdur.</p></div>
     <section th:each="c : ${competitions}" class="bg-white rounded-lg shadow p-5 space-y-2">
         <div class="flex flex-wrap items-center gap-3">
             <span class="text-sm text-gray-500" th:text="${c.code}"></span>

@@ -21,6 +21,9 @@ import static az.aqroinvest.service.AuditService.BAKU;
 @RequiredArgsConstructor
 public class EktisService {
 
+    /** Sender id in every EKTİS payload. */
+    static final String SOURCE = "AGROINVEST_QARABAG";
+
     private final EktisClient client;
     private final IntegrationLogRepository logs;
     private final ApplicationRepository applications;
@@ -42,6 +45,7 @@ public class EktisService {
     public IntegrationLog sendAuctionResult(Auction a, long bids) {
         ObjectNode n = json.createObjectNode();
         n.put("schemaVersion", "1.0");
+        n.put("source", SOURCE);
         n.put("operation", "SEND_AUCTION_RESULT");
         n.put("auctionCode", a.getCode());
         n.put("dealType", a.getDealType().name());
@@ -100,6 +104,7 @@ public class EktisService {
     String payload(Application a) {
         ObjectNode n = json.createObjectNode();
         n.put("schemaVersion", "1.0");
+        n.put("source", SOURCE);
         n.put("applicationNumber", a.getNumber());
         n.put("decision", a.getDecision() == null ? null : a.getDecision().name());
         n.put("reason", a.getDecisionReason());

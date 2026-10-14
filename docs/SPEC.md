@@ -82,14 +82,17 @@ Operator creates (title, requirements, min investment, deadline, plot checkboxes
 `estInvestment = areaHa × investmentPerHa(first recommended crop)`
 | Component | Max | Rule |
 |---|---|---|
-| Activity | 30 | plot.purpose == chosen → 30, else 0 |
-| Budget | 25 | est ≤ budget → 25; ≤ 1.25×budget → 12; else 0 |
-| Size | 20 | in range → 20; within 20% → 10; else 0 |
+| Activity | 30 | plot.purpose == chosen → 30, else 0 ("Digər" + typed text = OTHER: only OTHER plots get 30) |
+| Budget | 25 | est ≤ budget → 25; ≤ 1.25×budget → 12; else 0 (custom amount is used as the budget) |
+| Size | 20 | in range → 20; within 20% → 10; else 0 (custom min–max range scored the same way) |
 | Demining | 10 | CLEARED 10, PARTIALLY 3, IN_PROGRESS 0 |
 | Infrastructure | 10 | irrigation 5 + electricity 3 + road ≤ 5 km 2 (≤ 15 km 1) |
 | Region | 5 | no preference or district matches → 5 |
 Reasons (✓/✗): "Büdcənizə sığır (təxmini 382 500 AZN)", "Büdcəni ~15% aşır", "Suvarma var" / "Suvarma yoxdur", "Yola 12 km məsafə", "Minalardan tam təmizlənib" / "Qismən təmizlənib — əlavə yoxlama lazımdır", "Təyinat uyğun deyil: Heyvandarlıq". Candidates: plots in PUBLISHED competitions.
-Quiz: activity (4), budget (100k / 250k / 500k / 1M / 2M+), size (5–20 / 20–50 / 50–150 / 150+ ha), district ("Fərqi yoxdur" + list), experience (0 / 1–3 / 3–10 / 10+).
+Quiz: activity (4; "Digər" requires "Fəaliyyət növünü yazın", ≤ 100 chars), budget (100k / 250k / 500k / 1M / 2M+ / "Digər məbləğ" = typed amount ≥ 10 000 AZN, multiple of 1 000), size (1–5 / 5–20 / 20–50 / 50–150 / 150+ ha / "Özüm yazım" = min ≥ 0,5 and max ≥ min), district ("Fərqi yoxdur" + list), experience (0 / 1–3 / 3–10 / 10+). URL params: `activity, budget (0 = custom), budgetCustom, otherText, size (custom), minHa, maxHa, district, experience`. Results show "Seçiminiz: Digər — arıçılıq · …".
+
+## Catalog / map filter
+Params (all optional, GET, shareable): `q` (name / code / village / district, case-insensitive), `fruit`, `activity`, `region`, `district`, `demining`, `minHa`, `maxHa`, `open=true` (only plots in an open competition), `sort` = `deadline` | `area-asc` | `area-desc` | `score` (empty: by code, or by fruit score when `fruit` is set). Desktop auto-applies on change; mobile (< 768 px) uses a bottom sheet with "Tətbiq et" / "Sıfırla". Active filters are shown as removable chips.
 
 ## Fruit / crop designation ("Torpaq təyinatı — meyvələr")
 - Each plot has a suitability score per crop (`PlotCropSuitability`). Priority of sources: EXPERT > AI > RULE.
@@ -226,7 +229,7 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 - Audit every purchase; notify the lead investor.
 
 ## EKTİS mock
-`interface EktisClient { EktisResult send(String payloadJson); }` · `MockEktisClient` (`ektis.mode=MOCK`, default): 300 ms delay, returns `{"status":"ACCEPTED","ektisReference":"EKTIS-INV-2026-xxxxxx"}`; `ektis.mock.fail=true` → FAILED (retry demo); admin can also flip this flag at runtime on `/idare/inteqrasiya` (a restart would reset the H2 demo data). A FAILED send does not undo the decision; admin "Yenidən göndər" re-sends while the application has no `ektisRef`. Payload schemaVersion 1.0: application number, decision, reason, investment, jobs, investor type + FIN/VÖEN, plot code/district/area/purpose, competition code. `HttpEktisClient` stub for `ektis.mode=HTTP`.
+`interface EktisClient { EktisResult send(String payloadJson); }` · `MockEktisClient` (`ektis.mode=MOCK`, default): 300 ms delay, returns `{"status":"ACCEPTED","ektisReference":"EKTIS-INV-2026-xxxxxx"}`; `ektis.mock.fail=true` → FAILED (retry demo); admin can also flip this flag at runtime on `/idare/inteqrasiya` (a restart would reset the H2 demo data). A FAILED send does not undo the decision; admin "Yenidən göndər" re-sends while the application has no `ektisRef`. Payload schemaVersion 1.0: `source` = "AGROINVEST_QARABAG", application number, decision, reason, investment, jobs, investor type + FIN/VÖEN, plot code/district/area/purpose, competition code. `HttpEktisClient` stub for `ektis.mode=HTTP`.
 
 ## Pages
 | URL | Who | Content |

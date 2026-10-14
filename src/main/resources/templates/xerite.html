@@ -5,14 +5,19 @@
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
     <h1 class="text-2xl font-bold">Sahələr xəritədə</h1>
-    <form th:replace="~{layout :: plotFilter('/xerite')}"></form>
-    <p class="text-sm text-gray-600" th:text="${mapPlots.size()} + ' sahə göstərilir. Sahəyə klikləyin — pasporta keçid.'"></p>
-    <div id="map" class="w-full rounded-lg shadow" style="height: 620px"></div>
+    <div class="grid gap-4 md:grid-cols-[300px_minmax(0,1fr)] lg:grid-cols-[340px_minmax(0,1fr)] items-start">
+        <aside class="md:sticky md:top-20"><div th:replace="~{layout :: plotFilter('/xerite', true)}"></div></aside>
+        <div class="space-y-2 min-w-0">
+            <p class="text-sm text-gray-600" aria-live="polite" th:text="${mapPlots.size()} + ' sahə göstərilir. Sahəyə klikləyin — pasporta keçid.'"></p>
+            <div id="map" class="w-full rounded-[14px] shadow h-[65vh] min-h-[420px] md:h-[620px]"></div>
+        </div>
+    </div>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script th:src="@{/js/map.js}"></script>
+<script th:src="@{/js/filters.js}"></script>
 <th:block th:replace="~{layout :: scripts3d}"></th:block>
 <script th:inline="javascript">
     const map = createMap('map');

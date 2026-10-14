@@ -12,12 +12,27 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalModelAdvice {
 
     private final NotificationRepository notifications;
+    private final az.aqroinvest.repo.UserRepository users;
     private final org.springframework.context.ApplicationContext context;
 
     /** True only when DevTools runs (spring-boot:run): layout then loads livereload.js. */
     @ModelAttribute("liveReload")
     public boolean liveReload() {
         return context.containsBean("liveReloadServer");
+    }
+
+    /** Request path for the header's active nav link (Thymeleaf 3.1 no longer exposes #request). */
+    @ModelAttribute("currentPath")
+    public String currentPath(jakarta.servlet.http.HttpServletRequest request) {
+        return request.getRequestURI().substring(request.getContextPath().length());
+    }
+
+    /** Header shows the user's name instead of the e-mail (falls back to the part before @). */
+    @ModelAttribute("userShortName")
+    public String userShortName(Authentication auth) {
+        if (auth == null) return null;
+        return users.findByEmailIgnoreCase(auth.getName()).map(u -> u.getFullName()).filter(n -> n != null && !n.isBlank())
+                .orElse(auth.getName().replaceAll("@.*", ""));
     }
 
     @ModelAttribute("unreadCount")

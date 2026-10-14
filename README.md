@@ -1,4 +1,4 @@
-# AqroInvest Qarabağ
+# AgroInvest Qarabağ
 
 Qarabağ və Şərqi Zəngəzurda kənd təsərrüfatına investisiya portalı (hakaton MVP). İnvestor torpaq sahələrini tapır
 (xəritə, kataloq, meyvə uyğunluğu, uyğunluq testi), qiymətləndirir (pasport, ROI + proqnoz, peyk + 3D + AI analizi),

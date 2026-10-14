@@ -18,7 +18,7 @@
             <option th:each="d : ${dealTypes}" th:value="${d}" th:text="${@statusLabels.label(d)}" th:selected="${d == dealType}"></option></select></label>
         <button class="px-4 py-1.5 rounded bg-leaf-600 text-white">Filtrlə</button>
     </form>
-    <p th:if="${auctions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600">Filtrə uyğun hərrac yoxdur.</p>
+    <div th:if="${auctions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Filtrə uyğun hərrac yoxdur.</p></div>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         <a th:each="a : ${auctions}" th:href="@{/herraclar/{id}(id=${a.id})}" class="bg-white rounded-lg shadow p-4 hover:ring-2 hover:ring-leaf-500 flex flex-col gap-2">
             <div class="flex items-center gap-2">

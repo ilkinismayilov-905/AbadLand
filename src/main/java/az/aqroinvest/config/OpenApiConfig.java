@@ -12,9 +12,9 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    OpenAPI aqroInvestOpenApi() {
+    OpenAPI agroInvestOpenApi() {
         return new OpenAPI()
-                .info(new Info().title("AqroInvest Qarabağ API").version("v1")
+                .info(new Info().title("AgroInvest Qarabağ API").version("v1")
                         .description("Sahələr, müsabiqələr, müraciət statusu və xarici sistemlər üçün qərarlar. Bütün məlumatlar uydurmadır."))
                 .components(new Components().addSecuritySchemes("apiKey",
                         new SecurityScheme().type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name("X-API-Key")));

@@ -74,4 +74,51 @@ class MatchingServiceTest {
                 .containsExactly(0, 25, 10, 3, 5, 0);           // 55 ha within 20% of 50; road > 15 km → 0
         assertThat(m.reasons().get(0)).isEqualTo(new Reason(false, "Təyinat uyğun deyil: Heyvandarlıq"));
     }
+
+    @Test
+    void otherActivityMatchesOnlyOtherPlots() {
+        var other = new Answers(ActivityType.OTHER, 500_000L, "20-50", "", "0", null, "arıçılıq", null, null);
+        assertThat(other.invalid()).isNull();
+        Plot hort = plot("Füzuli", 30, DeminingStatus.CLEARED, true, true, 1);
+        Plot bees = plot("Füzuli", 30, DeminingStatus.CLEARED, true, true, 1);
+        bees.setPurpose(ActivityType.OTHER);
+        assertThat(service.score(bees, crop(1000), other).components().get(0).points()).isEqualTo(30);
+        assertThat(service.score(hort, crop(1000), other).components().get(0).points()).isEqualTo(0);
+        assertThat(new Answers(ActivityType.OTHER, 500_000L, "20-50", "", "0", null, " ", null, null).invalid())
+                .isEqualTo("Fəaliyyət növünü yazın.");
+        assertThat(new Answers(ActivityType.OTHER, 500_000L, "20-50", "", "0", null, "a".repeat(101), null, null).invalid())
+                .contains("100 simvol");
+    }
+
+    @Test
+    void customBudget() {
+        Plot p = plot("Füzuli", 20, DeminingStatus.CLEARED, true, true, 1); // 20 ha × 10 000 = 200 000
+        var fits = new Answers(ActivityType.HORTICULTURE, MatchingService.BUDGET_CUSTOM, "5-20", "", "0", "200 000", null, null, null);
+        assertThat(fits.invalid()).isNull();
+        assertThat(fits.effectiveBudget()).isEqualTo(200_000);
+        assertThat(service.score(p, crop(10_000), fits).components().get(1).points()).isEqualTo(25);
+        var tight = new Answers(ActivityType.HORTICULTURE, MatchingService.BUDGET_CUSTOM, "5-20", "", "0", "170000", null, null, null);
+        assertThat(service.score(p, crop(10_000), tight).components().get(1).points()).isEqualTo(12); // 200 000 ≤ 1.25 × 170 000
+        assertThat(new Answers(ActivityType.HORTICULTURE, 0L, "5-20", "", "0", "9 000", null, null, null).invalid()).contains("10 000");
+        assertThat(new Answers(ActivityType.HORTICULTURE, 0L, "5-20", "", "0", "15 500", null, null, null).invalid()).contains("1 000");
+        assertThat(new Answers(ActivityType.HORTICULTURE, 0L, "5-20", "", "0", "abc", null, null, null).invalid()).isEqualTo("Büdcə məbləğini yazın.");
+    }
+
+    @Test
+    void customAreaRangeUsesSameTolerance() {
+        var custom = new Answers(ActivityType.HORTICULTURE, 500_000L, MatchingService.CUSTOM_SIZE, "", "0", null, null, "10", "30");
+        assertThat(custom.invalid()).isNull();
+        assertThat(sizePoints(30, custom)).isEqualTo(20);   // in range
+        assertThat(sizePoints(36, custom)).isEqualTo(10);   // ≤ 30 × 1.2
+        assertThat(sizePoints(8, custom)).isEqualTo(10);    // ≥ 10 × 0.8
+        assertThat(sizePoints(37, custom)).isEqualTo(0);
+        assertThat(sizePoints(3, new Answers(ActivityType.HORTICULTURE, 500_000L, "1-5", "", "0"))).isEqualTo(20);
+        assertThat(new Answers(ActivityType.HORTICULTURE, 500_000L, "custom", "", "0", null, null, "0,2", "3").invalid()).contains("0,5");
+        assertThat(new Answers(ActivityType.HORTICULTURE, 500_000L, "custom", "", "0", null, null, "20", "10").invalid()).contains("Maksimum");
+        assertThat(new Answers(ActivityType.HORTICULTURE, 500_000L, "custom", "", "0", null, null, "2,5", "4").invalid()).isNull();
+    }
+
+    int sizePoints(double area, Answers a) {
+        return service.score(plot("Füzuli", area, DeminingStatus.CLEARED, true, true, 1), crop(1), a).components().get(2).points();
+    }
 }

@@ -6,7 +6,7 @@ Read `CLAUDE.md`, `docs/SPEC.md` (Entities, Enums, Roles, Seed).
 - `StatusLabels` bean: Azerbaijani label + Tailwind badge classes for every enum.
 - `DataSeeder` (CommandLineRunner): everything in SPEC → Seed (crops with all fields, calendar templates, ≥ 15 plots, demo PlotClimate, competitions, 8 applications with history, 2 farm projects with tasks/workforce/reports, sample AI analysis, 1 share offering).
 - `SecurityConfig`: form login `/giris`, logout, BCrypt. Public: `/`, `/xerite`, `/saheler/**`, `/muqayise`, `/musabiqeler`, `/uygunluq/**`, `/pay-layiheleri` (list + detail GET), `/qeydiyyat`, static, `/api/v1/plots/**`, `/api/v1/competitions`, swagger. `/kabinet/**` INVESTOR; `/idare/**` OPERATOR/COMMISSION/ADMIN; `/api/v1/external/**` API-key filter. After login: investor → `/kabinet`, staff → `/idare`.
-- `templates/layout.html` fragments: header "AqroInvest Qarabağ", nav (Xəritə, Sahələr, Müsabiqələr, Uyğunluq testi, Pay layihələri), login or user + role + notification badge + logout; staff see "İdarəetmə". Tailwind CDN, green/earth palette, flash area.
+- `templates/layout.html` fragments: header "AgroInvest Qarabağ", nav (Xəritə, Sahələr, Müsabiqələr, Uyğunluq testi, Pay layihələri), login or user + role + notification badge + logout; staff see "İdarəetmə". Tailwind CDN, green/earth palette, flash area.
 - Pages: `/` (hero + KPIs), `/giris` (demo accounts box), `/qeydiyyat` (name, email, phone, password, type, FİN or VÖEN+company, consent), placeholders `/kabinet`, `/idare`.
 - `AuditService.log(action, entity, id, details)` on login and registration.
 

@@ -18,8 +18,30 @@ public class DashboardService {
     public record Dashboard(long totalApplications, long totalInvestment, long expectedJobs, long approved,
                             long publishedCompetitions, Map<ApplicationStatus, Long> byStatus, List<DistrictRow> byDistrict) {}
 
+    /** Public home page: stats strip counts + one sample plot (soonest open deadline) for the hero card. */
+    public record Home(long openPlots, long totalHa, long activeCompetitions, long activeAuctions, long districts,
+                       long approvedProjects, PlotService.PlotCard sample) {}
+
     private final ApplicationRepository applications;
     private final CompetitionRepository competitions;
+    private final PlotService plotService;
+    private final az.aqroinvest.repo.FarmProjectRepository farms;
+    private final az.aqroinvest.auction.AuctionService auctionService;
+
+    public Home home() {
+        List<PlotService.PlotCard> cards = plotService.search(PlotService.PlotFilter.none());
+        long activeAuctions = auctionService.list().stream()
+                .filter(a -> a.getStatus() == AuctionStatus.LIVE || a.getStatus() == AuctionStatus.SCHEDULED).count();
+        return new Home(
+                cards.stream().filter(c -> c.plot().getStatus() == PlotStatus.AVAILABLE || c.plot().getStatus() == PlotStatus.IN_AUCTION).count(),
+                Math.round(cards.stream().mapToDouble(c -> c.plot().getAreaHa()).sum()),
+                cards.stream().map(PlotService.PlotCard::competition).filter(Objects::nonNull).distinct().count(),
+                activeAuctions,
+                cards.stream().map(c -> c.plot().getDistrict()).distinct().count(),
+                farms.count(),
+                cards.stream().filter(c -> c.competition() != null)
+                        .min(Comparator.comparing(PlotService.PlotCard::daysLeft).thenComparing(c -> c.plot().getCode())).orElse(null));
+    }
 
     public Dashboard build() {
         List<Application> all = applications.findAll();

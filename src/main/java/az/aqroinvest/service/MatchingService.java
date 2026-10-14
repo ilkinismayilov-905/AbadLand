@@ -13,11 +13,46 @@ import java.util.*;
 @org.springframework.transaction.annotation.Transactional(readOnly = true) // lazy collections also outside web requests
 public class MatchingService {
 
-    /** Quiz answers. budget ≥ 2 000 000 means "2M+" (no upper limit); size = "5-20" | "20-50" | "50-150" | "150+"; district "" = no preference. */
-    public record Answers(ActivityType activity, Long budget, String size, String district, String experience) {
+    /**
+     * Quiz answers. budget ≥ 2 000 000 means "2M+" (no upper limit), budget = BUDGET_CUSTOM uses budgetCustom;
+     * size = "1-5" | "5-20" | "20-50" | "50-150" | "150+" | "custom" (minHa–maxHa); district "" = no preference;
+     * otherText = what the investor typed for activity OTHER. Typed values stay strings so "100 000" / "2,5" parse leniently.
+     */
+    public record Answers(ActivityType activity, Long budget, String size, String district, String experience,
+                          String budgetCustom, String otherText, String minHa, String maxHa) {
+        public Answers(ActivityType activity, Long budget, String size, String district, String experience) {
+            this(activity, budget, size, district, experience, null, null, null, null);
+        }
+
         public boolean complete() {
             return activity != null && budget != null && size != null && !size.isBlank() && district != null
                     && experience != null && !experience.isBlank();
+        }
+
+        /** First problem with the typed values in Azerbaijani, or null when the answers can be scored. */
+        public String invalid() {
+            if (budget != null && budget == BUDGET_CUSTOM) {
+                Long v = parseLong(budgetCustom);
+                if (v == null) return "Büdcə məbləğini yazın.";
+                if (v < BUDGET_CUSTOM_MIN) return "Büdcə ən azı 10 000 AZN olmalıdır.";
+                if (v % 1000 != 0) return "Büdcə 1 000 AZN-ə bölünən məbləğ olmalıdır.";
+            }
+            if (activity == ActivityType.OTHER) {
+                if (otherText == null || otherText.isBlank()) return "Fəaliyyət növünü yazın.";
+                if (otherText.strip().length() > 100) return "Fəaliyyət növü ən çoxu 100 simvol ola bilər.";
+            }
+            if (CUSTOM_SIZE.equals(size)) {
+                Double lo = parseHa(minHa), hi = parseHa(maxHa);
+                if (lo == null || hi == null) return "Sahə üçün minimum və maksimum hektarı yazın.";
+                if (lo < 0.5) return "Minimum sahə ən azı 0,5 ha olmalıdır.";
+                if (hi < lo) return "Maksimum sahə minimumdan kiçik ola bilməz.";
+            }
+            return null;
+        }
+
+        /** Budget in AZN used for scoring. */
+        public long effectiveBudget() {
+            return budget == BUDGET_CUSTOM ? parseLong(budgetCustom) : budget;
         }
     }
 
@@ -33,6 +68,10 @@ public class MatchingService {
     }
 
     public static final long BUDGET_NO_LIMIT = 2_000_000;
+    /** Budget option "Digər məbləğ": the amount comes from Answers.budgetCustom. */
+    public static final long BUDGET_CUSTOM = 0;
+    public static final long BUDGET_CUSTOM_MIN = 10_000;
+    public static final String CUSTOM_SIZE = "custom";
 
     private final PlotService plotService;
     private final CropRepository crops;
@@ -63,14 +102,14 @@ public class MatchingService {
         if (!activityOk) reasons.add(new Reason(false, "Təyinat uyğun deyil: " + labels.label(p.getPurpose())));
 
         long est = Math.round(p.getAreaHa() * (firstCrop == null ? 0 : firstCrop.getInvestmentPerHa()));
-        long budget = a.budget() >= BUDGET_NO_LIMIT ? Long.MAX_VALUE : a.budget();
+        long budget = a.effectiveBudget() >= BUDGET_NO_LIMIT ? Long.MAX_VALUE : a.effectiveBudget();
         int budgetPts = est <= budget ? 25 : est <= budget * 1.25 ? 12 : 0;
         comps.add(new Component("Büdcə", budgetPts, 25));
         reasons.add(est <= budget
                 ? new Reason(true, "Büdcənizə sığır (təxmini " + money(est) + ")")
                 : new Reason(false, "Büdcəni ~" + Math.round((est / (double) budget - 1) * 100) + "% aşır"));
 
-        double[] range = range(a.size());
+        double[] range = range(a);
         double area = p.getAreaHa();
         int sizePts = area >= range[0] && area <= range[1] ? 20 : area >= range[0] * 0.8 && area <= range[1] * 1.2 ? 10 : 0;
         comps.add(new Component("Sahə ölçüsü", sizePts, 20));
@@ -95,8 +134,10 @@ public class MatchingService {
         return new Match(p, null, null, total, comps, reasons);
     }
 
-    static double[] range(String size) {
-        return switch (size) {
+    static double[] range(Answers a) {
+        return switch (a.size()) {
+            case "1-5" -> new double[]{1, 5};
+            case CUSTOM_SIZE -> new double[]{parseHa(a.minHa()), parseHa(a.maxHa())};
             case "5-20" -> new double[]{5, 20};
             case "20-50" -> new double[]{20, 50};
             case "50-150" -> new double[]{50, 150};
@@ -107,6 +148,24 @@ public class MatchingService {
 
     static String firstRecommended(Plot p) {
         return p.getRecommendedCrops() == null || p.getRecommendedCrops().isBlank() ? null : p.getRecommendedCrops().split(",")[0].trim();
+    }
+
+    /** "100 000" / "100000" → 100000; null when empty or not a number. */
+    static Long parseLong(String s) {
+        if (s == null) return null;
+        String digits = s.replaceAll("[\\s\u00a0]", "");
+        return digits.matches("\\d{1,12}") ? Long.parseLong(digits) : null;
+    }
+
+    /** "2,5" / "2.5" → 2.5; null when empty or not a number. */
+    static Double parseHa(String s) {
+        if (s == null || s.isBlank()) return null;
+        try {
+            double v = Double.parseDouble(s.strip().replace(',', '.'));
+            return Double.isFinite(v) ? v : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static String money(long v) {

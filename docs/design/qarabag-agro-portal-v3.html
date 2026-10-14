@@ -106,9 +106,9 @@ const RAW=[[39.62,47.17,"Füzuli taxıl sahəsi","Füzuli",120,1,"2026-12-15","�
 const PARCELS=RAW.map((r,i)=>({id:i+1,lat:r[0],lng:r[1],name:r[2],rayon:r[3],ha:r[4],type:r[5],deadline:r[6],modes:r[7],terms:r[8]}));
 const FLOW=["Qəbul edilib","Baxılır","Əlavə məlumat tələb olunur","Qərar verilib"];
 let S={view:"map",role:"user",filter:0,sel:null,cmp:[],apps:[],board:[
- {id:1,parcel:9,leader:"Aqro-Qarabağ MMC",role:"Maliyyə ortağı",share:30,note:"Mal-qara kompleksi üçün maliyyə ortağı axtarılır.",req:[]},
+ {id:1,parcel:9,leader:"Agro-Qarabağ MMC",role:"Maliyyə ortağı",share:30,note:"Mal-qara kompleksi üçün maliyyə ortağı axtarılır.",req:[]},
  {id:2,parcel:3,leader:"Zəngəzur Bağları ASC",role:"Texniki ortaq",share:20,note:"Üzüm emalı və suvarma texnologiyası bilən ortaq.",req:[]},
- {id:3,parcel:1,leader:"Siz",own:true,role:"Yerli ortaq",share:25,note:"Taxıl sahəsi üçün yerli ortaq.",req:[{n:"Füzuli Aqro MMC",st:"Gözləyir"}]}]};
+ {id:3,parcel:1,leader:"Siz",own:true,role:"Yerli ortaq",share:25,note:"Taxıl sahəsi üçün yerli ortaq.",req:[{n:"Füzuli Agro MMC",st:"Gözləyir"}]}]};
 try{const r=JSON.parse(localStorage.getItem("qai_v3")||"null");if(r){S.apps=r.apps||[];S.board=r.board||S.board}}catch(e){}
 const sv=()=>{try{localStorage.setItem("qai_v3",JSON.stringify({apps:S.apps,board:S.board}))}catch(e){}};
 const $=s=>document.querySelector(s),esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));

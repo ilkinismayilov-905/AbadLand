@@ -79,7 +79,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/herraclar/**").hasRole("INVESTOR")
                         .requestMatchers(HttpMethod.GET, "/herraclar", "/herraclar/*", "/herraclar/*/protokol", "/api/v1/auctions/**").permitAll()
                         .requestMatchers("/", "/xerite", "/saheler/**", "/muqayise", "/musabiqeler", "/uygunluq/**",
-                                "/qeydiyyat", "/giris", "/error", "/css/**", "/js/**", "/favicon.ico",
+                                "/qeydiyyat", "/giris", "/error", "/css/**", "/js/**", "/img/**", "/site.webmanifest", "/favicon.ico",
                                 "/api/v1/plots/**", "/api/v1/competitions", "/api/v1/external/**",
                                 "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/pay-layiheleri", "/pay-layiheleri/*").permitAll()

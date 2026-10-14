@@ -11,7 +11,7 @@
     <groupId>az.aqroinvest</groupId>
     <artifactId>aqroinvest</artifactId>
     <version>0.1.0</version>
-    <name>AqroInvest Qarabag</name>
+    <name>AgroInvest Qarabag</name>
     <properties>
         <java.version>21</java.version>
         <!-- spring-boot:run only (templates from src + live reload); override: -Dspring-boot.run.profiles=pg -->

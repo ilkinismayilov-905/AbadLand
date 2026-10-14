@@ -38,16 +38,16 @@ public class PlotController {
     private final az.aqroinvest.auction.AuctionService auctionService;
 
     @GetMapping("/saheler")
-    public String catalog(@ModelAttribute("filter") PlotFilter filter, Model model) {
-        addFilterOptions(model);
+    public String catalog(@ModelAttribute("filter") PlotFilter filter, Model model, jakarta.servlet.http.HttpServletRequest request) {
+        addFilterOptions(model, filter, request);
         model.addAttribute("cards", plotService.search(filter));
         return "saheler";
     }
 
     @GetMapping("/xerite")
     public String map(@ModelAttribute("filter") PlotFilter filter, Model model,
-                      org.springframework.security.core.Authentication auth) {
-        addFilterOptions(model);
+                      org.springframework.security.core.Authentication auth, jakarta.servlet.http.HttpServletRequest request) {
+        addFilterOptions(model, filter, request);
         model.addAttribute("mapPlots", plotService.search(filter).stream().map(c -> {
             Map<String, Object> m = viewerData(c, auth);
             m.put("district", c.plot().getDistrict());
@@ -179,11 +179,44 @@ public class PlotController {
         return new Row(label, values, best);
     }
 
-    private void addFilterOptions(Model model) {
+    /** An active filter shown as a removable chip: "Nar ×" links to the same page without that filter. */
+    public record Chip(String label, String removeUrl) {}
+
+    private void addFilterOptions(Model model, PlotFilter f, jakarta.servlet.http.HttpServletRequest request) {
+        List<Crop> fruits = crops.findAll().stream().filter(Crop::isFruit).toList();
         model.addAttribute("districts", plotService.districts());
-        model.addAttribute("fruits", crops.findAll().stream().filter(Crop::isFruit).toList());
+        model.addAttribute("districtRegions", plotService.districtRegions());
+        model.addAttribute("fruits", fruits);
         model.addAttribute("regions", EconomicRegion.values());
         model.addAttribute("activities", ActivityType.values());
         model.addAttribute("deminings", DeminingStatus.values());
+        String query = request.getQueryString() == null ? "" : "?" + request.getQueryString();
+        model.addAttribute("cardsUrl", "/saheler" + query);
+        model.addAttribute("mapUrl", "/xerite" + query);
+
+        String path = request.getRequestURI();
+        java.util.function.Function<String[], String> without = names -> {
+            var b = org.springframework.web.util.UriComponentsBuilder.fromUriString(path + query);
+            for (String n : names) b.replaceQueryParam(n);
+            return b.build().toUriString();
+        };
+        List<Chip> chips = new java.util.ArrayList<>();
+        if (notBlank(f.q())) chips.add(new Chip("“" + f.q().strip() + "”", without.apply(new String[]{"q"})));
+        if (notBlank(f.fruit())) fruits.stream().filter(c -> c.getCode().equals(f.fruit())).findFirst()
+                .ifPresent(c -> chips.add(new Chip(c.getNameAz(), without.apply(new String[]{"fruit"}))));
+        if (f.activity() != null) chips.add(new Chip(labels.label(f.activity()), without.apply(new String[]{"activity"})));
+        if (f.region() != null) chips.add(new Chip(labels.label(f.region()), without.apply(new String[]{"region"})));
+        if (notBlank(f.district())) chips.add(new Chip(f.district(), without.apply(new String[]{"district"})));
+        if (f.demining() != null) chips.add(new Chip(labels.label(f.demining()), without.apply(new String[]{"demining"})));
+        if (f.minHa() != null || f.maxHa() != null)
+            chips.add(new Chip((f.minHa() == null ? "0" : fmt.dec(f.minHa())) + "–" + (f.maxHa() == null ? "∞" : fmt.dec(f.maxHa())) + " ha",
+                    without.apply(new String[]{"minHa", "maxHa"})));
+        if (Boolean.TRUE.equals(f.open())) chips.add(new Chip("Yalnız müsabiqədə olanlar", without.apply(new String[]{"open"})));
+        model.addAttribute("activeChips", chips);
+        model.addAttribute("clearUrl", path);
+    }
+
+    private static boolean notBlank(String s) {
+        return s != null && !s.isBlank();
     }
 }

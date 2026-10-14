@@ -31,9 +31,9 @@
         </section>
         <section class="lg:col-span-2 bg-white rounded-lg shadow p-5">
             <h2 class="font-semibold mb-3">Müraciətlərim</h2>
-            <p th:if="${applications.isEmpty()}" class="text-sm text-gray-600">Hələ müraciətiniz yoxdur.
+            <div th:if="${applications.isEmpty()}" class="text-sm text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Hələ müraciətiniz yoxdur.
                 <a th:href="@{/uygunluq}" class="text-leaf-700 underline">Uyğunluq testindən</a> və ya
-                <a th:href="@{/saheler}" class="text-leaf-700 underline">kataloqdan</a> sahə seçin.</p>
+                <a th:href="@{/saheler}" class="text-leaf-700 underline">kataloqdan</a> sahə seçin.</p></div>
             <table th:unless="${applications.isEmpty()}" class="w-full text-sm">
                 <tr class="text-left text-gray-500"><th class="py-1">Nömrə</th><th>Sahə</th><th>Status</th><th>Yeniləndi</th></tr>
                 <tr th:each="a : ${applications}" class="border-t hover:bg-gray-50">

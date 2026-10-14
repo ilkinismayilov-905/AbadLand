@@ -4,7 +4,9 @@
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
-<main class="max-w-4xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-8">
+<main class="max-w-4xl mx-auto px-4 py-10">
+    <a th:replace="~{layout :: authLogo}"></a>
+    <div class="grid md:grid-cols-2 gap-8">
     <form th:action="@{/giris}" method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
         <h1 class="text-2xl font-bold">Daxil ol</h1>
         <div th:if="${param.xeta}" class="p-3 rounded bg-red-100 text-red-800">E-poçt və ya şifrə yanlışdır.</div>
@@ -30,6 +32,7 @@
             <li><code>komissiya@demo.az</code> — Komissiya</li>
             <li><code>admin@demo.az</code> — Admin</li>
         </ul>
+    </div>
     </div>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>

@@ -1,4 +1,4 @@
-# Plan — AqroInvest Qarabağ MVP
+# Plan — AgroInvest Qarabağ MVP
 
 **Format:** bir Spring Boot tətbiqi həm backend-i, həm də HTML səhifələri verir (Thymeleaf + Tailwind CDN + Leaflet). Node, React və Docker yoxdur. Baza H2-dir: hər açılışda sınaq məlumatı təzədən yüklənir, yəni restart = demo sıfırlama. Bu, TZ-nin tövsiyəsinə (Java + HTML/CSS) birbaşa uyğundur.
 
