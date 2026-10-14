@@ -15,6 +15,7 @@ import static az.aqroinvest.service.AuditService.BAKU;
 
 @Service
 @RequiredArgsConstructor
+@org.springframework.transaction.annotation.Transactional(readOnly = true) // lazy collections also outside web requests
 public class PlotService {
 
     /** Catalog/map filter; all fields optional. fruit = crop code for "Hansı meyvə üçün?". */

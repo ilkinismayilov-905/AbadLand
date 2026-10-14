@@ -10,8 +10,8 @@
 | 6 | Satellite, real climate, AI land analysis | 1:00 | ✅ |
 | 6b | 3D satellite view of a plot | 0:25 | ✅ |
 | 7 | Farm management + planting calendar | 0:50 | ✅ |
-| 8 | OPTIONAL: co-investment shares (simulation) | 0:35 | ⬜ |
-| 9 | Polish, README, demo test | 0:30 | ⬜ |
+| 8 | OPTIONAL: co-investment shares (simulation) | 0:35 | ⏭ skipped (nav link hidden; seed offering kept) |
+| 9 | Polish, README, demo test | 0:30 | ✅ |
 
 Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 
@@ -63,3 +63,9 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - Pages: `/kabinet/teserrufat/{id}` (5 sections, shared `farm-fragments.html`), Kabinet "Təsərrüfatlarım", link from approved application; `/idare/monitorinq` (+ detail with satellite image, report review); dashboard +3 farm KPIs.
 - Timeline = one CSS grid per task row (auto-placement mixed rows). "İcra olundu" only for tasks already started.
 - Tests: `FarmProgressTest` (percentages, risk, 14-day grace), `Step7FarmTest` (demo steps 10–11 on DB `step7`).
+
+### Step 9 — 2026-10-14
+- Polish: AZ binding messages (`messages.properties`), 500 + generic error pages, all pages checked at 375 px in Chrome (farm task table now scrolls), "Pay layihələri" nav hidden until Step 8. `PlotService`/`MatchingService` read-only transactional (lazy collections outside web requests).
+- `DemoPathTest`: SPEC demo steps 1–11 through services (fake AI). 40 tests green. README rewritten (run, env, accounts, pages, mermaid, PostgreSQL/EKTİS, roadmap). `spring-boot.run.profiles` is now a pom property → `-Dspring-boot.run.profiles=pg` works.
+- HTTP demo walk on the running app: every step OK; slowest = approve 0.31 s (mock EKTİS 300 ms). No FİN/VÖEN/key in logs. Real Claude call still unverified here (no key).
+- Note: after adding a NEW file under `src/main/resources` (e.g. messages.properties) do a full restart, not a DevTools restart (Boot caches the "file missing" check).

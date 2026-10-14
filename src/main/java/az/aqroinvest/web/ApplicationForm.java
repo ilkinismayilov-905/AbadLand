@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class ApplicationForm {
-    @NotNull
+    @NotNull(message = "Sahə seçilməyib")
     private Long plotId;
     @NotBlank(message = "Bitkini seçin")
     private String plannedCrop;

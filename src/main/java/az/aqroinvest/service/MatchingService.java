@@ -10,6 +10,7 @@ import java.util.*;
 /** Matching score 0–100 from SPEC ("Matching score"). */
 @Service
 @RequiredArgsConstructor
+@org.springframework.transaction.annotation.Transactional(readOnly = true) // lazy collections also outside web requests
 public class MatchingService {
 
     /** Quiz answers. budget ≥ 2 000 000 means "2M+" (no upper limit); size = "5-20" | "20-50" | "50-150" | "150+"; district "" = no preference. */
