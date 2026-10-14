@@ -47,7 +47,14 @@ public class SecurityConfig {
         AuthenticationSuccessHandler onLogin = (req, res, auth) -> {
             String role = auth.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
             audit.log(auth.getName(), role, "LOGIN", "User", auth.getName(), null);
-            res.sendRedirect(req.getContextPath() + ("INVESTOR".equals(role) ? "/kabinet" : "/idare"));
+            // back to the page that required login (e.g. "Müraciət et"), else the role's home
+            var saved = new org.springframework.security.web.savedrequest.HttpSessionRequestCache().getRequest(req, res);
+            String path = saved == null ? "" : java.net.URI.create(saved.getRedirectUrl()).getPath();
+            // only our own pages (browsers probe /.well-known/... which must not become the landing page)
+            boolean savedOk = saved != null && saved.getMethod().equals("GET")
+                    && ("INVESTOR".equals(role) ? path.startsWith("/kabinet/") || path.startsWith("/pay-layiheleri")
+                    : path.startsWith("/idare/")) || saved != null && path.equals("/bildirisler");
+            res.sendRedirect(savedOk ? saved.getRedirectUrl() : req.getContextPath() + ("INVESTOR".equals(role) ? "/kabinet" : "/idare"));
         };
         http
                 .authorizeHttpRequests(a -> a

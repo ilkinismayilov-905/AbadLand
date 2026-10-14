@@ -4,9 +4,10 @@
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
-<main class="max-w-7xl mx-auto px-4 py-8">
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
+    <nav th:replace="~{app-fragments :: staffNav('dashboard')}"></nav>
     <h1 class="text-2xl font-bold">İdarəetmə paneli</h1>
-    <p class="mt-2 text-gray-600">Dashboard, müraciətlər, müsabiqələr və monitorinq növbəti mərhələlərdə əlavə olunacaq.</p>
+    <p class="text-gray-600">Dashboard Step 5-də əlavə olunacaq. <a th:href="@{/idare/muracietler}" class="text-leaf-700 underline">Müraciətlərə keç →</a></p>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>
 </body>

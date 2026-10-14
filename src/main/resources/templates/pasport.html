@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{layout :: head(${plot.code} + ' — Pasport')}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
@@ -117,7 +117,7 @@
                     <div>Son tarix: <span th:text="${@fmt.date(card.competition.deadline)}"></span>
                         (<span th:class="${card.daysLeft <= 7} ? 'text-red-600 font-semibold' : ''" th:text="${card.daysLeft} + ' gün qalıb'"></span>)</div>
                     <div>Minimum investisiya: <span th:text="${@fmt.money(card.competition.minInvestment)}"></span></div>
-                    <a th:href="@{/kabinet/muraciet/yeni(plotId=${plot.id})}" class="block text-center mt-3 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Müraciət et</a>
+                    <a sec:authorize="!hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/kabinet/muraciet/yeni(plotId=${plot.id})}" class="block text-center mt-3 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Müraciət et</a>
                 </div>
             </section>
             <section class="bg-white rounded-lg shadow p-5 text-sm space-y-1">

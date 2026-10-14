@@ -6,23 +6,43 @@
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
     <h1 class="text-2xl font-bold" th:text="'Xoş gəlmisiniz, ' + ${user.fullName}"></h1>
-    <section class="bg-white rounded-lg shadow p-5 text-sm grid md:grid-cols-3 gap-2">
-        <div><span class="text-gray-500">E-poçt:</span> <span th:text="${user.email}"></span></div>
-        <div><span class="text-gray-500">Telefon:</span> <span th:text="${user.phone}"></span></div>
-        <div><span class="text-gray-500">Növ:</span> <span th:text="${@statusLabels.label(user.investorType)}"></span></div>
-    </section>
-    <section class="bg-white rounded-lg shadow p-5">
-        <h2 class="font-semibold mb-3">Müraciətlərim</h2>
-        <p th:if="${applications.isEmpty()}" class="text-sm text-gray-600">Hələ müraciətiniz yoxdur. <a th:href="@{/saheler}" class="text-leaf-700 underline">Sahələrə baxın</a>.</p>
-        <table th:unless="${applications.isEmpty()}" class="w-full text-sm">
-            <tr class="text-left text-gray-500"><th>Nömrə</th><th>Sahə</th><th>Status</th></tr>
-            <tr th:each="a : ${applications}" class="border-t">
-                <td class="py-2" th:text="${a.number}"></td>
-                <td th:text="${a.plot.code}"></td>
-                <td><span th:class="${@statusLabels.badge(a.status)}" th:text="${@statusLabels.label(a.status)}"></span></td>
-            </tr>
-        </table>
-    </section>
+    <div class="grid lg:grid-cols-3 gap-6">
+        <section class="bg-white rounded-lg shadow p-5 text-sm space-y-3">
+            <h2 class="font-semibold">Profil</h2>
+            <div><span class="text-gray-500">E-poçt:</span> <span th:text="${user.email}"></span></div>
+            <div><span class="text-gray-500">Telefon:</span> <span th:text="${user.phone}"></span></div>
+            <div><span class="text-gray-500">Növ:</span> <span th:text="${@statusLabels.label(user.investorType)}"></span>
+                <span th:if="${user.companyName != null}" th:text="'· ' + ${user.companyName}"></span></div>
+            <form th:action="@{/kabinet/profil}" th:object="${profile}" method="post" class="space-y-2 pt-2 border-t">
+                <label th:if="${user.investorType == null or user.investorType.name() == 'INDIVIDUAL'}" class="block">FİN
+                    <input th:field="*{fin}" maxlength="7" class="mt-1 w-full border rounded px-2 py-1 uppercase">
+                    <span class="text-red-600" th:errors="*{fin}"></span></label>
+                <label th:if="${user.investorType != null and user.investorType.name() == 'LEGAL'}" class="block">VÖEN
+                    <input th:field="*{voen}" maxlength="10" class="mt-1 w-full border rounded px-2 py-1">
+                    <span class="text-red-600" th:errors="*{voen}"></span></label>
+                <label class="block">Təcrübə (il)
+                    <input th:field="*{experienceYears}" type="number" min="0" max="80" class="mt-1 w-full border rounded px-2 py-1">
+                    <span class="text-red-600" th:errors="*{experienceYears}"></span></label>
+                <button class="px-3 py-1.5 rounded bg-leaf-600 text-white hover:bg-leaf-700">Yadda saxla</button>
+            </form>
+        </section>
+        <section class="lg:col-span-2 bg-white rounded-lg shadow p-5">
+            <h2 class="font-semibold mb-3">Müraciətlərim</h2>
+            <p th:if="${applications.isEmpty()}" class="text-sm text-gray-600">Hələ müraciətiniz yoxdur.
+                <a th:href="@{/uygunluq}" class="text-leaf-700 underline">Uyğunluq testindən</a> və ya
+                <a th:href="@{/saheler}" class="text-leaf-700 underline">kataloqdan</a> sahə seçin.</p>
+            <table th:unless="${applications.isEmpty()}" class="w-full text-sm">
+                <tr class="text-left text-gray-500"><th class="py-1">Nömrə</th><th>Sahə</th><th>Status</th><th>Yeniləndi</th></tr>
+                <tr th:each="a : ${applications}" class="border-t hover:bg-gray-50">
+                    <td class="py-2"><a th:href="@{/kabinet/muraciet/{id}(id=${a.id})}" class="text-leaf-700 font-medium underline" th:text="${a.number}"></a></td>
+                    <td th:text="${a.plot.code} + ' · ' + ${a.plot.district}"></td>
+                    <td><span th:class="${@statusLabels.badge(a.status)}" th:text="${@statusLabels.label(a.status)}"></span>
+                        <span th:if="${a.decision != null}" th:class="${@statusLabels.badge(a.decision)}" th:text="${@statusLabels.label(a.decision)}"></span></td>
+                    <td th:text="${@fmt.dateTime(a.updatedAt)}"></td>
+                </tr>
+            </table>
+        </section>
+    </div>
     <p class="text-sm text-gray-500">Təsərrüfatlarım və pay layihələri növbəti mərhələlərdə əlavə olunacaq.</p>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>

@@ -33,6 +33,11 @@ public class Fmt {
         return java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(az.aqroinvest.service.AuditService.BAKU), d);
     }
 
+    /** FİN/VÖEN in staff lists: first 3 chars + ****. */
+    public String mask(String v) {
+        return v == null || v.isBlank() ? "—" : v.substring(0, Math.min(3, v.length())) + "****";
+    }
+
     public String date(LocalDate d) {
         return d == null ? "—" : d.format(DATE);
     }
