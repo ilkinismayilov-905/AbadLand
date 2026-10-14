@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · AqroInvest Qarabağ'">AqroInvest Qarabağ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: {
+            leaf: {50:'#f1f8ee',100:'#dcefd3',500:'#4d8b31',600:'#3d7326',700:'#2f5a1e',800:'#23431a'},
+            earth: {50:'#faf6f0',100:'#f1e7d6',500:'#a0703c',700:'#6e4a25'} } } } };
+    </script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<header th:fragment="header" class="bg-leaf-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-4">
+        <a th:href="@{/}" class="text-xl font-bold tracking-tight">🌱 AqroInvest Qarabağ</a>
+        <nav class="flex flex-wrap gap-4 text-sm">
+            <a th:href="@{/xerite}" class="hover:underline">Xəritə</a>
+            <a th:href="@{/saheler}" class="hover:underline">Sahələr</a>
+            <a th:href="@{/musabiqeler}" class="hover:underline">Müsabiqələr</a>
+            <a th:href="@{/uygunluq}" class="hover:underline">Uyğunluq testi</a>
+            <a th:href="@{/pay-layiheleri}" class="hover:underline">Pay layihələri</a>
+            <a sec:authorize="hasRole('INVESTOR')" th:href="@{/kabinet}" class="hover:underline font-semibold">Kabinet</a>
+            <a sec:authorize="hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/idare}" class="hover:underline font-semibold">İdarəetmə</a>
+        </nav>
+        <div class="ml-auto flex items-center gap-3 text-sm">
+            <th:block sec:authorize="isAnonymous()">
+                <a th:href="@{/giris}" class="px-3 py-1 rounded bg-white text-leaf-700 font-medium">Daxil ol</a>
+                <a th:href="@{/qeydiyyat}" class="hover:underline">Qeydiyyat</a>
+            </th:block>
+            <th:block sec:authorize="isAuthenticated()">
+                <a th:href="@{/bildirisler}" class="relative" title="Bildirişlər">🔔
+                    <span th:if="${unreadCount > 0}" th:text="${unreadCount}"
+                          class="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full px-1.5"></span>
+                </a>
+                <span>
+                    <span sec:authentication="name"></span>
+                    <span class="text-leaf-100" th:text="'(' + ${@statusLabels.roleLabel(#authentication.authorities[0].authority)} + ')'"></span>
+                </span>
+                <form th:action="@{/cixis}" method="post">
+                    <button class="px-3 py-1 rounded border border-white/60 hover:bg-white/10">Çıxış</button>
+                </form>
+            </th:block>
+        </div>
+    </div>
+</header>
+
+<div th:fragment="flash" class="max-w-7xl mx-auto px-4 mt-4">
+    <div th:if="${success}" th:text="${success}" class="p-3 rounded bg-green-100 text-green-800 border border-green-200"></div>
+    <div th:if="${error}" th:text="${error}" class="p-3 rounded bg-red-100 text-red-800 border border-red-200"></div>
+</div>
+
+<footer th:fragment="footer" class="mt-16 border-t bg-earth-50 text-sm text-earth-700">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        AqroInvest Qarabağ — hakaton MVP. Bütün məlumatlar uydurmadır (sınaq dəyəri).
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Tapılmadı')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<main class="max-w-xl mx-auto px-4 py-16 text-center">
+    <h1 class="text-3xl font-bold">404 — Səhifə tapılmadı</h1>
+    <a th:href="@{/}" class="inline-block mt-6 text-leaf-700 underline">Ana səhifəyə qayıt</a>
+</main>
+</body>
+</html>

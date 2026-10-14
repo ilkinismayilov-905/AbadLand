@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Qeydiyyat')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<main class="max-w-xl mx-auto px-4 py-10">
+    <form th:action="@{/qeydiyyat}" th:object="${form}" method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
+        <h1 class="text-2xl font-bold">İnvestor qeydiyyatı</h1>
+        <div th:if="${#fields.hasGlobalErrors()}" class="p-3 rounded bg-red-100 text-red-800">
+            <p th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p>
+        </div>
+        <label class="block"><span class="text-sm font-medium">Ad və soyad</span>
+            <input th:field="*{fullName}" class="mt-1 w-full border rounded px-3 py-2">
+            <span class="text-sm text-red-600" th:errors="*{fullName}"></span></label>
+        <label class="block"><span class="text-sm font-medium">E-poçt</span>
+            <input th:field="*{email}" type="email" class="mt-1 w-full border rounded px-3 py-2">
+            <span class="text-sm text-red-600" th:errors="*{email}"></span></label>
+        <label class="block"><span class="text-sm font-medium">Telefon</span>
+            <input th:field="*{phone}" placeholder="+994 50 123 45 67" class="mt-1 w-full border rounded px-3 py-2">
+            <span class="text-sm text-red-600" th:errors="*{phone}"></span></label>
+        <label class="block"><span class="text-sm font-medium">Şifrə</span>
+            <input th:field="*{password}" type="password" class="mt-1 w-full border rounded px-3 py-2">
+            <span class="text-sm text-red-600" th:errors="*{password}"></span></label>
+        <fieldset>
+            <legend class="text-sm font-medium">İnvestor növü</legend>
+            <label class="mr-4"><input type="radio" th:field="*{investorType}" value="INDIVIDUAL" onchange="toggleType()"> Fiziki şəxs</label>
+            <label><input type="radio" th:field="*{investorType}" value="LEGAL" onchange="toggleType()"> Hüquqi şəxs</label>
+        </fieldset>
+        <div id="individual">
+            <label class="block"><span class="text-sm font-medium">FİN</span>
+                <input th:field="*{fin}" maxlength="7" class="mt-1 w-full border rounded px-3 py-2 uppercase">
+                <span class="text-sm text-red-600" th:errors="*{fin}"></span></label>
+        </div>
+        <div id="legal" class="space-y-4">
+            <label class="block"><span class="text-sm font-medium">VÖEN</span>
+                <input th:field="*{voen}" maxlength="10" class="mt-1 w-full border rounded px-3 py-2">
+                <span class="text-sm text-red-600" th:errors="*{voen}"></span></label>
+            <label class="block"><span class="text-sm font-medium">Şirkətin adı</span>
+                <input th:field="*{companyName}" class="mt-1 w-full border rounded px-3 py-2">
+                <span class="text-sm text-red-600" th:errors="*{companyName}"></span></label>
+        </div>
+        <label class="flex gap-2 text-sm"><input type="checkbox" th:field="*{consent}">
+            <span>Şəxsi məlumatlarımın müraciətə baxılması məqsədilə emalına razıyam.</span></label>
+        <span class="text-sm text-red-600 block" th:errors="*{consent}"></span>
+        <button class="w-full py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Qeydiyyatdan keç</button>
+    </form>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+<script>
+    function toggleType() {
+        const legal = document.querySelector('input[name=investorType][value=LEGAL]').checked;
+        document.getElementById('legal').style.display = legal ? '' : 'none';
+        document.getElementById('individual').style.display = legal ? 'none' : '';
+    }
+    toggleType();
+</script>
+</body>
+</html>

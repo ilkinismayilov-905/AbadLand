@@ -2,7 +2,7 @@
 
 | Step | Title | Time | Status |
 |---|---|---|---|
-| 1 | Skeleton, full data model, seed, login | 0:45 | ⬜ |
+| 1 | Skeleton, full data model, seed, login | 0:45 | ✅ |
 | 2 | Map, catalog, fruit filter, passport, ROI + prediction, compare | 1:25 | ⬜ |
 | 3 | Matching quiz | 0:40 | ⬜ |
 | 4 | Application, review cycle, notifications | 1:30 | ⬜ |
@@ -15,3 +15,9 @@
 Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 
 ## Log
+
+### Step 1 — 2026-10-14
+- Boot 3.5.7 + wrapper; all 21 entities + enums + repos; `StatusLabels` (AZ labels + badges); `AuditService`; `CalendarService.generate` (used by seeder, reuse in Step 7).
+- `DataSeeder`: 9 users, 8 crops, 32 calendar templates, 16 plots + climate, 4 competitions (incl. closed `MUS-2025-02` holding the 2 farm plots XCL-001/XCV-001), 8 applications + history/audit/notifications/EKTİS logs, 2 farms (Rəşad ACTIVE, Tural AT_RISK with delayed tasks), sample AI for FZL-001, 1 offering (40% sold). Counts logged at startup.
+- Security: `/giris` login → investor `/kabinet`, staff `/idare`; logout POST `/cixis`; `/api/v1/external/**` needs `X-API-Key`. Pages: `/`, `/giris`, `/qeydiyyat`, placeholder `/kabinet`, `/idare`, AZ 403/404.
+- `Step1SmokeTest` (MockMvc): logins, 403, registration validation, seed counts. Note: seed runs ~1 s after Tomcat starts.

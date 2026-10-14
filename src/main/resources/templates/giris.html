@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Giriş')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-4xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-8">
+    <form th:action="@{/giris}" method="post" class="bg-white rounded-lg shadow p-6 space-y-4">
+        <h1 class="text-2xl font-bold">Daxil ol</h1>
+        <div th:if="${param.xeta}" class="p-3 rounded bg-red-100 text-red-800">E-poçt və ya şifrə yanlışdır.</div>
+        <div th:if="${param.logout}" class="p-3 rounded bg-green-100 text-green-800">Sistemdən çıxdınız.</div>
+        <label class="block">
+            <span class="text-sm font-medium">E-poçt</span>
+            <input name="username" type="email" required autofocus class="mt-1 w-full border rounded px-3 py-2">
+        </label>
+        <label class="block">
+            <span class="text-sm font-medium">Şifrə</span>
+            <input name="password" type="password" required class="mt-1 w-full border rounded px-3 py-2">
+        </label>
+        <button class="w-full py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Daxil ol</button>
+        <p class="text-sm">Hesabınız yoxdur? <a th:href="@{/qeydiyyat}" class="text-leaf-700 underline">Qeydiyyat</a></p>
+    </form>
+    <div class="bg-earth-50 border border-earth-100 rounded-lg p-6 text-sm">
+        <h2 class="font-semibold mb-3">Demo hesablar (şifrə: <code>Demo1234</code>)</h2>
+        <ul class="space-y-1">
+            <li><code>elvin@demo.az</code> — İnvestor</li>
+            <li><code>rashad@demo.az</code> — İnvestor</li>
+            <li><code>operator@demo.az</code> — Operator</li>
+            <li><code>komissiya@demo.az</code> — Komissiya</li>
+            <li><code>admin@demo.az</code> — Admin</li>
+        </ul>
+    </div>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

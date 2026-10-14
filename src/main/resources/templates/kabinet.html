@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Kabinet')}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <h1 class="text-2xl font-bold" th:text="'Xoş gəlmisiniz, ' + ${user.fullName}"></h1>
+    <section class="bg-white rounded-lg shadow p-5 text-sm grid md:grid-cols-3 gap-2">
+        <div><span class="text-gray-500">E-poçt:</span> <span th:text="${user.email}"></span></div>
+        <div><span class="text-gray-500">Telefon:</span> <span th:text="${user.phone}"></span></div>
+        <div><span class="text-gray-500">Növ:</span> <span th:text="${@statusLabels.label(user.investorType)}"></span></div>
+    </section>
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="font-semibold mb-3">Müraciətlərim</h2>
+        <p th:if="${applications.isEmpty()}" class="text-sm text-gray-600">Hələ müraciətiniz yoxdur. <a th:href="@{/saheler}" class="text-leaf-700 underline">Sahələrə baxın</a>.</p>
+        <table th:unless="${applications.isEmpty()}" class="w-full text-sm">
+            <tr class="text-left text-gray-500"><th>Nömrə</th><th>Sahə</th><th>Status</th></tr>
+            <tr th:each="a : ${applications}" class="border-t">
+                <td class="py-2" th:text="${a.number}"></td>
+                <td th:text="${a.plot.code}"></td>
+                <td><span th:class="${@statusLabels.badge(a.status)}" th:text="${@statusLabels.label(a.status)}"></span></td>
+            </tr>
+        </table>
+    </section>
+    <p class="text-sm text-gray-500">Təsərrüfatlarım və pay layihələri növbəti mərhələlərdə əlavə olunacaq.</p>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>
