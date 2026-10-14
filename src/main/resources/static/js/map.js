@@ -2,15 +2,35 @@
 const ACTIVITY_COLORS = { HORTICULTURE: '#3d7326', CROP_FARMING: '#ca8a04', LIVESTOCK: '#a0703c', OTHER: '#6b7280' };
 const ACTIVITY_LABELS = { HORTICULTURE: 'Bağçılıq', CROP_FARMING: 'Əkinçilik', LIVESTOCK: 'Heyvandarlıq', OTHER: 'Digər' };
 
-// satDefault: start on the satellite layer (passport)
-function createMap(elId, satDefault) {
+// p: {name, subtitle, purpose, geoJson (string), applyUrl} from the server
+function open3d(p) {
+    if (typeof Plot3D === 'undefined') { alert('3D görünüş bu səhifədə yüklənməyib.'); return; }
+    Plot3D.open({ name: p.name, subtitle: p.subtitle, color: ACTIVITY_COLORS[p.purpose] || '#6b7280',
+        geometry: JSON.parse(p.geoJson), applyUrl: p.applyUrl || undefined });
+}
+
+// satDefault: start on the satellite layer (passport); plot3d: adds a "3D" entry to the layer toggle (passport)
+function createMap(elId, satDefault, plot3d) {
     const map = L.map(elId);
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         { maxZoom: 19, attribution: '&copy; OpenStreetMap' });
     const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         { maxZoom: 19, attribution: 'Tiles &copy; Esri &mdash; Esri, Maxar, Earthstar Geographics' });
-    (satDefault ? sat : osm).addTo(map);
-    L.control.layers({ 'Xəritə': osm, 'Peyk': sat }).addTo(map);
+    let current = satDefault ? sat : osm;
+    current.addTo(map);
+    const bases = { 'Xəritə': osm, 'Peyk': sat };
+    if (plot3d) {
+        // "3D" is a pseudo layer: open the viewer, then switch the toggle back to the previous layer
+        const three = L.layerGroup();
+        bases['3D'] = three;
+        map.on('baselayerchange', e => {
+            if (e.layer !== three) { current = e.layer; return; }
+            // next tick: Leaflet ignores layer changes while it handles its own click, so the radio would stay on "3D"
+            setTimeout(() => { map.removeLayer(three); current.addTo(map); }, 0);
+            open3d(plot3d);
+        });
+    }
+    L.control.layers(bases, null, { collapsed: !plot3d }).addTo(map);
     return map;
 }
 
@@ -29,6 +49,11 @@ function drawPlots(map, plots, withPopup, outlineOnly) {
                 + (p.score ? ' · uyğunluq ' + p.score : '')));
             div.appendChild(document.createElement('br'));
             const a = document.createElement('a'); a.href = '/saheler/' + p.id; a.textContent = 'Pasporta bax →'; div.appendChild(a);
+            if (p.subtitle) {
+                const b3 = document.createElement('a'); b3.href = '#'; b3.textContent = '3D görünüş'; b3.style.marginLeft = '12px';
+                b3.onclick = e => { e.preventDefault(); map.closePopup(); open3d(p); };
+                div.appendChild(b3);
+            }
             layer.bindPopup(div);
         }
         layer.addTo(group);

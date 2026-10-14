@@ -8,6 +8,7 @@
 | 4 | Application, review cycle, notifications | 1:30 | ✅ |
 | 5 | Competition approval, EKTİS mock, dashboard, audit, API | 0:50 | ✅ |
 | 6 | Satellite, real climate, AI land analysis | 1:00 | ✅ |
+| 6b | 3D satellite view of a plot | 0:25 | ✅ |
 | 7 | Farm management + planting calendar | 0:50 | ⬜ |
 | 8 | OPTIONAL: co-investment shares (simulation) | 0:35 | ⬜ |
 | 9 | Polish, README, demo test | 0:30 | ⬜ |
@@ -51,3 +52,8 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - AI: `AiClient` / `ClaudeAiClient` (raw HTTP per CLAUDE.md; image first; effort low, max_tokens 4000, stop_reason checks, refusal fallback for Sonnet 5.5 — see SPEC), `AiAnalysisService` (cache per plot, 5/user/day via audit log, admin re-run, running-lock, AI suitability rows, audit `AI_ANALYSIS`). Passport: climate cards, "Peyk və AI analizi" section, ROI pre-selects AI top crop (real analyses only).
 - Verified live: satellite image, Open-Meteo refresh for 16 plots, demo filters unchanged. Real Claude call NOT verified (no `ANTHROPIC_API_KEY` in this environment) — covered by unit tests on request/response shape and a fake-client flow test.
 - Demo prep: admin → "İqlim məlumatını yenilə"; set key + `AI_MODEL=claude-sonnet-5-5`, run LCN-001 analysis once (cached).
+
+### Step 6b — 2026-10-14
+- Integrated the kit's `plot3d.js` (unchanged): `layout :: scripts3d` (three.js r128 + plot3d.js) on passport and `/xerite` only; `PlotController.viewerData` (name, subtitle, purpose, geoJson, applyUrl); `map.js` `open3d()` uses the Leaflet `ACTIVITY_COLORS`. Passport toggle "Xəritə | Peyk | 3D" (switch-back deferred one tick — Leaflet ignores changes during its own click); map popup "3D görünüş".
+- `app.css` fixes without editing the viewer: `.p3d [hidden]` (walk pad showed in orbit mode), phone spacing for hint/pad (`.p3d.p3d` to beat the injected style).
+- Verified in Chrome (playwright-cli): FZL-001 terrain + outline + label + orbit, LCN-001 mountains (centre 863 m — the SPEC polygon lies in the river valley, not ~1 400 m), walk W/Shift/pad, Gün/Qürub, Esc/Bağla restore scroll, "Müraciət et" → login → form, map popup, blocked tiles → offline message.

@@ -6,3 +6,10 @@ body { min-height: 100vh; }
 .quiz-card:hover span { border-color: #4d8b31; }
 .quiz-card input:checked + span { border-color: #3d7326; background: #f1f8ee; color: #23431a; }
 .quiz-card input:focus-visible + span { outline: 2px solid #3d7326; outline-offset: 2px; }
+/* plot3d.js sets display on .pad, which overrides the [hidden] attribute — keep hidden elements hidden */
+.p3d [hidden] { display: none !important; }
+/* Phones: the bottom buttons wrap to two rows — lift the hint and the walk pad above them (.p3d.p3d beats the viewer's injected style) */
+@media (max-width: 640px) {
+    .p3d.p3d .hint { bottom: calc(118px + env(safe-area-inset-bottom, 0px)); }
+    .p3d.p3d .pad { bottom: calc(190px + env(safe-area-inset-bottom, 0px)); }
+}

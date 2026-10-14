@@ -43,19 +43,41 @@ public class PlotController {
     }
 
     @GetMapping("/xerite")
-    public String map(@ModelAttribute("filter") PlotFilter filter, Model model) {
+    public String map(@ModelAttribute("filter") PlotFilter filter, Model model,
+                      org.springframework.security.core.Authentication auth) {
         addFilterOptions(model);
-        model.addAttribute("mapPlots", plotService.search(filter).stream().map(c -> Map.of(
-                "id", c.plot().getId(), "code", c.plot().getCode(), "name", c.plot().getName(),
-                "district", c.plot().getDistrict(), "areaHa", c.plot().getAreaHa(),
-                "purpose", c.plot().getPurpose().name(), "geoJson", c.plot().getGeoJson(),
-                "score", c.fruitScore() == null ? "" : c.fruitScore() + "%")).toList());
+        model.addAttribute("mapPlots", plotService.search(filter).stream().map(c -> {
+            Map<String, Object> m = viewerData(c, auth);
+            m.put("district", c.plot().getDistrict());
+            m.put("areaHa", c.plot().getAreaHa());
+            m.put("score", c.fruitScore() == null ? "" : c.fruitScore() + "%");
+            return m;
+        }).toList());
         return "xerite";
+    }
+
+    /**
+     * Data for Leaflet popups and the 3D viewer (Plot3D.open). Colour comes from ACTIVITY_COLORS in map.js (same as polygons).
+     * applyUrl only for an open competition and non-staff; anonymous users are sent to login and back to the form.
+     */
+    private Map<String, Object> viewerData(PlotCard c, org.springframework.security.core.Authentication auth) {
+        Plot p = c.plot();
+        boolean staff = auth != null && auth.getAuthorities().stream().anyMatch(a -> !a.getAuthority().equals("ROLE_INVESTOR"));
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("id", p.getId());
+        m.put("code", p.getCode());
+        m.put("name", p.getName());
+        m.put("subtitle", p.getDistrict() + " · " + fmt.dec(p.getAreaHa()) + " ha · " + labels.label(p.getPurpose()));
+        m.put("purpose", p.getPurpose().name());
+        m.put("geoJson", p.getGeoJson());
+        m.put("applyUrl", c.competition() != null && !staff ? "/kabinet/muraciet/yeni?plotId=" + p.getId() : null);
+        return m;
     }
 
     @GetMapping("/saheler/{id}")
     public String passport(@PathVariable Long id, @RequestParam(required = false) String crop,
-                           @RequestParam(required = false) Integer score, Model model) {
+                           @RequestParam(required = false) Integer score, Model model,
+                           org.springframework.security.core.Authentication auth) {
         Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         PlotCard card = plotService.card(plot);
         List<Crop> cropOptions = crops.findAll().stream().filter(c -> c.getActivityType() == plot.getPurpose()).toList();
@@ -78,6 +100,7 @@ public class PlotController {
             model.addAttribute("roi", roiService.calculate(plot, selected, climate, suit));
         }
         model.addAttribute("card", card);
+        model.addAttribute("plot3d", viewerData(card, auth));
         model.addAttribute("plot", plot);
         model.addAttribute("climate", climate);
         model.addAttribute("cropOptions", cropOptions);

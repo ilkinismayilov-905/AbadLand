@@ -52,4 +52,17 @@ class Step2PagesTest {
                 .andExpect(content().string(allOf(containsString("MUS-2026-03"), not(containsString("MUS-2026-05")))));
         mvc.perform(get("/saheler/999999")).andExpect(status().isNotFound());
     }
+
+    @Test
+    void viewer3dDataOnPassportAndMapOnly() throws Exception { // Thymeleaf JS inlining escapes non-ASCII (\\u00FC …)
+        String three = "three.js/r128/three.min.js";
+        mvc.perform(get("/saheler/" + id("FZL-001"))).andExpect(content().string(allOf(containsString(three), containsString("/js/plot3d.js"),
+                containsString("F\\u00FCzuli \\u00B7 42,5 ha"), containsString("/kabinet/muraciet/yeni?plotId=" + id("FZL-001")))));
+        mvc.perform(get("/xerite")).andExpect(content().string(allOf(containsString(three), containsString("C\\u0259bray\\u0131l \\u00B7 70 ha"))));
+        mvc.perform(get("/saheler")).andExpect(content().string(not(containsString(three))));
+        // staff get no "Müraciət et"; a plot without an open competition neither
+        mvc.perform(get("/saheler/" + id("FZL-001")).with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+                .user("operator@demo.az").roles("OPERATOR"))).andExpect(content().string(not(containsString("muraciet/yeni?plotId="))));
+        mvc.perform(get("/saheler/" + id("CBR-002"))).andExpect(content().string(allOf(containsString("\"applyUrl\":null"), not(containsString("muraciet/yeni")))));
+    }
 }

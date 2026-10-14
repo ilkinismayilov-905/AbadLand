@@ -128,6 +128,13 @@ Answer ONLY with valid JSON (no markdown) in Azerbaijani for all text fields, ma
 - PlotClimate.fetchedAt = null means seeded test value (UI: "Sınaq dəyəri"); set when Open-Meteo data is stored (admin "İqlim məlumatını yenilə" on `/idare`, or automatically before an AI analysis). `app.external.enabled=false` disables Esri/Open-Meteo calls (tests/offline).
 - Cost control: one analysis per plot (cached); only logged-in users can trigger; max 5 per user per day; admin can re-run. Without `ANTHROPIC_API_KEY` the button is disabled, everything else works.
 
+## 3D view (Step 6b)
+- Viewer `static/js/plot3d.js` (three.js r128 from cdnjs, loaded only on the passport and `/xerite`): Esri World Imagery tiles draped on AWS Terrain Tiles (Terrarium PNG), fetched by the browser directly — no backend calls, nothing stored.
+- Opens from the passport layer toggle "Xəritə | Peyk | 3D" (toggle returns to the previous layer) and from the map popup link "3D görünüş".
+- Controls: drag to orbit, wheel to zoom; "Sahənin içində gəz" = walk (W A S D / arrows / on-screen pad, Shift = faster); "Gün / Qürub"; Esc or "Bağla" closes and frees GPU memory. Shows plot outline + translucent walls in the activity colour, label, elevation box (centre, min–max m), credits.
+- "Müraciət et" inside the viewer only when the plot is in an open PUBLISHED competition and the viewer is not staff; anonymous users go through login back to the form.
+- Offline: "Peyk şəkli yüklənmədi. İnternet bağlantısını yoxlayın."; it still closes cleanly.
+
 ## Farm project (post-lease)
 - Created on APPROVED. Commitments copied from the application.
 - Progress: investment% = latest investedToDate / committed; jobs% = Σ workforce / committedJobs; time% = months elapsed / committedMonths; local% = local / total.
@@ -156,7 +163,7 @@ Answer ONLY with valid JSON (no markdown) in Azerbaijani for all text fields, ma
 | `/` | all | hero + CTA "Sizə uyğun torpağı tapın" + KPIs |
 | `/xerite` | all | Leaflet map (Xəritə/Peyk), polygons by activity, filters incl. "Hansı meyvə üçün?" |
 | `/saheler` | all | catalog cards + filters + fruit filter + "N gün qalıb" + compare checkboxes |
-| `/saheler/{id}` | all | passport, crop suitability chips, ROI + prediction, satellite + AI, competition card |
+| `/saheler/{id}` | all | passport, crop suitability chips, ROI + prediction, satellite + AI, competition card, **3D görünüş** (layer toggle "Xəritə \| Peyk \| 3D") |
 | `/muqayise?ids=` | all | 2–3 plots side by side |
 | `/musabiqeler` | all | published competitions |
 | `/uygunluq` | all | quiz → results with score, reasons, breakdown |

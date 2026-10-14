@@ -91,6 +91,12 @@
     </div>
 </form>
 
+<!-- 3D viewer scripts (passport, map only). Order matters: three.js before plot3d.js -->
+<th:block th:fragment="scripts3d">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script th:src="@{/js/plot3d.js}"></script>
+</th:block>
+
 <!-- Suitability chips: "Nar 85% · Qayda" -->
 <span th:fragment="suitChips(list)" class="flex flex-wrap gap-1">
     <span th:each="s : ${list}" th:title="${s.reason}"
