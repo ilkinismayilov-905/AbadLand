@@ -4,6 +4,7 @@ import az.aqroinvest.domain.Application;
 import az.aqroinvest.domain.DocType;
 import az.aqroinvest.domain.Document;
 import az.aqroinvest.repo.DocumentRepository;
+import az.aqroinvest.web.I18n;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,12 +33,12 @@ public class StorageService {
     @Value("${app.upload-dir}")
     private String uploadDir;
 
-    /** @return Azerbaijani error or null if the file is acceptable. Empty file → null (caller decides if required). */
+    /** @return error in the current language or null if the file is acceptable. Empty file → null (caller decides if required). */
     public String check(MultipartFile f) {
         if (f == null || f.isEmpty()) return null;
-        if (f.getSize() > MAX_BYTES) return "Fayl 5 MB-dan böyük ola bilməz";
+        if (f.getSize() > MAX_BYTES) return I18n.t("common.file.tooLargeShort");
         String ext = extension(f.getOriginalFilename());
-        if (!Arrays.asList("pdf", "jpg", "jpeg", "png").contains(ext)) return "Yalnız PDF, JPG və ya PNG fayl yükləyin";
+        if (!Arrays.asList("pdf", "jpg", "jpeg", "png").contains(ext)) return I18n.t("common.file.badType");
         byte[] head = new byte[8];
         try (InputStream in = f.getInputStream()) {
             int n = in.readNBytes(head, 0, 8);
@@ -46,9 +47,9 @@ public class StorageService {
                 case "png" -> n >= 4 && (head[0] & 0xFF) == 0x89 && head[1] == 'P' && head[2] == 'N' && head[3] == 'G';
                 default -> n >= 3 && (head[0] & 0xFF) == 0xFF && (head[1] & 0xFF) == 0xD8 && (head[2] & 0xFF) == 0xFF;
             };
-            return ok ? null : "Faylın məzmunu " + ext.toUpperCase() + " formatına uyğun deyil";
+            return ok ? null : I18n.t("common.file.contentMismatch", ext.toUpperCase());
         } catch (IOException e) {
-            return "Faylı oxumaq mümkün olmadı";
+            return I18n.t("common.file.readFailed");
         }
     }
 
@@ -65,7 +66,7 @@ public class StorageService {
             Files.createDirectories(dir);
             f.transferTo(dir.resolve(stored).toAbsolutePath());
         } catch (IOException e) {
-            throw new BusinessException("Faylı yadda saxlamaq mümkün olmadı");
+            throw new BusinessException(I18n.t("common.file.saveFailed"));
         }
         Document d = new Document();
         d.setApplication(application);

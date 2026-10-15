@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Single place for Azerbaijani enum labels and Tailwind badge classes. Use in templates: ${@statusLabels.label(x)}. */
+/** Single place for enum labels (az/en/ru via I18n) and Tailwind badge classes. Use in templates: ${@statusLabels.label(x)}. */
 @Component("statusLabels")
 public class StatusLabels {
 
@@ -17,100 +17,101 @@ public class StatusLabels {
     private static final String GRAY = "bg-gray-100 text-gray-700";
     private static final String ORANGE = "bg-orange-100 text-orange-800";
 
-    private final Map<Enum<?>, String[]> map = new HashMap<>();
+    private final Map<Enum<?>, String> map = new HashMap<>();
 
     public StatusLabels() {
-        put(Role.INVESTOR, "İnvestor", GREEN);
-        put(Role.OPERATOR, "Operator", BLUE);
-        put(Role.COMMISSION, "Komissiya", ORANGE);
-        put(Role.ADMIN, "Admin", RED);
-        put(EconomicRegion.QARABAG, "Qarabağ", GRAY);
-        put(EconomicRegion.SHERQI_ZANGEZUR, "Şərqi Zəngəzur", GRAY);
-        put(ActivityType.CROP_FARMING, "Əkinçilik", YELLOW);
-        put(ActivityType.LIVESTOCK, "Heyvandarlıq", ORANGE);
-        put(ActivityType.HORTICULTURE, "Bağçılıq", GREEN);
-        put(ActivityType.OTHER, "Digər", GRAY);
-        put(DeminingStatus.CLEARED, "Tam təmizlənib", GREEN);
-        put(DeminingStatus.PARTIALLY_CLEARED, "Qismən təmizlənib", YELLOW);
-        put(DeminingStatus.IN_PROGRESS, "Təmizlənir", RED);
-        put(CompetitionStatus.PENDING_APPROVAL, "Təsdiq gözləyir", YELLOW);
-        put(CompetitionStatus.PUBLISHED, "Dərc edilib", GREEN);
-        put(CompetitionStatus.REJECTED, "Rədd edilib", RED);
-        put(CompetitionStatus.CLOSED, "Bağlanıb", GRAY);
-        put(ApplicationStatus.SUBMITTED, "Qəbul edilib", BLUE);
-        put(ApplicationStatus.UNDER_REVIEW, "Baxılır", YELLOW);
-        put(ApplicationStatus.INFO_REQUESTED, "Əlavə məlumat tələb olunur", ORANGE);
-        put(ApplicationStatus.DECIDED, "Qərar verilib", GREEN);
-        put(Decision.APPROVED, "Müsbət", GREEN);
-        put(Decision.REJECTED, "Mənfi", RED);
-        put(DocType.BUSINESS_PLAN, "Biznes plan", GRAY);
-        put(DocType.SOIL_ANALYSIS, "Torpaq analizi", GRAY);
-        put(DocType.IDENTITY, "Şəxsiyyət sənədi", GRAY);
-        put(DocType.OTHER, "Digər", GRAY);
-        put(WaterNeed.LOW, "Az", GREEN);
-        put(WaterNeed.MEDIUM, "Orta", YELLOW);
-        put(WaterNeed.HIGH, "Çox", RED);
-        put(SuitabilitySource.RULE, "Qayda", GRAY);
-        put(SuitabilitySource.AI, "AI", BLUE);
-        put(SuitabilitySource.EXPERT, "Ekspert", GREEN);
-        put(RiskLevel.LOW, "Aşağı", GREEN);
-        put(RiskLevel.MEDIUM, "Orta", YELLOW);
-        put(RiskLevel.HIGH, "Yüksək", RED);
-        put(WorkRole.AGRONOMIST, "Aqronom", GRAY);
-        put(WorkRole.VET, "Baytar", GRAY);
-        put(WorkRole.MACHINE_OPERATOR, "Texnika operatoru", GRAY);
-        put(WorkRole.WORKER, "Fəhlə", GRAY);
-        put(WorkRole.ACCOUNTANT, "Mühasib", GRAY);
-        put(WorkRole.OTHER, "Digər", GRAY);
-        put(CalendarStage.SOIL_PREP, "Torpaq hazırlığı", ORANGE);
-        put(CalendarStage.PLANTING, "Əkin", GREEN);
-        put(CalendarStage.IRRIGATION, "Suvarma mövsümü", BLUE);
-        put(CalendarStage.FERTILIZING, "Gübrələmə", YELLOW);
-        put(CalendarStage.PRUNING, "Budama / qulluq", GRAY);
-        put(CalendarStage.HARVEST, "Yığım", RED);
-        put(TaskStatus.PLANNED, "Planlaşdırılıb", BLUE);
-        put(TaskStatus.DONE, "İcra olunub", GREEN);
-        put(TaskStatus.DELAYED, "Gecikir", RED);
-        put(FarmStatus.ACTIVE, "Aktiv", GREEN);
-        put(FarmStatus.AT_RISK, "Risk var", RED);
-        put(FarmStatus.COMPLETED, "Tamamlanıb", GRAY);
-        put(ReportStatus.SUBMITTED, "Göndərilib", BLUE);
-        put(ReportStatus.ACCEPTED, "Qəbul edilib", GREEN);
-        put(ReportStatus.NEEDS_FIX, "Düzəliş tələb olunur", ORANGE);
-        put(OfferingStatus.OPEN, "Açıq", GREEN);
-        put(OfferingStatus.FUNDED, "Toplandı", BLUE);
-        put(OfferingStatus.CLOSED, "Bağlandı", GRAY);
-        put(DealType.LEASE, "İcarə", BLUE);
-        put(DealType.SALE, "Satış", ORANGE);
-        put(AuctionStatus.PENDING_APPROVAL, "Təsdiq gözləyir", YELLOW);
-        put(AuctionStatus.SCHEDULED, "Planlaşdırılıb", BLUE);
-        put(AuctionStatus.LIVE, "Gedir", GREEN);
-        put(AuctionStatus.ENDED, "Başa çatıb", ORANGE);
-        put(AuctionStatus.CONFIRMED, "Nəticə təsdiqlənib", GREEN);
-        put(AuctionStatus.FAILED, "Baş tutmadı", GRAY);
-        put(AuctionStatus.REJECTED, "Rədd edilib", RED);
-        put(AuctionStatus.CANCELLED, "Ləğv edilib", GRAY);
-        put(PlotStatus.AVAILABLE, "Boşdur", GREEN);
-        put(PlotStatus.IN_AUCTION, "Hərracda", ORANGE);
-        put(PlotStatus.LEASED, "İcarəyə verilib", BLUE);
-        put(PlotStatus.SOLD, "Satılıb", GRAY);
-        put(InvestorType.INDIVIDUAL, "Fiziki şəxs", GRAY);
-        put(InvestorType.LEGAL, "Hüquqi şəxs", GRAY);
-        put(IntegrationStatus.SUCCESS, "Uğurlu", GREEN);
-        put(IntegrationStatus.FAILED, "Uğursuz", RED);
+        put(Role.INVESTOR, GREEN);
+        put(Role.OPERATOR, BLUE);
+        put(Role.COMMISSION, ORANGE);
+        put(Role.ADMIN, RED);
+        put(EconomicRegion.QARABAG, GRAY);
+        put(EconomicRegion.SHERQI_ZANGEZUR, GRAY);
+        put(ActivityType.CROP_FARMING, YELLOW);
+        put(ActivityType.LIVESTOCK, ORANGE);
+        put(ActivityType.HORTICULTURE, GREEN);
+        put(ActivityType.OTHER, GRAY);
+        put(DeminingStatus.CLEARED, GREEN);
+        put(DeminingStatus.PARTIALLY_CLEARED, YELLOW);
+        put(DeminingStatus.IN_PROGRESS, RED);
+        put(CompetitionStatus.PENDING_APPROVAL, YELLOW);
+        put(CompetitionStatus.PUBLISHED, GREEN);
+        put(CompetitionStatus.REJECTED, RED);
+        put(CompetitionStatus.CLOSED, GRAY);
+        put(ApplicationStatus.SUBMITTED, BLUE);
+        put(ApplicationStatus.UNDER_REVIEW, YELLOW);
+        put(ApplicationStatus.INFO_REQUESTED, ORANGE);
+        put(ApplicationStatus.DECIDED, GREEN);
+        put(Decision.APPROVED, GREEN);
+        put(Decision.REJECTED, RED);
+        put(DocType.BUSINESS_PLAN, GRAY);
+        put(DocType.SOIL_ANALYSIS, GRAY);
+        put(DocType.IDENTITY, GRAY);
+        put(DocType.OTHER, GRAY);
+        put(WaterNeed.LOW, GREEN);
+        put(WaterNeed.MEDIUM, YELLOW);
+        put(WaterNeed.HIGH, RED);
+        put(SuitabilitySource.RULE, GRAY);
+        put(SuitabilitySource.AI, BLUE);
+        put(SuitabilitySource.EXPERT, GREEN);
+        put(RiskLevel.LOW, GREEN);
+        put(RiskLevel.MEDIUM, YELLOW);
+        put(RiskLevel.HIGH, RED);
+        put(WorkRole.AGRONOMIST, GRAY);
+        put(WorkRole.VET, GRAY);
+        put(WorkRole.MACHINE_OPERATOR, GRAY);
+        put(WorkRole.WORKER, GRAY);
+        put(WorkRole.ACCOUNTANT, GRAY);
+        put(WorkRole.OTHER, GRAY);
+        put(CalendarStage.SOIL_PREP, ORANGE);
+        put(CalendarStage.PLANTING, GREEN);
+        put(CalendarStage.IRRIGATION, BLUE);
+        put(CalendarStage.FERTILIZING, YELLOW);
+        put(CalendarStage.PRUNING, GRAY);
+        put(CalendarStage.HARVEST, RED);
+        put(TaskStatus.PLANNED, BLUE);
+        put(TaskStatus.DONE, GREEN);
+        put(TaskStatus.DELAYED, RED);
+        put(FarmStatus.ACTIVE, GREEN);
+        put(FarmStatus.AT_RISK, RED);
+        put(FarmStatus.COMPLETED, GRAY);
+        put(ReportStatus.SUBMITTED, BLUE);
+        put(ReportStatus.ACCEPTED, GREEN);
+        put(ReportStatus.NEEDS_FIX, ORANGE);
+        put(OfferingStatus.OPEN, GREEN);
+        put(OfferingStatus.FUNDED, BLUE);
+        put(OfferingStatus.CLOSED, GRAY);
+        put(DealType.LEASE, BLUE);
+        put(DealType.SALE, ORANGE);
+        put(AuctionStatus.PENDING_APPROVAL, YELLOW);
+        put(AuctionStatus.SCHEDULED, BLUE);
+        put(AuctionStatus.LIVE, GREEN);
+        put(AuctionStatus.ENDED, ORANGE);
+        put(AuctionStatus.CONFIRMED, GREEN);
+        put(AuctionStatus.FAILED, GRAY);
+        put(AuctionStatus.REJECTED, RED);
+        put(AuctionStatus.CANCELLED, GRAY);
+        put(PlotStatus.AVAILABLE, GREEN);
+        put(PlotStatus.IN_AUCTION, ORANGE);
+        put(PlotStatus.LEASED, BLUE);
+        put(PlotStatus.SOLD, GRAY);
+        put(InvestorType.INDIVIDUAL, GRAY);
+        put(InvestorType.LEGAL, GRAY);
+        put(IntegrationStatus.SUCCESS, GREEN);
+        put(IntegrationStatus.FAILED, RED);
     }
 
-    private void put(Enum<?> e, String label, String badge) {
-        map.put(e, new String[]{label, badge});
+    private void put(Enum<?> e, String badge) {
+        map.put(e, badge);
     }
 
+    /** Label in the current language: key "enum.&lt;Type&gt;.&lt;NAME&gt;" in i18n/enums*.properties. */
     public String label(Enum<?> e) {
-        return e == null ? "—" : map.getOrDefault(e, new String[]{e.name()})[0];
+        return e == null ? "—" : I18n.t("enum." + e.getDeclaringClass().getSimpleName() + "." + e.name());
     }
 
     public String badge(Enum<?> e) {
-        String[] v = e == null ? null : map.get(e);
-        return "inline-block px-2 py-0.5 rounded text-xs font-medium " + (v == null ? GRAY : v[1]);
+        String v = e == null ? null : map.get(e);
+        return "inline-block px-2 py-0.5 rounded text-xs font-medium " + (v == null ? GRAY : v);
     }
 
     /** Role from a Spring authority string like "ROLE_OPERATOR". */

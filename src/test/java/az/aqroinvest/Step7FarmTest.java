@@ -49,7 +49,7 @@ class Step7FarmTest {
         applications.decide(app.getId(), "komissiya@demo.az", Decision.APPROVED, "Biznes plan əsaslandırılıb.");
         FarmProject farm = farms.findByApplication(app).orElseThrow();
         assertThat(notifications.findByUserEmailIgnoreCaseOrderByAtDescIdDesc("elvin@demo.az"))
-                .anyMatch(n -> n.getMessage().startsWith("Təsərrüfat layihəniz yaradıldı") && n.getLink().equals("/kabinet/teserrufat/" + farm.getId()));
+                .anyMatch(n -> new az.aqroinvest.web.I18n(az.aqroinvest.web.I18n.bundles()).render(n.getMessage()).startsWith("Təsərrüfat layihəniz yaradıldı") && n.getLink().equals("/kabinet/teserrufat/" + farm.getId()));
         String page = "/kabinet/teserrufat/" + farm.getId();
 
         mvc.perform(get("/kabinet").with(ELVIN)).andExpect(content().string(containsString(page)));

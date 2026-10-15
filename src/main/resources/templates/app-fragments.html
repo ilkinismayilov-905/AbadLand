@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
 <!-- Horizontal status steps: Qəbul edilib → Baxılır → Qərar verilib (amber side state for info request) -->
 <ol th:fragment="steps(app)" class="flex flex-wrap items-center gap-2 text-sm"
     th:with="s=${app.status.name()}, idx=${s == 'SUBMITTED' ? 0 : (s == 'DECIDED' ? 2 : 1)}">
-    <li th:each="label, st : ${ {'Qəbul edilib', 'Baxılır', 'Qərar verilib'} }" class="flex items-center gap-2">
+    <li th:each="label, st : ${ {'common.steps.submitted', 'common.steps.review', 'common.steps.decided'} }" class="flex items-center gap-2">
         <span th:class="'w-7 h-7 rounded-full flex items-center justify-center font-bold ' +
               (${st.index < idx or (st.index == 2 and idx == 2)} ? 'bg-leaf-600 text-white' :
               (${st.index == idx} ? (${s == 'INFO_REQUESTED'} ? 'bg-amber-500 text-white' : 'bg-leaf-100 text-leaf-800 ring-2 ring-leaf-600') : 'bg-gray-200 text-gray-500'))"
               th:text="${st.index < idx or (st.index == 2 and idx == 2)} ? '✓' : ${st.count}"></span>
         <span th:class="${st.index == idx} ? 'font-semibold' : 'text-gray-600'"
-              th:text="${st.index == 1 and s == 'INFO_REQUESTED'} ? 'Əlavə məlumat tələb olunur' : (${st.index == 2 and app.decision != null} ? 'Qərar verilib: ' + ${@statusLabels.label(app.decision)} : ${label})"></span>
+              th:text="${st.index == 1 and s == 'INFO_REQUESTED'} ? #{common.steps.infoRequested} : (${st.index == 2 and app.decision != null} ? #{common.steps.decidedWith(${@statusLabels.label(app.decision)})} : ${#messages.msg(label)})"></span>
         <span th:unless="${st.last}" class="w-8 h-0.5 bg-gray-300"></span>
     </li>
 </ol>
@@ -28,24 +28,24 @@
 
 <!-- Documents -->
 <ul th:fragment="docs(items)" class="text-sm space-y-1">
-    <li th:if="${items.isEmpty()}" class="text-gray-500">Sənəd yoxdur.</li>
+    <li th:if="${items.isEmpty()}" class="text-gray-500" th:text="#{common.docs.empty}"></li>
     <li th:each="d : ${items}" class="flex flex-wrap gap-2 items-center">
         <span th:class="${@statusLabels.badge(d.type)}" th:text="${@statusLabels.label(d.type)}"></span>
         <a th:href="@{/fayl/{id}(id=${d.id})}" target="_blank" class="text-leaf-700 underline" th:text="${d.originalName}"></a>
-        <span class="text-gray-500" th:text="${@fmt.num(d.size / 1024)} + ' KB · ' + ${@fmt.dateTime(d.uploadedAt)}"></span>
+        <span class="text-gray-500" th:text="#{common.docs.size(${@fmt.num(d.size / 1024)}, ${@fmt.dateTime(d.uploadedAt)})}"></span>
     </li>
 </ul>
 
 <!-- Staff sub-navigation -->
 <nav th:fragment="staffNav(active)" class="flex flex-wrap gap-2 text-sm">
-    <a th:href="@{/idare}" th:class="'px-3 py-1.5 rounded ' + (${active == 'dashboard'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Dashboard</a>
-    <a th:href="@{/idare/muracietler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'apps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Müraciətlər</a>
-    <a th:href="@{/idare/musabiqeler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'comps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Müsabiqələr</a>
-    <a th:href="@{/idare/herraclar}" th:class="'px-3 py-1.5 rounded ' + (${active == 'auctions'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Hərraclar</a>
-    <a th:href="@{/idare/monitorinq}" th:class="'px-3 py-1.5 rounded ' + (${active == 'monitor'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Monitorinq</a>
-    <a th:href="@{/idare/inteqrasiya}" th:class="'px-3 py-1.5 rounded ' + (${active == 'ektis'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">EKTİS inteqrasiyası</a>
-    <a sec:authorize="hasRole('ADMIN')" th:href="@{/idare/istifadeciler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'users'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">İstifadəçilər</a>
-    <a sec:authorize="hasAnyRole('COMMISSION','ADMIN')" th:href="@{/idare/audit}" th:class="'px-3 py-1.5 rounded ' + (${active == 'audit'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')">Audit</a>
+    <a th:href="@{/idare}" th:class="'px-3 py-1.5 rounded ' + (${active == 'dashboard'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.dashboard}"></a>
+    <a th:href="@{/idare/muracietler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'apps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.applications}"></a>
+    <a th:href="@{/idare/musabiqeler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'comps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.competitions}"></a>
+    <a th:href="@{/idare/herraclar}" th:class="'px-3 py-1.5 rounded ' + (${active == 'auctions'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.auctions}"></a>
+    <a th:href="@{/idare/monitorinq}" th:class="'px-3 py-1.5 rounded ' + (${active == 'monitor'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.monitoring}"></a>
+    <a th:href="@{/idare/inteqrasiya}" th:class="'px-3 py-1.5 rounded ' + (${active == 'ektis'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.ektis}"></a>
+    <a sec:authorize="hasRole('ADMIN')" th:href="@{/idare/istifadeciler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'users'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.users}"></a>
+    <a sec:authorize="hasAnyRole('COMMISSION','ADMIN')" th:href="@{/idare/audit}" th:class="'px-3 py-1.5 rounded ' + (${active == 'audit'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.audit}"></a>
     <a th:href="@{/swagger-ui.html}" target="_blank" class="px-3 py-1.5 rounded bg-white shadow hover:bg-leaf-50">API ↗</a>
 </nav>
 </body>

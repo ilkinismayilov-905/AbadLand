@@ -39,25 +39,25 @@ public class StaffApplicationController {
         model.addAttribute("app", a);
         model.addAttribute("history", service.history(a));
         model.addAttribute("documents", documents.findByApplicationOrderByUploadedAtAsc(a));
-        model.addAttribute("cropName", crops.findByCode(a.getPlannedCrop()).map(Crop::getNameAz).orElse(a.getPlannedCrop()));
+        model.addAttribute("cropName", crops.findByCode(a.getPlannedCrop()).map(Crop::getName).orElse(a.getPlannedCrop()));
         return "idare-muraciet";
     }
 
     @PostMapping("/muracietler/{id}/baxis")
     public String startReview(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
-        return act(id, ra, "Baxışa başlanıldı.", () -> service.startReview(id, auth.getName()));
+        return act(id, ra, I18n.t("staff.flash.reviewStarted"), () -> service.startReview(id, auth.getName()));
     }
 
     @PostMapping("/muracietler/{id}/melumat")
     public String requestInfo(@PathVariable Long id, @RequestParam(required = false) String message, Authentication auth,
                               RedirectAttributes ra) {
-        return act(id, ra, "Əlavə məlumat tələbi investora göndərildi.", () -> service.requestInfo(id, auth.getName(), message));
+        return act(id, ra, I18n.t("staff.flash.infoRequested"), () -> service.requestInfo(id, auth.getName(), message));
     }
 
     @PostMapping("/muracietler/{id}/qerar")
     public String decide(@PathVariable Long id, @RequestParam(required = false) Decision decision,
                          @RequestParam(required = false) String reason, Authentication auth, RedirectAttributes ra) {
-        return act(id, ra, "Qərar qeydə alındı.", () -> service.decide(id, auth.getName(), decision, reason));
+        return act(id, ra, I18n.t("staff.flash.decisionSaved"), () -> service.decide(id, auth.getName(), decision, reason));
     }
 
     private String act(Long id, RedirectAttributes ra, String ok, Runnable action) {

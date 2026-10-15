@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Müqayisə')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{plots.compare.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
-    <h1 class="text-2xl font-bold">Sahələrin müqayisəsi</h1>
+    <h1 class="text-2xl font-bold" th:text="#{plots.compare.heading}"></h1>
     <p th:if="${cards.size() < 2}" class="bg-white rounded-lg shadow p-6 text-gray-600">
-        Müqayisə üçün <a th:href="@{/saheler}" class="text-leaf-700 underline">kataloqda</a> 2 və ya 3 sahə seçin.</p>
+        [[#{plots.compare.pickBefore}]] <a th:href="@{/saheler}" class="text-leaf-700 underline" th:text="#{plots.compare.pickLink}"></a> [[#{plots.compare.pickAfter}]]</p>
     <div th:if="${cards.size() >= 2}" class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="w-full text-sm">
             <tr class="bg-earth-50">
@@ -22,7 +22,7 @@
                     th:text="${v}"></td>
             </tr>
         </table>
-        <p class="p-3 text-xs text-gray-500">Yaşıl — ən yaxşı dəyər.</p>
+        <p class="p-3 text-xs text-gray-500" th:text="#{plots.compare.legend}"></p>
     </div>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>

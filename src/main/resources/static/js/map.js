@@ -1,10 +1,11 @@
 // Leaflet helpers: OSM + Esri satellite layers, plot polygons coloured by activity.
 const ACTIVITY_COLORS = { HORTICULTURE: '#3d7326', CROP_FARMING: '#ca8a04', LIVESTOCK: '#a0703c', OTHER: '#6b7280' };
-const ACTIVITY_LABELS = { HORTICULTURE: 'Bağçılıq', CROP_FARMING: 'Əkinçilik', LIVESTOCK: 'Heyvandarlıq', OTHER: 'Digər' };
+const ACTIVITY_LABELS = { HORTICULTURE: window.t('js.plots.horticulture', 'Bağçılıq'), CROP_FARMING: window.t('js.plots.cropFarming', 'Əkinçilik'),
+    LIVESTOCK: window.t('js.plots.livestock', 'Heyvandarlıq'), OTHER: window.t('js.plots.other', 'Digər') };
 
 // p: {name, subtitle, purpose, geoJson (string), applyUrl} from the server
 function open3d(p) {
-    if (typeof Plot3D === 'undefined') { alert('3D görünüş bu səhifədə yüklənməyib.'); return; }
+    if (typeof Plot3D === 'undefined') { alert(window.t('js.plots.no3d', '3D görünüş bu səhifədə yüklənməyib.')); return; }
     Plot3D.open({ name: p.name, subtitle: p.subtitle, color: ACTIVITY_COLORS[p.purpose] || '#6b7280',
         geometry: JSON.parse(p.geoJson), applyUrl: p.applyUrl || undefined });
 }
@@ -18,7 +19,7 @@ function createMap(elId, satDefault, plot3d) {
         { maxZoom: 19, attribution: 'Tiles &copy; Esri &mdash; Esri, Maxar, Earthstar Geographics' });
     let current = satDefault ? sat : osm;
     current.addTo(map);
-    const bases = { 'Xəritə': osm, 'Peyk': sat };
+    const bases = { [window.t('js.plots.layerMap', 'Xəritə')]: osm, [window.t('js.plots.layerSat', 'Peyk')]: sat };
     if (plot3d) {
         // "3D" is a pseudo layer: open the viewer, then switch the toggle back to the previous layer
         const three = L.layerGroup();
@@ -45,12 +46,12 @@ function drawPlots(map, plots, withPopup, outlineOnly) {
             const div = document.createElement('div');
             const b = document.createElement('b'); b.textContent = p.code + ' — ' + p.name; div.appendChild(b);
             div.appendChild(document.createElement('br'));
-            div.appendChild(document.createTextNode(p.district + ', ' + p.areaHa + ' ha · ' + (ACTIVITY_LABELS[p.purpose] || '')
-                + (p.score ? ' · uyğunluq ' + p.score : '')));
+            div.appendChild(document.createTextNode(p.district + ', ' + p.areaHa + ' ' + window.t('js.plots.ha', 'ha') + ' · ' + (ACTIVITY_LABELS[p.purpose] || '')
+                + (p.score ? ' · ' + window.t('js.plots.match', 'uyğunluq') + ' ' + p.score : '')));
             div.appendChild(document.createElement('br'));
-            const a = document.createElement('a'); a.href = '/saheler/' + p.id; a.textContent = 'Pasporta bax →'; div.appendChild(a);
+            const a = document.createElement('a'); a.href = '/saheler/' + p.id; a.textContent = window.t('js.plots.openPassport', 'Pasporta bax →'); div.appendChild(a);
             if (p.subtitle) {
-                const b3 = document.createElement('a'); b3.href = '#'; b3.textContent = '3D görünüş'; b3.style.marginLeft = '12px';
+                const b3 = document.createElement('a'); b3.href = '#'; b3.textContent = window.t('js.plots.view3d', '3D görünüş'); b3.style.marginLeft = '12px';
                 b3.onclick = e => { e.preventDefault(); map.closePopup(); open3d(p); };
                 div.appendChild(b3);
             }

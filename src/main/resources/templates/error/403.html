@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Giriş qadağandır')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{common.error.403title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-xl mx-auto px-4 py-16 text-center">
-    <h1 class="text-3xl font-bold">403 — Giriş qadağandır</h1>
-    <p class="mt-3 text-gray-600">Bu səhifəyə baxmaq üçün icazəniz yoxdur.</p>
-    <a th:href="@{/}" class="inline-block mt-6 text-leaf-700 underline">Ana səhifəyə qayıt</a>
+    <h1 class="text-3xl font-bold" th:text="'403 — ' + #{common.error.403title}"></h1>
+    <p class="mt-3 text-gray-600" th:text="#{common.error.403text}"></p>
+    <a th:href="@{/}" class="inline-block mt-6 text-leaf-700 underline" th:text="#{common.error.home}"></a>
 </main>
 </body>
 </html>

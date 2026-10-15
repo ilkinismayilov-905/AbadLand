@@ -1,71 +1,71 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{layout :: head(${app.number})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-5xl mx-auto px-4 py-6 space-y-6">
     <div th:if="${created}" class="p-5 rounded-lg bg-green-600 text-white text-lg font-semibold shadow">
-        ✓ Müraciətiniz qeydə alındı: <span th:text="${created}"></span></div>
+        ✓ [[#{apply.detail.created}]] <span th:text="${created}"></span></div>
 
     <section class="bg-white rounded-lg shadow p-5 space-y-4">
         <div class="flex flex-wrap items-center gap-3">
             <h1 class="text-2xl font-bold" th:text="${app.number}"></h1>
             <span th:class="${@statusLabels.badge(app.status)}" th:text="${@statusLabels.label(app.status)}"></span>
-            <a th:href="@{/kabinet}" class="ml-auto text-sm text-leaf-700 underline">← Kabinet</a>
+            <a th:href="@{/kabinet}" class="ml-auto text-sm text-leaf-700 underline" th:text="#{apply.detail.backCabinet}"></a>
         </div>
         <ol th:replace="~{app-fragments :: steps(${app})}"></ol>
     </section>
 
     <!-- Info request: amber card with reply form -->
     <section th:if="${app.status.name() == 'INFO_REQUESTED'}" class="rounded-lg shadow p-5 bg-amber-50 border-l-4 border-amber-500 space-y-3">
-        <h2 class="font-semibold text-amber-900">Əlavə məlumat tələb olunur</h2>
+        <h2 class="font-semibold text-amber-900" th:text="#{apply.detail.infoRequested}"></h2>
         <p class="whitespace-pre-line" th:text="${app.infoRequest}"></p>
         <form th:action="@{/kabinet/muraciet/{id}/cavab(id=${app.id})}" method="post" enctype="multipart/form-data" class="space-y-3">
-            <textarea name="response" rows="4" required maxlength="2000" placeholder="Cavabınız…" class="w-full border rounded px-3 py-2"
+            <textarea name="response" rows="4" required maxlength="2000" th:placeholder="#{apply.detail.replyPlaceholder}" class="w-full border rounded px-3 py-2"
                       th:text="${draftResponse}"></textarea>
             <div class="flex flex-wrap gap-3 items-center text-sm">
                 <select name="fileType" class="border rounded px-2 py-1">
                     <option th:each="t : ${replyTypes}" th:value="${t}" th:text="${@statusLabels.label(t)}"></option>
                 </select>
                 <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png">
-                <span class="text-gray-500">PDF/JPG/PNG, ≤ 5 MB, istəyə bağlı</span>
+                <span class="text-gray-500" th:text="#{apply.detail.fileHint}"></span>
             </div>
-            <button class="px-5 py-2 rounded bg-amber-600 text-white font-semibold hover:bg-amber-700">Cavabı göndər</button>
+            <button class="px-5 py-2 rounded bg-amber-600 text-white font-semibold hover:bg-amber-700" th:text="#{apply.detail.sendReply}"></button>
         </form>
     </section>
 
     <!-- Decision -->
     <section th:if="${app.decision != null}" th:class="'rounded-lg shadow p-5 border-l-4 ' + (${app.decision.name() == 'APPROVED'} ? 'bg-green-50 border-green-600' : 'bg-red-50 border-red-600')">
-        <h2 class="text-lg font-bold" th:text="'Qərar verilib: ' + ${@statusLabels.label(app.decision)}"></h2>
+        <h2 class="text-lg font-bold" th:text="#{apply.detail.decided(${@statusLabels.label(app.decision)})}"></h2>
         <p class="mt-1 whitespace-pre-line" th:text="${app.decisionReason}"></p>
-        <p th:if="${app.ektisRef != null}" class="mt-2 text-sm text-gray-600" th:text="'EKTİS ref: ' + ${app.ektisRef}"></p>
+        <p th:if="${app.ektisRef != null}" class="mt-2 text-sm text-gray-600" th:text="#{apply.detail.ektisRef(${app.ektisRef})}"></p>
         <a th:if="${farm != null}" th:href="@{/kabinet/teserrufat/{id}(id=${farm.id})}"
-           class="inline-block mt-3 px-4 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Təsərrüfatım →</a>
+           class="inline-block mt-3 px-4 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700" th:text="#{apply.detail.myFarm}"></a>
     </section>
 
     <div class="grid md:grid-cols-2 gap-6">
         <section class="bg-white rounded-lg shadow p-5 text-sm space-y-1">
-            <h2 class="font-semibold mb-2">Müraciət məlumatları</h2>
-            <div>Sahə: <a th:href="@{/saheler/{id}(id=${app.plot.id})}" class="text-leaf-700 underline" th:text="${app.plot.code} + ' — ' + ${app.plot.name}"></a></div>
-            <div th:text="'Müsabiqə: ' + ${app.competition.code}"></div>
-            <div th:text="'Bitki: ' + ${cropName}"></div>
-            <div th:text="'İnvestisiya: ' + ${@fmt.money(app.investmentAzn)}"></div>
-            <div th:text="'İş yerləri: ' + ${app.jobs} + ' · Müddət: ' + ${app.months} + ' ay'"></div>
-            <div th:text="'Göndərilib: ' + ${@fmt.dateTime(app.createdAt)}"></div>
-            <details class="pt-2"><summary class="cursor-pointer text-leaf-700">Biznes plan</summary>
+            <h2 class="font-semibold mb-2" th:text="#{apply.detail.info}"></h2>
+            <div>[[#{apply.detail.plot}]] <a th:href="@{/saheler/{id}(id=${app.plot.id})}" class="text-leaf-700 underline" th:text="${app.plot.code} + ' — ' + ${app.plot.name}"></a></div>
+            <div th:text="#{apply.detail.competition(${app.competition.code})}"></div>
+            <div th:text="#{apply.detail.crop(${cropName})}"></div>
+            <div th:text="#{apply.detail.investment(${@fmt.money(app.investmentAzn)})}"></div>
+            <div th:text="#{apply.detail.jobsMonths(${'' + app.jobs}, ${'' + app.months})}"></div>
+            <div th:text="#{apply.detail.sent(${@fmt.dateTime(app.createdAt)})}"></div>
+            <details class="pt-2"><summary class="cursor-pointer text-leaf-700" th:text="#{apply.detail.businessPlan}"></summary>
                 <p class="mt-2 whitespace-pre-line text-gray-700" th:text="${app.businessPlan}"></p></details>
-            <div th:if="${app.infoResponse != null}" class="pt-2"><span class="text-gray-500">Son cavabınız:</span>
+            <div th:if="${app.infoResponse != null}" class="pt-2"><span class="text-gray-500" th:text="#{apply.detail.lastReply}"></span>
                 <p class="whitespace-pre-line" th:text="${app.infoResponse}"></p></div>
         </section>
         <section class="bg-white rounded-lg shadow p-5 space-y-3">
-            <h2 class="font-semibold">Sənədlər</h2>
+            <h2 class="font-semibold" th:text="#{apply.detail.documents}"></h2>
             <ul th:replace="~{app-fragments :: docs(${documents})}"></ul>
         </section>
     </div>
 
     <section class="bg-white rounded-lg shadow p-5">
-        <h2 class="font-semibold mb-3">Tarixçə</h2>
+        <h2 class="font-semibold mb-3" th:text="#{apply.detail.history}"></h2>
         <ol th:replace="~{app-fragments :: history(${history})}"></ol>
     </section>
 </main>

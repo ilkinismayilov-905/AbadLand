@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Uyğunluq testi')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{plots.quiz.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
@@ -9,37 +9,37 @@
     <!-- Quiz: radio cards; "Digər" / "Digər məbləğ" / "Özüm yazım" reveal an input under their question -->
     <form th:unless="${matches != null}" th:action="@{/uygunluq}" method="get" id="quiz" class="space-y-5" novalidate>
         <div>
-            <h1 class="text-2xl font-bold">Sizə uyğun torpağı tapın</h1>
-            <p class="text-gray-600">5 sual — nəticədə açıq müsabiqələrdəki sahələr uyğunluq balına görə sıralanacaq.</p>
+            <h1 class="text-2xl font-bold" th:text="#{plots.quiz.heading}"></h1>
+            <p class="text-gray-600" th:text="#{plots.quiz.intro}"></p>
         </div>
         <fieldset class="card p-5" data-q="activity">
-            <legend class="q-legend">1. Hansı fəaliyyətlə məşğul olmaq istəyirsiniz?</legend>
+            <legend class="q-legend" th:text="#{plots.quiz.q1}"></legend>
             <div class="opt-grid lg:grid-cols-4">
                 <label th:each="x : ${activities}" class="opt">
                     <input type="radio" name="activity" th:value="${x}" th:checked="${x == a.activity}" class="sr-only" required>
                     <span><i class="opt-check" aria-hidden="true">✓</i><b th:text="${@statusLabels.label(x)}"></b></span></label>
             </div>
             <div class="reveal" data-when="activity=OTHER" th:classappend="${a.activity?.name() == 'OTHER'} ? 'open'">
-                <div><label class="block pt-4 max-w-md"><span class="field-label">Fəaliyyət növünü yazın</span>
-                    <input name="otherText" th:value="${a.otherText}" maxlength="100" class="field" placeholder="məs. arıçılıq, istixana, balıqçılıq"></label></div>
+                <div><label class="block pt-4 max-w-md"><span class="field-label" th:text="#{plots.quiz.otherActivity}"></span>
+                    <input name="otherText" th:value="${a.otherText}" maxlength="100" class="field" th:placeholder="#{plots.quiz.otherActivityHint}"></label></div>
             </div>
         </fieldset>
         <fieldset class="card p-5" data-q="budget">
-            <legend class="q-legend">2. İnvestisiya büdcəniz?</legend>
+            <legend class="q-legend" th:text="#{plots.quiz.q2}"></legend>
             <div class="opt-grid lg:grid-cols-6">
                 <label th:each="b : ${budgets}" class="opt">
                     <input type="radio" name="budget" th:value="${b.key}" th:checked="${b.key == a.budget}" class="sr-only" required>
                     <span><i class="opt-check" aria-hidden="true">✓</i><b th:text="${b.value}"></b></span></label>
             </div>
             <div class="reveal" data-when="budget=0" th:classappend="${a.budget == 0} ? 'open'">
-                <div><label class="block pt-4 max-w-xs"><span class="field-label">Məbləği yazın (AZN)</span>
+                <div><label class="block pt-4 max-w-xs"><span class="field-label" th:text="#{plots.quiz.amount}"></span>
                     <input name="budgetCustom" th:value="${a.budgetCustom}" inputmode="numeric" autocomplete="off" data-thousands
-                           class="field" placeholder="məs. 150 000"></label>
-                    <p class="text-xs text-gray-500 mt-1">Ən azı 10 000 AZN, 1 000 AZN addımla.</p></div>
+                           class="field" th:placeholder="#{plots.quiz.amountHint}"></label>
+                    <p class="text-xs text-gray-500 mt-1" th:text="#{plots.quiz.amountRule}"></p></div>
             </div>
         </fieldset>
         <fieldset class="card p-5" data-q="size">
-            <legend class="q-legend">3. Nə qədər sahə lazımdır?</legend>
+            <legend class="q-legend" th:text="#{plots.quiz.q3}"></legend>
             <div class="opt-grid lg:grid-cols-6">
                 <label th:each="z : ${sizes}" class="opt">
                     <input type="radio" name="size" th:value="${z.key}" th:checked="${z.key == a.size}" class="sr-only" required>
@@ -47,26 +47,26 @@
             </div>
             <div class="reveal" data-when="size=custom" th:classappend="${a.size == 'custom'} ? 'open'">
                 <div class="grid grid-cols-2 gap-3 pt-4 max-w-sm">
-                    <label class="block"><span class="field-label">Min ha</span>
+                    <label class="block"><span class="field-label" th:text="#{plots.quiz.minHa}"></span>
                         <input name="minHa" th:value="${a.minHa}" type="number" min="0.5" step="0.5" class="field"></label>
-                    <label class="block"><span class="field-label">Maks ha</span>
+                    <label class="block"><span class="field-label" th:text="#{plots.quiz.maxHa}"></span>
                         <input name="maxHa" th:value="${a.maxHa}" type="number" min="0.5" step="0.5" class="field"></label>
                 </div>
             </div>
         </fieldset>
         <fieldset class="card p-5" data-q="district">
-            <legend class="q-legend">4. Hansı rayon?</legend>
+            <legend class="q-legend" th:text="#{plots.quiz.q4}"></legend>
             <div class="opt-grid lg:grid-cols-5">
                 <label class="opt">
                     <input type="radio" name="district" value="" th:checked="${a.district == null or a.district.isEmpty()}" class="sr-only">
-                    <span><i class="opt-check" aria-hidden="true">✓</i><b>Fərqi yoxdur</b></span></label>
+                    <span><i class="opt-check" aria-hidden="true">✓</i><b th:text="#{plots.quiz.anyDistrict}"></b></span></label>
                 <label th:each="d : ${districts}" class="opt">
                     <input type="radio" name="district" th:value="${d}" th:checked="${d == a.district}" class="sr-only">
                     <span><i class="opt-check" aria-hidden="true">✓</i><b th:text="${d}"></b></span></label>
             </div>
         </fieldset>
         <fieldset class="card p-5" data-q="experience">
-            <legend class="q-legend">5. Kənd təsərrüfatında təcrübəniz?</legend>
+            <legend class="q-legend" th:text="#{plots.quiz.q5}"></legend>
             <div class="opt-grid lg:grid-cols-4">
                 <label th:each="e : ${experiences}" class="opt">
                     <input type="radio" name="experience" th:value="${e.key}" th:checked="${e.key == a.experience}" class="sr-only" required>
@@ -74,8 +74,8 @@
             </div>
         </fieldset>
         <div class="quiz-bar">
-            <span class="text-sm text-gray-600 leading-tight" aria-live="polite"><b data-progress>0</b> / 5 cavablandırılıb</span>
-            <button class="btn-primary px-5 md:px-8 md:text-lg whitespace-nowrap">Nəticələri göstər</button>
+            <span class="text-sm text-gray-600 leading-tight" aria-live="polite"><b data-progress>0</b> [[#{plots.quiz.answered}]]</span>
+            <button class="btn-primary px-5 md:px-8 md:text-lg whitespace-nowrap" th:text="#{plots.quiz.submit}"></button>
         </div>
     </form>
 
@@ -83,16 +83,16 @@
     <section th:if="${matches != null}" class="space-y-4">
         <div class="flex flex-wrap items-end gap-3">
             <div>
-                <h1 class="text-2xl font-bold">Sizə uyğun sahələr</h1>
+                <h1 class="text-2xl font-bold" th:text="#{plots.quiz.resultsHeading}"></h1>
                 <p class="text-sm text-gray-600" th:text="${summary}"></p>
             </div>
-            <a th:href="${editUrl}" class="ml-auto text-sm text-leaf-700 underline">Cavabları dəyiş</a>
+            <a th:href="${editUrl}" class="ml-auto text-sm text-leaf-700 underline" th:text="#{plots.quiz.edit}"></a>
         </div>
-        <div th:if="${matches.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Hazırda açıq müsabiqədə sahə yoxdur.</p></div>
+        <div th:if="${matches.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p th:text="#{plots.quiz.empty}"></p></div>
         <form th:action="@{/muqayise}" method="get" id="compareForm" class="space-y-4">
             <div th:each="m, st : ${matches}" class="bg-white rounded-lg shadow p-5 flex flex-wrap gap-5 items-start">
                 <div th:class="'w-24 h-24 shrink-0 rounded-full flex flex-col items-center justify-center text-white ' + (${m.score >= 80} ? 'bg-leaf-600' : (${m.score >= 60} ? 'bg-amber-500' : 'bg-gray-400'))">
-                    <span class="text-2xl font-bold" th:text="${m.score} + '%'"></span><span class="text-xs">uyğun</span>
+                    <span class="text-2xl font-bold" th:text="${m.score} + '%'"></span><span class="text-xs" th:text="#{plots.quiz.match}"></span>
                 </div>
                 <div class="flex-1 min-w-[240px] space-y-2">
                     <div class="text-sm text-gray-500" th:text="'#' + ${st.count} + ' · ' + ${m.plot.code} + ' · ' + ${m.plot.district}"></div>
@@ -102,33 +102,33 @@
                             th:text="(${r.ok} ? '✓ ' : '✗ ') + ${r.text}"></li>
                     </ul>
                     <details class="text-sm">
-                        <summary class="cursor-pointer text-leaf-700">Bal necə hesablanır?</summary>
+                        <summary class="cursor-pointer text-leaf-700" th:text="#{plots.quiz.howScored}"></summary>
                         <table class="mt-2">
                             <tr th:each="c : ${m.components}"><td class="pr-4 text-gray-600" th:text="${c.name}"></td>
                                 <td class="font-medium" th:text="${c.points} + ' / ' + ${c.max}"></td></tr>
-                            <tr class="border-t"><td class="pr-4 font-semibold">Cəmi</td><td class="font-semibold" th:text="${m.score} + ' / 100'"></td></tr>
+                            <tr class="border-t"><td class="pr-4 font-semibold" th:text="#{plots.quiz.total}"></td><td class="font-semibold" th:text="${m.score} + ' / 100'"></td></tr>
                         </table>
                     </details>
                 </div>
                 <div class="text-sm space-y-2 w-full md:w-auto md:text-right">
                     <div th:text="${m.competition.code}"></div>
                     <div th:class="${m.daysLeft <= 7} ? 'text-red-600 font-semibold' : 'text-gray-700'"
-                         th:text="'Son tarix ' + ${@fmt.date(m.competition.deadline)} + ' (' + ${m.daysLeft} + ' gün qalıb)'"></div>
-                    <a th:href="@{/saheler/{id}(id=${m.plot.id},score=${m.score})}" class="inline-block px-4 py-1.5 rounded bg-leaf-600 text-white hover:bg-leaf-700">Pasport</a>
-                    <label class="flex md:justify-end items-center gap-2"><input type="checkbox" name="ids" th:value="${m.plot.id}"> Müqayisə</label>
+                         th:text="#{plots.quiz.deadline(${@fmt.date(m.competition.deadline)}, ${m.daysLeft})}"></div>
+                    <a th:href="@{/saheler/{id}(id=${m.plot.id},score=${m.score})}" class="inline-block px-4 py-1.5 rounded bg-leaf-600 text-white hover:bg-leaf-700" th:text="#{plots.quiz.passport}"></a>
+                    <label class="flex md:justify-end items-center gap-2"><input type="checkbox" name="ids" th:value="${m.plot.id}"> [[#{plots.quiz.compare}]]</label>
                 </div>
             </div>
-            <button th:unless="${matches.isEmpty()}" class="px-4 py-2 rounded bg-earth-500 text-white hover:bg-earth-700">Seçilənləri müqayisə et (2–3)</button>
+            <button th:unless="${matches.isEmpty()}" class="px-4 py-2 rounded bg-earth-500 text-white hover:bg-earth-700" th:text="#{plots.catalog.compareSelected}"></button>
         </form>
     </section>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>
 <script th:src="@{/js/quiz.js}"></script>
-<script>
+<script th:inline="javascript">
     const cf = document.getElementById('compareForm');
     if (cf) cf.addEventListener('submit', e => {
         const n = cf.querySelectorAll('input[name=ids]:checked').length;
-        if (n < 2 || n > 3) { e.preventDefault(); alert('Müqayisə üçün 2 və ya 3 sahə seçin.'); }
+        if (n < 2 || n > 3) { e.preventDefault(); alert(/*[[#{plots.compare.pick}]]*/ ''); }
     });
 </script>
 </body>

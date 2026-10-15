@@ -10,16 +10,16 @@ import java.util.List;
 
 @Data
 public class CompetitionForm {
-    @NotBlank(message = "Başlıq tələb olunur")
-    @Size(max = 200, message = "Ən çox 200 simvol")
+    @NotBlank(message = "{staff.form.titleRequired}")
+    @Size(max = 200, message = "{staff.form.max200}")
     private String title;
-    @NotBlank(message = "Tələbləri yazın")
-    @Size(max = 3000, message = "Ən çox 3000 simvol")
+    @NotBlank(message = "{staff.form.requirementsRequired}")
+    @Size(max = 3000, message = "{staff.form.max3000}")
     private String requirements;
-    @NotNull(message = "Minimum investisiyanı yazın")
-    @Positive(message = "Müsbət olmalıdır")
+    @NotNull(message = "{staff.form.minInvestmentRequired}")
+    @Positive(message = "{staff.form.positive}")
     private Long minInvestment;
-    @NotNull(message = "Son tarixi seçin")
+    @NotNull(message = "{staff.form.deadlineRequired}")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate deadline;
     private List<Long> plotIds = new ArrayList<>();

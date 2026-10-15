@@ -58,7 +58,7 @@ class AuctionTest {
         assertThat(service.placeBid(id, "elvin@demo.az", 4_750L, now(), false).amount()).isEqualTo(4_750);
         assertThatThrownBy(() -> service.placeBid(id, "elvin@demo.az", 5_000L, now(), false)).hasMessageContaining("Ən yüksək təklif artıq sizindir");
         assertThat(notifications.findByUserEmailIgnoreCaseOrderByAtDescIdDesc("rashad@demo.az"))
-                .anyMatch(n -> n.getMessage().startsWith("Təklifiniz keçildi"));
+                .anyMatch(n -> new az.aqroinvest.web.I18n(az.aqroinvest.web.I18n.bundles()).render(n.getMessage()).startsWith("Təklifiniz keçildi"));
         assertThatThrownBy(() -> service.placeBid(id, "tural@demo.az", 6_000L, now(), false)).hasMessageContaining("qeydiyyatdan keçin");
         assertThatThrownBy(() -> service.placeBid(id, "operator@demo.az", 6_000L, now(), false)).hasMessageContaining("yalnız investorlar");
         assertThatThrownBy(() -> service.register(id, "operator@demo.az", true)).hasMessageContaining("yalnız investorlar");
@@ -102,7 +102,7 @@ class AuctionTest {
         FarmProject farm = farms.findAll().stream().filter(f -> f.getAuction() != null && f.getAuction().getId().equals(a.getId())).findFirst().orElseThrow();
         assertThat(farm.getInvestor().getEmail()).isEqualTo("rashad@demo.az");
         assertThat(farm.getCommittedMonths()).isEqualTo(15 * 12);
-        assertThat(notifications.findByUserEmailIgnoreCaseOrderByAtDescIdDesc("rashad@demo.az")).anyMatch(n -> n.getMessage().contains("qalibsiniz"));
+        assertThat(notifications.findByUserEmailIgnoreCaseOrderByAtDescIdDesc("rashad@demo.az")).anyMatch(n -> new az.aqroinvest.web.I18n(az.aqroinvest.web.I18n.bundles()).render(n.getMessage()).contains("qalibsiniz"));
         // protocol is public now; winner name only for staff
         mvc.perform(get("/herraclar/" + a.getId() + "/protokol")).andExpect(status().isOk()).andExpect(content().string(allOf(
                 containsString("İştirakçı #1"), containsString("4 500 AZN"), containsString("+28,6%"), not(containsString("Rəşad")))));

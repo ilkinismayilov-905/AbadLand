@@ -36,7 +36,7 @@ public class DocumentController {
         if (!staff && (owner == null || !owner.equalsIgnoreCase(auth.getName())))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         Path p = storage.path(d);
-        if (p == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fayl tapılmadı");
+        if (p == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, I18n.t("common.file.notFound"));
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(StorageService.contentType(d)))
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline()

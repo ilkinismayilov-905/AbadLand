@@ -1,68 +1,68 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Yeni müraciət')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{apply.new.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-5xl mx-auto px-4 py-6 grid lg:grid-cols-3 gap-6">
     <aside class="space-y-4 text-sm">
         <section class="bg-white rounded-lg shadow p-4 space-y-1">
-            <h2 class="font-semibold">Sahə</h2>
+            <h2 class="font-semibold" th:text="#{apply.new.plot}"></h2>
             <a th:href="@{/saheler/{id}(id=${plot.id})}" class="text-leaf-700 underline" th:text="${plot.code} + ' — ' + ${plot.name}"></a>
-            <div th:text="${plot.district} + ' · ' + ${@fmt.dec(plot.areaHa)} + ' ha · ' + ${@statusLabels.label(plot.purpose)}"></div>
-            <div th:text="'İcarə: ' + ${plot.leaseYears} + ' il, ' + ${@fmt.money(plot.feePerHa)} + '/ha/il'"></div>
+            <div th:text="${plot.district} + ' · ' + ${@fmt.dec(plot.areaHa)} + ' ' + #{apply.unit.ha} + ' · ' + ${@statusLabels.label(plot.purpose)}"></div>
+            <div th:text="#{apply.new.lease(${'' + plot.leaseYears}, ${@fmt.money(plot.feePerHa)})}"></div>
         </section>
         <section th:if="${competition != null}" class="bg-white rounded-lg shadow p-4 space-y-1">
-            <h2 class="font-semibold">Müsabiqə</h2>
+            <h2 class="font-semibold" th:text="#{apply.new.competition}"></h2>
             <div th:text="${competition.code} + ' — ' + ${competition.title}"></div>
-            <div>Son tarix: <b th:text="${@fmt.date(competition.deadline)}"></b></div>
-            <div>Minimum investisiya: <b th:text="${@fmt.money(competition.minInvestment)}"></b></div>
+            <div>[[#{apply.new.deadline}]] <b th:text="${@fmt.date(competition.deadline)}"></b></div>
+            <div>[[#{apply.new.minInvestment}]] <b th:text="${@fmt.money(competition.minInvestment)}"></b></div>
             <p class="text-gray-600" th:text="${competition.requirements}"></p>
         </section>
         <section class="bg-white rounded-lg shadow p-4 space-y-1">
-            <h2 class="font-semibold">Müraciətçi</h2>
+            <h2 class="font-semibold" th:text="#{apply.new.applicant}"></h2>
             <div th:text="${user.fullName}"></div>
-            <div th:text="${@statusLabels.label(user.investorType)} + ' · ' + (${user.investorType != null and user.investorType.name() == 'LEGAL'} ? 'VÖEN ' + ${user.voen} : 'FİN ' + ${user.fin})"></div>
+            <div th:text="${@statusLabels.label(user.investorType)} + ' · ' + (${user.investorType != null and user.investorType.name() == 'LEGAL'} ? #{apply.cabinet.voen} + ' ' + ${user.voen} : #{apply.cabinet.fin} + ' ' + ${user.fin})"></div>
         </section>
     </aside>
 
     <form th:action="@{/kabinet/muraciet}" th:object="${form}" method="post" enctype="multipart/form-data"
           class="lg:col-span-2 bg-white rounded-lg shadow p-6 space-y-4">
-        <h1 class="text-2xl font-bold">Müsabiqəyə müraciət</h1>
+        <h1 class="text-2xl font-bold" th:text="#{apply.new.heading}"></h1>
         <input type="hidden" th:field="*{plotId}">
         <div th:if="${#fields.hasGlobalErrors()}" class="p-3 rounded bg-red-100 text-red-800 text-sm">
             <p th:each="e : ${#fields.globalErrors()}" th:text="${e}"></p></div>
-        <label class="block"><span class="text-sm font-medium">Planlaşdırılan bitki / fəaliyyət</span>
+        <label class="block"><span class="text-sm font-medium" th:text="#{apply.new.crop}"></span>
             <select th:field="*{plannedCrop}" class="mt-1 w-full border rounded px-3 py-2">
                 <option th:each="c : ${crops}" th:value="${c.code}"
-                        th:text="${c.nameAz} + ' (təxmini ' + ${@fmt.money(c.investmentPerHa * plot.areaHa)} + ')'"></option>
+                        th:text="#{apply.new.cropOption(${c.name}, ${@fmt.money(c.investmentPerHa * plot.areaHa)})}"></option>
             </select>
             <span class="text-sm text-red-600" th:errors="*{plannedCrop}"></span></label>
         <div class="grid sm:grid-cols-3 gap-4">
-            <label class="block"><span class="text-sm font-medium">İnvestisiya (AZN)</span>
+            <label class="block"><span class="text-sm font-medium" th:text="#{apply.new.investment}"></span>
                 <input th:field="*{investmentAzn}" type="number" min="1" class="mt-1 w-full border rounded px-3 py-2">
-                <span th:if="${competition != null}" class="text-xs text-gray-500" th:text="'Minimum ' + ${@fmt.money(competition.minInvestment)}"></span>
+                <span th:if="${competition != null}" class="text-xs text-gray-500" th:text="#{apply.new.minimum(${@fmt.money(competition.minInvestment)})}"></span>
                 <span class="block text-sm text-red-600" th:errors="*{investmentAzn}"></span></label>
-            <label class="block"><span class="text-sm font-medium">İş yerləri</span>
+            <label class="block"><span class="text-sm font-medium" th:text="#{apply.new.jobs}"></span>
                 <input th:field="*{jobs}" type="number" min="1" class="mt-1 w-full border rounded px-3 py-2">
                 <span class="text-sm text-red-600" th:errors="*{jobs}"></span></label>
-            <label class="block"><span class="text-sm font-medium">Müddət (ay)</span>
+            <label class="block"><span class="text-sm font-medium" th:text="#{apply.new.months}"></span>
                 <input th:field="*{months}" type="number" min="1" max="600" class="mt-1 w-full border rounded px-3 py-2">
                 <span class="text-sm text-red-600" th:errors="*{months}"></span></label>
         </div>
-        <label class="block"><span class="text-sm font-medium">Biznes planın qısa təsviri (≤ 3000 simvol)</span>
+        <label class="block"><span class="text-sm font-medium" th:text="#{apply.new.businessPlan}"></span>
             <textarea th:field="*{businessPlan}" rows="6" maxlength="3000" class="mt-1 w-full border rounded px-3 py-2"></textarea>
             <span class="text-sm text-red-600" th:errors="*{businessPlan}"></span></label>
-        <label class="block"><span class="text-sm font-medium">Biznes plan faylı (PDF/JPG/PNG, ≤ 5 MB) *</span>
+        <label class="block"><span class="text-sm font-medium" th:text="#{apply.new.planFile}"></span>
             <input type="file" name="businessPlanFile" accept=".pdf,.jpg,.jpeg,.png" class="mt-1 block text-sm">
             <span class="text-sm text-red-600" th:text="${planFileError}"></span></label>
-        <label class="block"><span class="text-sm font-medium">Əlavə sənəd (istəyə bağlı)</span>
+        <label class="block"><span class="text-sm font-medium" th:text="#{apply.new.otherFile}"></span>
             <input type="file" name="otherFile" accept=".pdf,.jpg,.jpeg,.png" class="mt-1 block text-sm">
             <span class="text-sm text-red-600" th:text="${otherFileError}"></span></label>
         <label class="flex gap-2 text-sm"><input type="checkbox" th:field="*{consent}">
-            <span>Təqdim etdiyim məlumatların doğru olduğunu təsdiq edirəm və onların emalına razıyam.</span></label>
+            <span th:text="#{apply.new.consent}"></span></label>
         <span class="block text-sm text-red-600" th:errors="*{consent}"></span>
-        <button class="px-6 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Müraciəti göndər</button>
+        <button class="px-6 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700" th:text="#{apply.new.submit}"></button>
     </form>
 </main>
 <footer th:replace="~{layout :: footer}"></footer>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{layout :: head(${app.number})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
@@ -10,73 +10,73 @@
         <div class="flex flex-wrap items-center gap-3">
             <h1 class="text-2xl font-bold" th:text="${app.number}"></h1>
             <span th:class="${@statusLabels.badge(app.status)}" th:text="${@statusLabels.label(app.status)}"></span>
-            <a th:href="@{/idare/muracietler}" class="ml-auto text-sm text-leaf-700 underline">← Siyahı</a>
+            <a th:href="@{/idare/muracietler}" class="ml-auto text-sm text-leaf-700 underline" th:text="#{staff.backToList}"></a>
         </div>
         <ol th:replace="~{app-fragments :: steps(${app})}"></ol>
     </section>
 
     <!-- Actions by role & status -->
     <section class="bg-white rounded-lg shadow p-5 space-y-4" th:with="st=${app.status.name()}">
-        <h2 class="font-semibold">Əməliyyatlar</h2>
+        <h2 class="font-semibold" th:text="#{staff.app.actions}"></h2>
         <form sec:authorize="hasAnyRole('OPERATOR','ADMIN')" th:if="${st == 'SUBMITTED'}"
               th:action="@{/idare/muracietler/{id}/baxis(id=${app.id})}" method="post">
-            <button class="px-5 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">Baxışa başla</button>
+            <button class="px-5 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700" th:text="#{staff.app.startReview}"></button>
         </form>
         <form sec:authorize="hasAnyRole('OPERATOR','ADMIN')" th:if="${st == 'UNDER_REVIEW'}"
               th:action="@{/idare/muracietler/{id}/melumat(id=${app.id})}" method="post" class="space-y-2">
-            <label class="block text-sm font-medium">Əlavə məlumat istə
-                <textarea name="message" rows="3" required maxlength="2000" placeholder="Məs.: Torpaq analizinin nəticəsini əlavə edin."
+            <label class="block text-sm font-medium">[[#{staff.app.requestInfo}]]
+                <textarea name="message" rows="3" required maxlength="2000" th:placeholder="#{staff.app.requestInfoPlaceholder}"
                           class="mt-1 w-full border rounded px-3 py-2"></textarea></label>
-            <button class="px-5 py-2 rounded bg-amber-600 text-white font-semibold hover:bg-amber-700">Əlavə məlumat istə</button>
+            <button class="px-5 py-2 rounded bg-amber-600 text-white font-semibold hover:bg-amber-700" th:text="#{staff.app.requestInfo}"></button>
         </form>
         <form sec:authorize="hasAnyRole('COMMISSION','ADMIN')" th:if="${st == 'UNDER_REVIEW'}"
               th:action="@{/idare/muracietler/{id}/qerar(id=${app.id})}" method="post" class="space-y-2 border-t pt-4">
-            <label class="block text-sm font-medium">Komissiyanın qərarı — əsaslandırma (ən azı 10 simvol)
+            <label class="block text-sm font-medium">[[#{staff.app.decisionLabel}]]
                 <textarea name="reason" rows="3" required minlength="10" maxlength="1000" class="mt-1 w-full border rounded px-3 py-2"></textarea></label>
             <div class="flex gap-3">
-                <button name="decision" value="APPROVED" class="px-5 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700">Müsbət qərar</button>
-                <button name="decision" value="REJECTED" class="px-5 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700">Mənfi qərar</button>
+                <button name="decision" value="APPROVED" class="px-5 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700" th:text="#{staff.app.approve}"></button>
+                <button name="decision" value="REJECTED" class="px-5 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700" th:text="#{staff.app.reject}"></button>
             </div>
         </form>
-        <p th:if="${st == 'INFO_REQUESTED'}" class="text-sm text-amber-800">İnvestorun cavabı gözlənilir.</p>
+        <p th:if="${st == 'INFO_REQUESTED'}" class="text-sm text-amber-800" th:text="#{staff.app.awaitingInvestor}"></p>
         <p th:if="${st == 'DECIDED'}" th:class="'text-sm font-semibold ' + (${app.decision.name() == 'APPROVED'} ? 'text-green-700' : 'text-red-700')"
-           th:text="'Qərar verilib: ' + ${@statusLabels.label(app.decision)} + ' — ' + ${app.decisionReason}"></p>
-        <p sec:authorize="hasRole('COMMISSION')" th:if="${st == 'SUBMITTED'}" class="text-sm text-gray-500">Operator baxışa başladıqdan sonra qərar vermək mümkündür.</p>
+           th:text="#{staff.app.decided(${@statusLabels.label(app.decision)}, ${app.decisionReason})}"></p>
+        <p sec:authorize="hasRole('COMMISSION')" th:if="${st == 'SUBMITTED'}" class="text-sm text-gray-500" th:text="#{staff.app.commissionHint}"></p>
     </section>
 
     <div class="grid md:grid-cols-2 gap-6">
         <section class="bg-white rounded-lg shadow p-5 text-sm space-y-1">
-            <h2 class="font-semibold mb-2">İnvestor</h2>
+            <h2 class="font-semibold mb-2" th:text="#{staff.app.investor}"></h2>
             <div th:text="${app.investor.fullName} + (${app.investor.companyName != null} ? ' · ' + ${app.investor.companyName} : '')"></div>
-            <div th:text="${@statusLabels.label(app.investor.investorType)} + ' · ' + (${app.investor.voen != null} ? 'VÖEN ' : 'FİN ') + ${@fmt.mask(app.investor.voen != null ? app.investor.voen : app.investor.fin)}"></div>
+            <div th:text="${@statusLabels.label(app.investor.investorType)} + ' · ' + (${app.investor.voen != null} ? #{staff.app.voenValue(${@fmt.mask(app.investor.voen)})} : #{staff.app.finValue(${@fmt.mask(app.investor.fin)})})"></div>
             <div th:text="${app.investor.email} + ' · ' + ${app.investor.phone}"></div>
-            <div th:text="'Təcrübə: ' + (${app.investor.experienceYears} ?: '—') + ' il'"></div>
+            <div th:text="#{staff.app.experience(${app.investor.experienceYears} ?: '—')}"></div>
         </section>
         <section class="bg-white rounded-lg shadow p-5 text-sm space-y-1">
-            <h2 class="font-semibold mb-2">Layihə</h2>
-            <div>Sahə: <a th:href="@{/saheler/{id}(id=${app.plot.id})}" class="text-leaf-700 underline" th:text="${app.plot.code} + ' — ' + ${app.plot.district}"></a></div>
-            <div th:text="'Müsabiqə: ' + ${app.competition.code} + ' (min ' + ${@fmt.money(app.competition.minInvestment)} + ')'"></div>
-            <div th:text="'Bitki: ' + ${cropName}"></div>
-            <div th:text="'İnvestisiya: ' + ${@fmt.money(app.investmentAzn)}"></div>
-            <div th:text="'İş yerləri: ' + ${app.jobs} + ' · Müddət: ' + ${app.months} + ' ay'"></div>
-            <div th:if="${app.ektisRef != null}" th:text="'EKTİS ref: ' + ${app.ektisRef}"></div>
+            <h2 class="font-semibold mb-2" th:text="#{staff.app.project}"></h2>
+            <div>[[#{staff.app.plotLabel}]] <a th:href="@{/saheler/{id}(id=${app.plot.id})}" class="text-leaf-700 underline" th:text="${app.plot.code} + ' — ' + ${app.plot.district}"></a></div>
+            <div th:text="#{staff.app.competitionLine(${app.competition.code}, ${@fmt.money(app.competition.minInvestment)})}"></div>
+            <div th:text="#{staff.app.crop(${cropName})}"></div>
+            <div th:text="#{staff.app.investment(${@fmt.money(app.investmentAzn)})}"></div>
+            <div th:text="#{staff.app.jobsMonths(${#strings.toString(app.jobs)}, ${#strings.toString(app.months)})}"></div>
+            <div th:if="${app.ektisRef != null}" th:text="#{staff.app.ektisRef(${app.ektisRef})}"></div>
         </section>
     </div>
     <section class="bg-white rounded-lg shadow p-5 text-sm space-y-2">
-        <h2 class="font-semibold">Biznes plan</h2>
+        <h2 class="font-semibold" th:text="#{staff.app.businessPlan}"></h2>
         <p class="whitespace-pre-line text-gray-700" th:text="${app.businessPlan}"></p>
-        <div th:if="${app.infoRequest != null}" class="pt-2 border-t"><span class="text-gray-500">Məlumat tələbi:</span>
+        <div th:if="${app.infoRequest != null}" class="pt-2 border-t"><span class="text-gray-500" th:text="#{staff.app.infoRequest}"></span>
             <p class="whitespace-pre-line" th:text="${app.infoRequest}"></p></div>
-        <div th:if="${app.infoResponse != null}"><span class="text-gray-500">İnvestorun cavabı:</span>
+        <div th:if="${app.infoResponse != null}"><span class="text-gray-500" th:text="#{staff.app.infoResponse}"></span>
             <p class="whitespace-pre-line" th:text="${app.infoResponse}"></p></div>
     </section>
     <div class="grid md:grid-cols-2 gap-6">
         <section class="bg-white rounded-lg shadow p-5 space-y-3">
-            <h2 class="font-semibold">Sənədlər</h2>
+            <h2 class="font-semibold" th:text="#{staff.app.documents}"></h2>
             <ul th:replace="~{app-fragments :: docs(${documents})}"></ul>
         </section>
         <section class="bg-white rounded-lg shadow p-5">
-            <h2 class="font-semibold mb-3">Tarixçə</h2>
+            <h2 class="font-semibold mb-3" th:text="#{staff.app.history}"></h2>
             <ol th:replace="~{app-fragments :: history(${history})}"></ol>
         </section>
     </div>

@@ -35,7 +35,7 @@ public class MonitoringController {
                          @RequestParam(required = false) String comment, Authentication auth, RedirectAttributes ra) {
         try {
             farms.reviewReport(reportId, auth.getName(), accept, comment);
-            ra.addFlashAttribute("success", accept ? "Hesabat qəbul edildi." : "Düzəliş tələbi göndərildi.");
+            ra.addFlashAttribute("success", I18n.t(accept ? "staff.flash.reportAccepted" : "staff.flash.reportReturned"));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }

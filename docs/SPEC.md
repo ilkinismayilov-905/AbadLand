@@ -97,7 +97,7 @@ Params (all optional, GET, shareable): `q` (name / code / village / district, ca
 ## Fruit / crop designation ("Torpaq təyinatı — meyvələr")
 - Each plot has a suitability score per crop (`PlotCropSuitability`). Priority of sources: EXPERT > AI > RULE.
 - **RULE score** (needs PlotClimate; if missing, crops in `recommendedCrops` get 70, others no score):
-  start 100; if absMinTempC < frostToleranceC → −40; if elevationM > maxElevationM → −30; if waterNeed HIGH and no irrigation → −30 (MEDIUM → −15); if precipMm < 300 and no irrigation → −15; if crop NOT in recommendedCrops → −20 (a "+10 bonus" would always be clamped away); clamp 0–100. Reason text lists the penalties in Azerbaijani. Only crops whose activityType equals plot.purpose are scored.
+  start 100; if absMinTempC < frostToleranceC → −40; if elevationM > maxElevationM → −30; if waterNeed HIGH and no irrigation → −30 (MEDIUM → −15); if precipMm < 300 and no irrigation → −15; if crop NOT in recommendedCrops → −20 (a "+10 bonus" would always be clamped away); clamp 0–100. Reason text lists the penalties in the UI language. Only crops whose activityType equals plot.purpose are scored.
 - **AI score**: from AI analysis `suitableCrops[].code` → overrides RULE for that crop; `notRecommended[].name` matching a crop nameAz → AI score 20.
 - UI: catalog/map filter "Hansı meyvə üçün?" (fruit crops) → plots with score ≥ 60, sorted by score; passport shows chips "Nar 85% · Fındıq 78% · Üzüm 64%" with source label.
 
@@ -179,7 +179,7 @@ Plot status: SCHEDULED/LIVE → `IN_AUCTION`, CONFIRMED → `LEASED` or `SOLD`, 
 4. Bidder is not already the highest bidder ("Ən yüksək təklif artıq sizindir").
 5. **Anti-sniping:** if endsAt − now < extendSeconds → endsAt = now + extendSeconds (UI shows "Vaxt 2 dəqiqə uzadıldı").
 6. Save Bid, update currentPrice, audit `AUCTION_BID`, notify the previously highest bidder "Təklifiniz keçildi".
-Errors return Azerbaijani messages; amounts are whole AZN.
+Errors return messages in the request language (default Azerbaijani); amounts are whole AZN.
 
 ### Live page data (polling, no websockets)
 `GET /api/v1/auctions/{id}/state` (public) → `{status, startPrice, currentPrice, step, minNextBid, endsAt, serverNow, participants, bids:[{participantNo, amount, at}] (last 20, newest first), me:{participantNo, depositConfirmed, isHighest} | null}`. Page polls every 2 s, countdown uses `serverNow` offset. Bids from the page: `POST /herraclar/{id}/teklif` via fetch with CSRF header (token from `<meta name="_csrf">`).
@@ -269,3 +269,8 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 - PlotClimate for demo plots seeded with plausible values (so suitability works offline); real fetch replaces them.
 - Competitions: `MUS-2026-03` PUBLISHED (FZL-001, FZL-002, CBR-001, LCN-001, ZNG-001; today+12), `MUS-2026-04` PUBLISHED (Ağdam/Tərtər; today+5), `MUS-2026-05` PENDING_APPROVAL.
 - 8 applications from other investors in mixed statuses (none for Elvin, none on FZL-001); 2 FarmProjects for approved ones (one ACTIVE with 2 reports and calendar on time, one AT_RISK with a delayed task); 1 sample AiAnalysis for `FZL-001` (model "sample", label "Nümunə analiz"); 1 open ShareOffering by rashad@demo.az (40% sold).
+
+## Languages (i18n)
+- UI languages: **az** (default), **en**, **ru**. Header switcher AZ | EN | RU → `?lang=xx` on the current URL; stored in the `lang` cookie (1 year); unsupported values are ignored.
+- Bundles: `messages*.properties` (binding errors) + `i18n/{enums,common,plots,apply,staff,auction}*.properties`; enum labels `enum.<Type>.<NAME>`, crop names `crop.<CODE>`. Missing key → AZ text (base bundle), never the server locale.
+- Notifications are stored as a key + args and rendered in the reader's language. Seed data (plot names, descriptions, competition titles), user-entered text, audit details, EKTİS payloads and AI analysis text stay Azerbaijani.

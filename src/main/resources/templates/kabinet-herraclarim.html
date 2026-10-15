@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Hərraclarım')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{auction.mine.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-5xl mx-auto px-4 py-6 space-y-4">
-    <div class="flex items-center"><h1 class="text-2xl font-bold">Hərraclarım</h1>
-        <a th:href="@{/kabinet}" class="ml-auto text-sm text-leaf-700 underline">← Kabinet</a></div>
-    <p th:if="${rows.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600">Hələ hərracda iştirak etməmisiniz.
-        <a th:href="@{/herraclar}" class="text-leaf-700 underline">Hərraclara baxın</a>.</p>
+    <div class="flex items-center"><h1 class="text-2xl font-bold" th:text="#{auction.mine.title}"></h1>
+        <a th:href="@{/kabinet}" class="ml-auto text-sm text-leaf-700 underline" th:text="#{auction.mine.back}"></a></div>
+    <p th:if="${rows.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600">[[#{auction.mine.empty}]]
+        <a th:href="@{/herraclar}" class="text-leaf-700 underline" th:text="#{auction.mine.browse}"></a>.</p>
     <div th:unless="${rows.isEmpty()}" class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="w-full text-sm min-w-[600px]">
-            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3">Hərrac</th><th>Sahə</th><th>Status</th><th>Mən</th><th class="text-right">Son təklifim</th><th class="pl-4">Nəticə</th></tr>
+            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3" th:text="#{auction.mine.auction}"></th><th th:text="#{auction.mine.plot}"></th><th th:text="#{auction.mine.status}"></th><th th:text="#{auction.mine.me}"></th><th class="text-right" th:text="#{auction.mine.lastBid}"></th><th class="pl-4" th:text="#{auction.mine.result}"></th></tr>
             <tr th:each="r : ${rows}" class="border-t">
                 <td class="p-3"><a th:href="@{/herraclar/{id}(id=${r.a.id})}" class="text-leaf-700 underline" th:text="${r.a.code}"></a></td>
                 <td th:text="${r.a.plot.code}"></td>
                 <td><span th:class="${@statusLabels.badge(r.a.status)}" th:text="${@statusLabels.label(r.a.status)}"></span></td>
-                <td th:text="'#' + ${r.p.number} + (${r.p.depositConfirmed} ? '' : ' · zaminat yox')"></td>
+                <td th:text="'#' + ${r.p.number} + (${r.p.depositConfirmed} ? '' : ' · ' + #{auction.mine.noDeposit})"></td>
                 <td class="text-right" th:text="${r.last >= 0} ? ${@fmt.money(r.last)} : '—'"></td>
-                <td class="pl-4" th:text="${r.won} ? 'Qalib ✓' : (${r.highest} ? 'Ən yüksək təklif' : '—')"></td>
+                <td class="pl-4" th:text="${r.won} ? #{auction.mine.won} : (${r.highest} ? #{auction.mine.highest} : '—')"></td>
             </tr>
         </table>
     </div>

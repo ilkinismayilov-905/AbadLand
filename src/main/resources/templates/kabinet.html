@@ -1,41 +1,39 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Kabinet')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{apply.cabinet.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
     <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-2xl font-bold" th:text="'Xoş gəlmisiniz, ' + ${user.fullName}"></h1>
-        <a th:href="@{/kabinet/herraclarim}" class="ml-auto px-3 py-1.5 rounded border bg-white text-sm hover:bg-leaf-50">Hərraclarım</a>
+        <h1 class="text-2xl font-bold" th:text="#{apply.cabinet.welcome(${user.fullName})}"></h1>
+        <a th:href="@{/kabinet/herraclarim}" class="ml-auto px-3 py-1.5 rounded border bg-white text-sm hover:bg-leaf-50" th:text="#{apply.cabinet.myAuctions}"></a>
     </div>
     <div class="grid lg:grid-cols-3 gap-6">
         <section class="bg-white rounded-lg shadow p-5 text-sm space-y-3">
-            <h2 class="font-semibold">Profil</h2>
-            <div><span class="text-gray-500">E-poçt:</span> <span th:text="${user.email}"></span></div>
-            <div><span class="text-gray-500">Telefon:</span> <span th:text="${user.phone}"></span></div>
-            <div><span class="text-gray-500">Növ:</span> <span th:text="${@statusLabels.label(user.investorType)}"></span>
+            <h2 class="font-semibold" th:text="#{apply.cabinet.profile}"></h2>
+            <div><span class="text-gray-500" th:text="#{apply.cabinet.email}"></span> <span th:text="${user.email}"></span></div>
+            <div><span class="text-gray-500" th:text="#{apply.cabinet.phone}"></span> <span th:text="${user.phone}"></span></div>
+            <div><span class="text-gray-500" th:text="#{apply.cabinet.type}"></span> <span th:text="${@statusLabels.label(user.investorType)}"></span>
                 <span th:if="${user.companyName != null}" th:text="'· ' + ${user.companyName}"></span></div>
             <form th:action="@{/kabinet/profil}" th:object="${profile}" method="post" class="space-y-2 pt-2 border-t">
-                <label th:if="${user.investorType == null or user.investorType.name() == 'INDIVIDUAL'}" class="block">FİN
+                <label th:if="${user.investorType == null or user.investorType.name() == 'INDIVIDUAL'}" class="block">[[#{apply.cabinet.fin}]]
                     <input th:field="*{fin}" maxlength="7" class="mt-1 w-full border rounded px-2 py-1 uppercase">
                     <span class="text-red-600" th:errors="*{fin}"></span></label>
-                <label th:if="${user.investorType != null and user.investorType.name() == 'LEGAL'}" class="block">VÖEN
+                <label th:if="${user.investorType != null and user.investorType.name() == 'LEGAL'}" class="block">[[#{apply.cabinet.voen}]]
                     <input th:field="*{voen}" maxlength="10" class="mt-1 w-full border rounded px-2 py-1">
                     <span class="text-red-600" th:errors="*{voen}"></span></label>
-                <label class="block">Təcrübə (il)
+                <label class="block">[[#{apply.cabinet.experience}]]
                     <input th:field="*{experienceYears}" type="number" min="0" max="80" class="mt-1 w-full border rounded px-2 py-1">
                     <span class="text-red-600" th:errors="*{experienceYears}"></span></label>
-                <button class="px-3 py-1.5 rounded bg-leaf-600 text-white hover:bg-leaf-700">Yadda saxla</button>
+                <button class="px-3 py-1.5 rounded bg-leaf-600 text-white hover:bg-leaf-700" th:text="#{apply.cabinet.save}"></button>
             </form>
         </section>
         <section class="lg:col-span-2 bg-white rounded-lg shadow p-5">
-            <h2 class="font-semibold mb-3">Müraciətlərim</h2>
-            <div th:if="${applications.isEmpty()}" class="text-sm text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Hələ müraciətiniz yoxdur.
-                <a th:href="@{/uygunluq}" class="text-leaf-700 underline">Uyğunluq testindən</a> və ya
-                <a th:href="@{/saheler}" class="text-leaf-700 underline">kataloqdan</a> sahə seçin.</p></div>
+            <h2 class="font-semibold mb-3" th:text="#{apply.cabinet.myApplications}"></h2>
+            <div th:if="${applications.isEmpty()}" class="text-sm text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p th:utext="#{apply.cabinet.noApplications(@{/uygunluq}, @{/saheler})}"></p></div>
             <table th:unless="${applications.isEmpty()}" class="w-full text-sm">
-                <tr class="text-left text-gray-500"><th class="py-1">Nömrə</th><th>Sahə</th><th>Status</th><th>Yeniləndi</th></tr>
+                <tr class="text-left text-gray-500"><th class="py-1" th:text="#{apply.cabinet.colNumber}"></th><th th:text="#{apply.cabinet.colPlot}"></th><th th:text="#{apply.cabinet.colStatus}"></th><th th:text="#{apply.cabinet.colUpdated}"></th></tr>
                 <tr th:each="a : ${applications}" class="border-t hover:bg-gray-50">
                     <td class="py-2"><a th:href="@{/kabinet/muraciet/{id}(id=${a.id})}" class="text-leaf-700 font-medium underline" th:text="${a.number}"></a></td>
                     <td th:text="${a.plot.code} + ' · ' + ${a.plot.district}"></td>
@@ -47,16 +45,16 @@
         </section>
     </div>
     <section class="bg-white rounded-lg shadow p-5">
-        <h2 class="font-semibold mb-3">Təsərrüfatlarım</h2>
-        <p th:if="${farms.isEmpty()}" class="text-sm text-gray-600">Müsbət qərar verilmiş müraciətdən sonra təsərrüfat layihəniz burada görünəcək.</p>
+        <h2 class="font-semibold mb-3" th:text="#{apply.cabinet.myFarms}"></h2>
+        <p th:if="${farms.isEmpty()}" class="text-sm text-gray-600" th:text="#{apply.cabinet.noFarms}"></p>
         <div class="grid md:grid-cols-2 gap-3">
             <a th:each="f : ${farms}" th:href="@{/kabinet/teserrufat/{id}(id=${f.id})}" class="block border rounded-lg p-4 hover:bg-leaf-50">
                 <div class="flex items-center gap-2">
                     <b th:text="${f.plot.code} + ' — ' + ${f.plot.name}"></b>
-                    <span th:if="${f.status.name() == 'ACTIVE'}" class="ml-auto inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Plan üzrə</span>
+                    <span th:if="${f.status.name() == 'ACTIVE'}" class="ml-auto inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" th:text="#{apply.farm.onPlan}"></span>
                     <span th:unless="${f.status.name() == 'ACTIVE'}" class="ml-auto" th:classappend="${@statusLabels.badge(f.status)}" th:text="${@statusLabels.label(f.status)}"></span>
                 </div>
-                <div class="text-sm text-gray-600" th:text="${f.sourceLabel()} + ' · başlanğıc ' + ${@fmt.date(f.startDate)}"></div>
+                <div class="text-sm text-gray-600" th:text="#{apply.cabinet.farmSource(${f.sourceLabel()}, ${@fmt.date(f.startDate)})}"></div>
             </a>
         </div>
     </section>

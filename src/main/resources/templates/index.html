@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Ana səhifə')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{common.home.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
@@ -10,12 +10,12 @@
     <section class="bg-gradient-to-br from-[#eef6ea] via-white to-[#faf6f0] border-b border-[#DDE3DC]">
         <div class="max-w-7xl mx-auto px-4 py-12 md:py-20 grid lg:grid-cols-2 gap-10 items-center">
             <div>
-                <span class="inline-block text-xs font-semibold uppercase tracking-wider text-[#2E6B3A] bg-[#e3f0de] rounded-full px-3 py-1">Qarabağ · Şərqi Zəngəzur</span>
-                <h1 class="mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-[#1F2933]">Qarabağda sizə uyğun torpağı tapın</h1>
-                <p class="mt-4 text-lg text-gray-600 max-w-xl">Sahələri xəritədə görün, meyvə uyğunluğunu, gəlirliliyi və riskləri qiymətləndirin, müsabiqəyə onlayn müraciət edin və təsərrüfatınızı bir yerdən idarə edin.</p>
+                <span class="inline-block text-xs font-semibold uppercase tracking-wider text-[#2E6B3A] bg-[#e3f0de] rounded-full px-3 py-1" th:text="#{common.home.badge}"></span>
+                <h1 class="mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-[#1F2933]" th:text="#{common.home.heading}"></h1>
+                <p class="mt-4 text-lg text-gray-600 max-w-xl" th:text="#{common.home.lead}"></p>
                 <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                    <a th:href="@{/uygunluq}" class="btn-primary text-base px-6">Uyğunluq testinə başla →</a>
-                    <a th:href="@{/xerite}" class="btn-secondary text-base px-6">Xəritəyə bax</a>
+                    <a th:href="@{/uygunluq}" class="btn-primary text-base px-6" th:text="#{common.home.startQuiz}"></a>
+                    <a th:href="@{/xerite}" class="btn-secondary text-base px-6" th:text="#{common.home.viewMap}"></a>
                 </div>
             </div>
             <!-- Visual: field rows + a real sample plot card -->
@@ -38,7 +38,7 @@
                             <div class="font-semibold truncate" th:text="${c.plot.name}"></div>
                         </div>
                         <div th:unless="${c.suitability.isEmpty()}" class="shrink-0 w-14 h-14 rounded-full bg-[#2E6B3A] text-white flex flex-col items-center justify-center">
-                            <b th:text="${c.suitability[0].score} + '%'"></b><span class="text-[10px] -mt-1">uyğun</span></div>
+                            <b th:text="${c.suitability[0].score} + '%'"></b><span class="text-[10px] -mt-1" th:text="#{common.home.suitable}"></span></div>
                     </div>
                     <div class="mt-2"><span th:replace="~{layout :: suitChips(${c.top3()})}"></span></div>
                 </div></th:block>
@@ -49,82 +49,81 @@
     <!-- 2. Stats strip (real DB counts) -->
     <section class="pt-12 md:pt-14"><div class="max-w-7xl mx-auto px-4">
         <div class="card grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 divide-gray-100">
-            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.openPlots}"></div><div class="text-sm text-gray-600">Açıq sahə</div></div>
-            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${@fmt.num(h.totalHa)}"></div><div class="text-sm text-gray-600">Ümumi hektar</div></div>
-            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.activeCompetitions}"></div><div class="text-sm text-gray-600">Aktiv müsabiqə</div></div>
-            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.activeAuctions}"></div><div class="text-sm text-gray-600">Aktiv hərrac</div></div>
-            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.districts}"></div><div class="text-sm text-gray-600">Rayon</div></div>
-            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.approvedProjects}"></div><div class="text-sm text-gray-600">Təsdiqlənmiş layihə</div></div>
+            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.openPlots}"></div><div class="text-sm text-gray-600" th:text="#{common.home.stat.openPlots}"></div></div>
+            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${@fmt.num(h.totalHa)}"></div><div class="text-sm text-gray-600" th:text="#{common.home.stat.totalHa}"></div></div>
+            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.activeCompetitions}"></div><div class="text-sm text-gray-600" th:text="#{common.home.stat.competitions}"></div></div>
+            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.activeAuctions}"></div><div class="text-sm text-gray-600" th:text="#{common.home.stat.auctions}"></div></div>
+            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.districts}"></div><div class="text-sm text-gray-600" th:text="#{common.home.stat.districts}"></div></div>
+            <div class="p-5 text-center"><div class="text-2xl md:text-3xl font-bold text-[#2E6B3A]" th:text="${h.approvedProjects}"></div><div class="text-sm text-gray-600" th:text="#{common.home.stat.approved}"></div></div>
         </div>
     </div></section>
 
     <!-- 3. How it works -->
     <section class="py-12 md:py-16"><div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-2xl font-bold">Necə işləyir</h2>
+        <h2 class="text-2xl font-bold" th:text="#{common.home.how}"></h2>
         <ol class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <li class="card p-5"><div class="home-icon">🔎</div><div class="mt-3 font-semibold">1. Tapın</div><p class="text-sm text-gray-600 mt-1">Xəritə, kataloq və uyğunluq testi ilə sahə seçin.</p></li>
-            <li class="card p-5"><div class="home-icon">📊</div><div class="mt-3 font-semibold">2. Qiymətləndirin</div><p class="text-sm text-gray-600 mt-1">Pasport, ROI, peyk + AI analizi və 3D relyefə baxın.</p></li>
-            <li class="card p-5"><div class="home-icon">📝</div><div class="mt-3 font-semibold">3. Müraciət edin</div><p class="text-sm text-gray-600 mt-1">Müsabiqəyə onlayn müraciət edin, statusu izləyin.</p></li>
-            <li class="card p-5"><div class="home-icon">🌱</div><div class="mt-3 font-semibold">4. İdarə edin</div><p class="text-sm text-gray-600 mt-1">Əkin planı, təqvim, işçilər və hesabatlar bir yerdə.</p></li>
+            <li class="card p-5"><div class="home-icon">🔎</div><div class="mt-3 font-semibold" th:text="#{common.home.how1}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.how1Text}"></p></li>
+            <li class="card p-5"><div class="home-icon">📊</div><div class="mt-3 font-semibold" th:text="#{common.home.how2}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.how2Text}"></p></li>
+            <li class="card p-5"><div class="home-icon">📝</div><div class="mt-3 font-semibold" th:text="#{common.home.how3}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.how3Text}"></p></li>
+            <li class="card p-5"><div class="home-icon">🌱</div><div class="mt-3 font-semibold" th:text="#{common.home.how4}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.how4Text}"></p></li>
         </ol>
     </div></section>
 
     <!-- 4. Feature showcase (white band) -->
     <section class="home-band py-12 md:py-16 bg-white border-y border-[#DDE3DC]"><div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-2xl font-bold">Platformanın imkanları</h2>
+        <h2 class="text-2xl font-bold" th:text="#{common.home.features}"></h2>
         <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <a th:href="@{/uygunluq}" class="card p-5 hover:ring-2 hover:ring-leaf-500 transition"><div class="home-icon">🎯</div>
-                <div class="mt-3 font-semibold">Uyğunluq balı</div><p class="text-sm text-gray-600 mt-1">5 sual — açıq sahələr 0–100 bal ilə, səbəbləri ilə sıralanır.</p></a>
+                <div class="mt-3 font-semibold" th:text="#{common.home.feat1}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.feat1Text}"></p></a>
             <a th:href="@{/saheler/{id}(id=${h.sample == null ? 1 : h.sample.plot.id})} + '#ai'" class="card p-5 hover:ring-2 hover:ring-leaf-500 transition"><div class="home-icon">🛰️</div>
-                <div class="mt-3 font-semibold">Peyk + AI analizi</div><p class="text-sm text-gray-600 mt-1">Peyk görüntüsü və iqlim məlumatı ilə torpaq qiymətləndirməsi (AI tövsiyəsidir).</p></a>
+                <div class="mt-3 font-semibold" th:text="#{common.home.feat2}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.feat2Text}"></p></a>
             <a th:href="@{/xerite}" class="card p-5 hover:ring-2 hover:ring-leaf-500 transition"><div class="home-icon">⛰️</div>
-                <div class="mt-3 font-semibold">3D görünüş</div><p class="text-sm text-gray-600 mt-1">Sahənin relyefini peyk teksturası ilə 3D-də gəzin.</p></a>
+                <div class="mt-3 font-semibold" th:text="#{common.home.feat3}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.feat3Text}"></p></a>
             <a th:href="@{/kabinet}" class="card p-5 hover:ring-2 hover:ring-leaf-500 transition"><div class="home-icon">📅</div>
-                <div class="mt-3 font-semibold">Əkin təqvimi və monitorinq</div><p class="text-sm text-gray-600 mt-1">Təsdiqdən sonra əkin planı, təqvim, işçilər və rüblük hesabat.</p></a>
+                <div class="mt-3 font-semibold" th:text="#{common.home.feat4}"></div><p class="text-sm text-gray-600 mt-1" th:text="#{common.home.feat4Text}"></p></a>
         </div>
     </div></section>
 
     <!-- 5. Data sources & technologies -->
     <section class="py-12 md:py-16"><div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-2xl font-bold">Məlumat mənbələri və texnologiyalar</h2>
+        <h2 class="text-2xl font-bold" th:text="#{common.home.sources}"></h2>
         <div class="mt-6 flex flex-wrap gap-2">
-            <span class="tech-badge">🛰️ Esri World Imagery — peyk görüntüsü</span>
-            <span class="tech-badge">🌦️ Open-Meteo — iqlim və hündürlük</span>
-            <span class="tech-badge">⛰️ AWS Terrain Tiles — 3D relyef</span>
-            <span class="tech-badge">🤖 Claude AI — torpaq analizi (tövsiyə)</span>
-            <span class="tech-badge">🔗 EKTİS — mock adapter</span>
+            <span class="tech-badge" th:text="#{common.home.src.esri}"></span>
+            <span class="tech-badge" th:text="#{common.home.src.meteo}"></span>
+            <span class="tech-badge" th:text="#{common.home.src.terrain}"></span>
+            <span class="tech-badge" th:text="#{common.home.src.claude}"></span>
+            <span class="tech-badge" th:text="#{common.home.src.ektis}"></span>
         </div>
     </div></section>
 
     <!-- 6. Potential partners (NOT official, white band) -->
     <section class="home-band py-12 md:py-16 bg-white border-y border-[#DDE3DC]"><div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-2xl font-bold">Potensial tərəfdaşlar</h2>
-        <p class="mt-2 inline-block text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-            Planlaşdırılan əməkdaşlıq istiqamətləri — rəsmi tərəfdaşlıq deyil.</p>
+        <h2 class="text-2xl font-bold" th:text="#{common.home.partners}"></h2>
+        <p class="mt-2 inline-block text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2" th:text="#{common.home.partnersNote}"></p>
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div class="card p-4"><div class="font-semibold">Kənd Təsərrüfatı Nazirliyi</div><div class="text-sm text-gray-600">EKTİS inteqrasiyası, müsabiqə qərarları</div></div>
-            <div class="card p-4"><div class="font-semibold">ANAMA</div><div class="text-sm text-gray-600">Minalardan təmizlənmə məlumatı</div></div>
-            <div class="card p-4"><div class="font-semibold">Qarabağ Dirçəliş Fondu</div><div class="text-sm text-gray-600">Bərpa layihələri ilə əlaqələndirmə</div></div>
-            <div class="card p-4"><div class="font-semibold">Aqrar Sığorta Fondu</div><div class="text-sm text-gray-600">Məhsul və risk sığortası</div></div>
-            <div class="card p-4"><div class="font-semibold">Banklar</div><div class="text-sm text-gray-600">Aqrar kredit və maliyyələşmə</div></div>
-            <div class="card p-4"><div class="font-semibold">Aqrar universitetlər</div><div class="text-sm text-gray-600">Ekspert rəyi, kadr hazırlığı</div></div>
+            <div class="card p-4"><div class="font-semibold" th:text="#{common.home.p.ministry}"></div><div class="text-sm text-gray-600" th:text="#{common.home.p.ministryText}"></div></div>
+            <div class="card p-4"><div class="font-semibold" th:text="#{common.home.p.anama}"></div><div class="text-sm text-gray-600" th:text="#{common.home.p.anamaText}"></div></div>
+            <div class="card p-4"><div class="font-semibold" th:text="#{common.home.p.fund}"></div><div class="text-sm text-gray-600" th:text="#{common.home.p.fundText}"></div></div>
+            <div class="card p-4"><div class="font-semibold" th:text="#{common.home.p.insurance}"></div><div class="text-sm text-gray-600" th:text="#{common.home.p.insuranceText}"></div></div>
+            <div class="card p-4"><div class="font-semibold" th:text="#{common.home.p.banks}"></div><div class="text-sm text-gray-600" th:text="#{common.home.p.banksText}"></div></div>
+            <div class="card p-4"><div class="font-semibold" th:text="#{common.home.p.unis}"></div><div class="text-sm text-gray-600" th:text="#{common.home.p.unisText}"></div></div>
         </div>
     </div></section>
 
     <!-- 7. FAQ -->
     <section class="py-12 md:py-16"><div class="max-w-3xl mx-auto px-4">
-        <h2 class="text-2xl font-bold">Tez-tez verilən suallar</h2>
+        <h2 class="text-2xl font-bold" th:text="#{common.home.faq}"></h2>
         <div class="mt-6 space-y-3">
-            <details class="faq card"><summary>Kim müraciət edə bilər?</summary>
-                <p>Qeydiyyatdan keçmiş fiziki və hüquqi şəxs investorlar açıq müsabiqədəki sahəyə onlayn müraciət edə bilər.</p></details>
-            <details class="faq card"><summary>Torpaq təhlükəsizdirmi, minalardan təmizlənibmi?</summary>
-                <p>Hər sahənin pasportunda minalardan təmizlənmə statusu göstərilir: tam, qismən və ya davam edir. Qismən təmizlənmiş sahələr əlavə yoxlama tələb edir.</p></details>
-            <details class="faq card"><summary>Müraciətlər necə qiymətləndirilir?</summary>
-                <p>Operator müraciəti yoxlayır, qərarı komissiya verir. Qərar və səbəbi kabinetinizdə görünür və EKTİS-ə göndərilir.</p></details>
-            <details class="faq card"><summary>Qərarı AI verirmi?</summary>
-                <p>Xeyr. AI yalnız tövsiyə verir (peyk və iqlim əsasında torpaq analizi). Qərarı həmişə komissiya verir.</p></details>
-            <details class="faq card"><summary>Təsdiqdən sonra nə baş verir?</summary>
-                <p>Kabinetinizdə təsərrüfat yaranır: əkin planı, əkin təqvimi, işçi heyəti və rüblük hesabatlar. Operator monitorinq aparır.</p></details>
+            <details class="faq card"><summary th:text="#{common.home.faq1}"></summary>
+                <p th:text="#{common.home.faq1Text}"></p></details>
+            <details class="faq card"><summary th:text="#{common.home.faq2}"></summary>
+                <p th:text="#{common.home.faq2Text}"></p></details>
+            <details class="faq card"><summary th:text="#{common.home.faq3}"></summary>
+                <p th:text="#{common.home.faq3Text}"></p></details>
+            <details class="faq card"><summary th:text="#{common.home.faq4}"></summary>
+                <p th:text="#{common.home.faq4Text}"></p></details>
+            <details class="faq card"><summary th:text="#{common.home.faq5}"></summary>
+                <p th:text="#{common.home.faq5Text}"></p></details>
         </div>
     </div></section>
 
@@ -132,12 +131,12 @@
     <section class="pb-4"><div class="max-w-7xl mx-auto px-4">
         <div class="rounded-2xl bg-[#2E6B3A] text-white p-8 md:p-12 flex flex-col md:flex-row md:items-center gap-6">
             <div class="flex-1">
-                <h2 class="text-2xl md:text-3xl font-bold">Sizə uyğun sahəni 2 dəqiqəyə tapın</h2>
-                <p class="mt-2 text-white/85">5 suala cavab verin — açıq müsabiqələrdəki sahələr uyğunluq balına görə sıralansın.</p>
+                <h2 class="text-2xl md:text-3xl font-bold" th:text="#{common.home.cta}"></h2>
+                <p class="mt-2 text-white/85" th:text="#{common.home.ctaText}"></p>
             </div>
             <div class="flex flex-col sm:flex-row gap-3">
-                <a th:href="@{/uygunluq}" class="btn-secondary !border-white">Testə başla</a>
-                <a th:href="@{/qeydiyyat}" class="btn-primary !bg-[#1E4A28] hover:!bg-black/30">Qeydiyyat</a>
+                <a th:href="@{/uygunluq}" class="btn-secondary !border-white" th:text="#{common.home.ctaStart}"></a>
+                <a th:href="@{/qeydiyyat}" class="btn-primary !bg-[#1E4A28] hover:!bg-black/30" th:text="#{common.nav.register}"></a>
             </div>
         </div>
     </div></section>

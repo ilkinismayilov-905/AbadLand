@@ -12,7 +12,7 @@ public class WebErrorAdvice {
     /** Upload over spring.servlet.multipart limits → back to the form with a flash message. */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public String tooLarge(HttpServletRequest req, RedirectAttributes ra) {
-        ra.addFlashAttribute("error", "Fayl 5 MB-dan böyük ola bilməz.");
+        ra.addFlashAttribute("error", I18n.t("common.file.tooLarge"));
         String referer = req.getHeader("Referer");
         String host = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort();
         return "redirect:" + (referer != null && referer.startsWith(host) ? referer.substring(host.length()) : "/");

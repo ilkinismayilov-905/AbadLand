@@ -1,62 +1,62 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('İstifadəçilər')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{staff.users.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
     <nav th:replace="~{app-fragments :: staffNav('users')}"></nav>
-    <h1 class="text-2xl font-bold">İstifadəçilər</h1>
+    <h1 class="text-2xl font-bold" th:text="#{staff.users.title}"></h1>
 
     <!-- Temporary password: flash attribute, so it is shown exactly once -->
     <section th:if="${tempPassword != null}" class="rounded-lg border-2 border-amber-400 bg-amber-50 p-5 space-y-2" role="alert">
-        <h2 class="font-semibold text-amber-900">Yeni işçi yaradıldı</h2>
-        <p class="text-sm">E-poçt: <b th:text="${tempEmail}"></b></p>
-        <p class="text-sm">Müvəqqəti şifrə:
+        <h2 class="font-semibold text-amber-900" th:text="#{staff.users.created}"></h2>
+        <p class="text-sm">[[#{staff.users.emailLabel}]] <b th:text="${tempEmail}"></b></p>
+        <p class="text-sm">[[#{staff.users.tempPassword}]]
             <code class="text-lg font-mono bg-white border rounded px-2 py-0.5 select-all" th:text="${tempPassword}"></code></p>
-        <p class="text-xs text-amber-900">Şifrə yalnız indi göstərilir və heç yerdə saxlanılmır. Kopyalayıb işçiyə təhlükəsiz kanalla çatdırın.</p>
+        <p class="text-xs text-amber-900" th:text="#{staff.users.passwordNote}"></p>
     </section>
 
     <details class="bg-white rounded-lg shadow p-5" th:attr="open=${openForm} ? 'open' : null">
-        <summary class="cursor-pointer font-semibold text-leaf-700">+ Yeni işçi</summary>
+        <summary class="cursor-pointer font-semibold text-leaf-700" th:text="#{staff.users.new}"></summary>
         <form th:action="@{/idare/istifadeciler}" th:object="${form}" method="post" class="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
-            <label class="block"><span class="font-medium">Ad və soyad</span>
+            <label class="block"><span class="font-medium" th:text="#{staff.users.fullName}"></span>
                 <input th:field="*{fullName}" maxlength="120" class="mt-1 w-full border rounded px-3 py-2">
                 <span class="text-red-600" th:errors="*{fullName}"></span></label>
-            <label class="block"><span class="font-medium">E-poçt</span>
+            <label class="block"><span class="font-medium" th:text="#{staff.users.email}"></span>
                 <input th:field="*{email}" type="email" class="mt-1 w-full border rounded px-3 py-2">
                 <span class="text-red-600" th:errors="*{email}"></span></label>
-            <label class="block"><span class="font-medium">Telefon</span>
+            <label class="block"><span class="font-medium" th:text="#{staff.users.phone}"></span>
                 <input th:field="*{phone}" placeholder="+994 50 123 45 67" class="mt-1 w-full border rounded px-3 py-2">
                 <span class="text-red-600" th:errors="*{phone}"></span></label>
-            <label class="block"><span class="font-medium">Rol</span>
+            <label class="block"><span class="font-medium" th:text="#{staff.users.role}"></span>
                 <select th:field="*{role}" class="mt-1 w-full border rounded px-3 py-2">
-                    <option value="">— seçin —</option>
+                    <option value="" th:text="#{staff.users.choose}"></option>
                     <option th:each="r : ${staffRoles}" th:value="${r}" th:text="${@statusLabels.label(r)}"></option>
                 </select>
                 <span class="text-red-600" th:errors="*{role}"></span></label>
-            <p class="sm:col-span-2 text-xs text-gray-500">Müvəqqəti şifrə avtomatik yaradılacaq və bir dəfə göstəriləcək. İnvestorlar yalnız qeydiyyat səhifəsindən yaranır.</p>
-            <div class="sm:col-span-2"><button class="px-5 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700">İşçini yarat</button></div>
+            <p class="sm:col-span-2 text-xs text-gray-500" th:text="#{staff.users.hint}"></p>
+            <div class="sm:col-span-2"><button class="px-5 py-2 rounded bg-leaf-600 text-white font-semibold hover:bg-leaf-700" th:text="#{staff.users.create}"></button></div>
         </form>
     </details>
 
     <div class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="w-full text-sm min-w-[720px]">
-            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3">Ad</th><th>E-poçt</th><th>Rol</th><th>Status</th><th>Son giriş</th><th></th></tr>
+            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3" th:text="#{staff.col.name}"></th><th th:text="#{staff.col.email}"></th><th th:text="#{staff.col.role}"></th><th th:text="#{staff.col.status}"></th><th th:text="#{staff.col.lastLogin}"></th><th></th></tr>
             <tr th:each="u : ${users}" class="border-t" th:classappend="${!u.active} ? 'bg-gray-50 text-gray-500'">
                 <td class="p-3" th:text="${u.fullName}"></td>
                 <td th:text="${u.email}"></td>
                 <td><span th:class="${@statusLabels.badge(u.role)}" th:text="${@statusLabels.label(u.role)}"></span></td>
-                <td><span th:if="${u.active}" class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Aktiv</span>
-                    <span th:unless="${u.active}" class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700">Deaktiv</span></td>
+                <td><span th:if="${u.active}" class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" th:text="#{staff.users.active}"></span>
+                    <span th:unless="${u.active}" class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700" th:text="#{staff.users.inactive}"></span></td>
                 <td th:text="${@fmt.dateTime(u.lastLoginAt)}"></td>
                 <td class="pr-3 text-right">
-                    <span th:if="${u.email == me}" class="text-xs text-gray-400">siz</span>
+                    <span th:if="${u.email == me}" class="text-xs text-gray-400" th:text="#{staff.users.you}"></span>
                     <form th:unless="${u.email == me}" th:action="@{/idare/istifadeciler/{id}/aktiv(id=${u.id})}" method="post"
-                          th:attr="onsubmit=${u.active} ? 'return confirm(\'İstifadəçi deaktiv edilsin? O, dərhal sistemdən çıxarılacaq.\')' : null">
+                          th:attr="data-confirm=${u.active} ? #{staff.users.confirmDisable} : null" onsubmit="return !this.dataset.confirm || confirm(this.dataset.confirm)">
                         <input type="hidden" name="active" th:value="${!u.active}">
                         <button th:class="'px-3 py-1 rounded text-xs text-white ' + (${u.active} ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700')"
-                                th:text="${u.active} ? 'Deaktiv et' : 'Aktiv et'"></button>
+                                th:text="${u.active} ? #{staff.users.disable} : #{staff.users.enable}"></button>
                     </form>
                 </td>
             </tr>

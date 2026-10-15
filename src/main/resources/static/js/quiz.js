@@ -25,20 +25,20 @@
   form.addEventListener("change", sync);
   form.addEventListener("submit", (e) => {
     const missing = questions.find((q) => !checked(q));
-    let msg = missing ? "Zəhmət olmasa bütün 5 suala cavab verin." : null;
+    let msg = missing ? window.t('js.plots.answerAll', "Zəhmət olmasa bütün 5 suala cavab verin.") : null;
     const budget = form.budgetCustom;
     if (!msg && checked("budget").value === "0") {
       const v = Number(budget.value.replace(/\D/g, ""));
-      if (!v) msg = "Büdcə məbləğini yazın.";
-      else if (v < 10000) msg = "Büdcə ən azı 10 000 AZN olmalıdır.";
-      else if (v % 1000) msg = "Büdcə 1 000 AZN-ə bölünən məbləğ olmalıdır.";
+      if (!v) msg = window.t('js.plots.budgetMissing', "Büdcə məbləğini yazın.");
+      else if (v < 10000) msg = window.t('js.plots.budgetMin', "Büdcə ən azı 10 000 AZN olmalıdır.");
+      else if (v % 1000) msg = window.t('js.plots.budgetStep', "Büdcə 1 000 AZN-ə bölünən məbləğ olmalıdır.");
     }
-    if (!msg && checked("activity").value === "OTHER" && !form.otherText.value.trim()) msg = "Fəaliyyət növünü yazın.";
+    if (!msg && checked("activity").value === "OTHER" && !form.otherText.value.trim()) msg = window.t('js.plots.activityMissing', "Fəaliyyət növünü yazın.");
     if (!msg && checked("size").value === "custom") {
       const lo = parseFloat(form.minHa.value), hi = parseFloat(form.maxHa.value);
-      if (isNaN(lo) || isNaN(hi)) msg = "Sahə üçün minimum və maksimum hektarı yazın.";
-      else if (lo < 0.5) msg = "Minimum sahə ən azı 0,5 ha olmalıdır.";
-      else if (hi < lo) msg = "Maksimum sahə minimumdan kiçik ola bilməz.";
+      if (isNaN(lo) || isNaN(hi)) msg = window.t('js.plots.sizeMissing', "Sahə üçün minimum və maksimum hektarı yazın.");
+      else if (lo < 0.5) msg = window.t('js.plots.sizeMin', "Minimum sahə ən azı 0,5 ha olmalıdır.");
+      else if (hi < lo) msg = window.t('js.plots.sizeOrder', "Maksimum sahə minimumdan kiçik ola bilməz.");
     }
     if (msg) {
       e.preventDefault();

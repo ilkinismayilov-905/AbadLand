@@ -28,30 +28,30 @@
       if (!(s.me && s.me.isHighest)) show("", true); // someone else bid: old message is stale
     }
     const perHa = $("[data-per-ha]");
-    if (perHa) perHa.textContent = "≈ " + fmt((s.currentPrice ?? s.startPrice) / Number(root.dataset.area)) + " / ha / il";
+    if (perHa) perHa.textContent = "≈ " + fmt((s.currentPrice ?? s.startPrice) / Number(root.dataset.area)) + " " + window.t("js.auction.perHaYear", "/ ha / il");
     lastPrice = s.currentPrice;
-    $("[data-price-label]").textContent = s.currentPrice == null ? "Başlanğıc qiymət" : "Cari qiymət";
+    $("[data-price-label]").textContent = s.currentPrice == null ? window.t("js.auction.startPrice", "Başlanğıc qiymət") : window.t("js.auction.currentPrice", "Cari qiymət");
     $("[data-min]").textContent = fmt(s.minNextBid);
     $("[data-participants]").textContent = s.participants;
-    if (lastEnds !== null && s.endsAt > lastEnds + 1000) show("Vaxt 2 dəqiqə uzadıldı", true);
+    if (lastEnds !== null && s.endsAt > lastEnds + 1000) show(window.t("js.auction.extended", "Vaxt 2 dəqiqə uzadıldı"), true);
     lastEnds = s.endsAt;
     const list = $("[data-bids]");
     list.replaceChildren(...s.bids.map((b, i) => {
       const li = document.createElement("li");
       li.className = "flex justify-between py-1 border-t" + (i === 0 ? " font-semibold" : "");
       const who = document.createElement("span");
-      who.textContent = "İştirakçı #" + b.participantNo + (s.me && s.me.participantNo === b.participantNo ? " (siz)" : "")
-        + (b.extended ? " · ⏱ +2 dəq" : "");
+      who.textContent = window.t("js.auction.participant", "İştirakçı #") + b.participantNo + (s.me && s.me.participantNo === b.participantNo ? " " + window.t("js.auction.you", "(siz)") : "")
+        + (b.extended ? " · " + window.t("js.auction.extendedMark", "⏱ +2 dəq") : "");
       const amt = document.createElement("span");
       amt.textContent = fmt(b.amount) + " · " + new Date(b.at).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       li.append(who, amt);
       return li;
     }));
-    if (!s.bids.length) list.innerHTML = '<li class="py-1 text-gray-500">Hələ təklif yoxdur.</li>';
+    if (!s.bids.length) { const li = document.createElement("li"); li.className = "py-1 text-gray-500"; li.textContent = window.t("js.auction.noBids", "Hələ təklif yoxdur."); list.replaceChildren(li); }
     const live = s.status === "LIVE";
     const canBid = live && s.me && s.me.depositConfirmed;
     $("[data-controls]").hidden = !canBid;
-    $("[data-mine]").textContent = s.me && s.me.isHighest ? "Ən yüksək təklif sizindir ✓" : "";
+    $("[data-mine]").textContent = s.me && s.me.isHighest ? window.t("js.auction.highest", "Ən yüksək təklif sizindir ✓") : "";
     if (!live && root.dataset.wasLive === "1") location.reload(); // ended / failed → server renders the result
     root.dataset.wasLive = live ? "1" : "0";
     tick();
@@ -65,7 +65,7 @@
     if (!["LIVE", "SCHEDULED"].includes(state.status)) { el.textContent = "—"; return; }
     if (ms < 0) ms = 0;
     const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-    el.textContent = (state.status === "SCHEDULED" ? "Başlamağa: " : "") + (h ? h + ":" : "") + String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+    el.textContent = (state.status === "SCHEDULED" ? window.t("js.auction.startsIn", "Başlamağa:") + " " : "") + (h ? h + ":" : "") + String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
     el.classList.toggle("text-red-600", state.status === "LIVE" && ms < 60000);
   }
 
@@ -85,11 +85,11 @@
       const r = await fetch("/herraclar/" + id + "/teklif", {
         method: "POST", body, headers: { [csrfHeader]: csrfToken, Accept: "application/json" }
       });
-      const data = r.headers.get("content-type")?.includes("json") ? await r.json() : { ok: false, message: "Sessiya bitib — yenidən daxil olun." };
+      const data = r.headers.get("content-type")?.includes("json") ? await r.json() : { ok: false, message: window.t("js.auction.sessionExpired", "Sessiya bitib — yenidən daxil olun.") };
       show(data.message, data.ok);
       await poll();
     } catch (e) {
-      show("Bağlantı xətası — yenidən cəhd edin.", false);
+      show(window.t("js.auction.networkError", "Bağlantı xətası — yenidən cəhd edin."), false);
     } finally {
       busy = false;
       root.querySelectorAll("[data-controls] button").forEach((b) => (b.disabled = false));
@@ -104,7 +104,7 @@
   $("[data-custom]").addEventListener("submit", (e) => {
     e.preventDefault();
     const v = Number(e.target.amount.value);
-    if (v > 0) bid(v); else show("Məbləği yazın.", false);
+    if (v > 0) bid(v); else show(window.t("js.auction.enterAmount", "Məbləği yazın."), false);
   });
 
   poll();

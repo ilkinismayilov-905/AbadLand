@@ -166,27 +166,27 @@
     scene.add(sp); T.objects.push(sp);
 
     T.hAt = hAt; T.ox = ox; T.oz = oz; T.size = size; T.tex = tex;
-    if (!ok) onHint("Peyk şəkli yüklənmədi. İnternet bağlantısını yoxlayın.");
-    else if (!hasElev) onHint("Relyef məlumatı yüklənmədi, sahə düz göstərilir.");
+    if (!ok) onHint(window.t('js.plots.3d.noImage', 'Peyk şəkli yüklənmədi. İnternet bağlantısını yoxlayın.'));
+    else if (!hasElev) onHint(window.t('js.plots.3d.noElevation', 'Relyef məlumatı yüklənmədi, sahə düz göstərilir.'));
     else onHint(null);
     return { minE: hasElev ? minE : null, maxE: hasElev ? maxE : null, centerE: hasElev ? base : null };
   }
 
   function open(opts) {
-    if (typeof THREE === "undefined") { alert("3D kitabxanası (three.js) yüklənmədi."); return; }
-    if (!opts || !opts.geometry || !opts.geometry.coordinates) { alert("Sahənin sərhədləri tapılmadı."); return; }
+    if (typeof THREE === "undefined") { alert(window.t('js.plots.3d.noLib', '3D kitabxanası (three.js) yüklənmədi.')); return; }
+    if (!opts || !opts.geometry || !opts.geometry.coordinates) { alert(window.t('js.plots.3d.noGeometry', 'Sahənin sərhədləri tapılmadı.')); return; }
     injectCss();
     var poly = localPolygon(opts.geometry);
-    var m = document.createElement("div"); m.className = "p3d"; m.setAttribute("role", "dialog"); m.setAttribute("aria-label", "3D görünüş: " + (opts.name || ""));
+    var m = document.createElement("div"); m.className = "p3d"; m.setAttribute("role", "dialog"); m.setAttribute("aria-label", window.t('js.plots.3d.dialog', '3D görünüş:') + " " + (opts.name || ""));
     m.innerHTML =
       '<canvas></canvas>' +
-      '<div class="hud top"><div><b>' + esc(opts.name) + '</b>' + esc(opts.subtitle) + '</div><button class="g" data-a="close">✕ Bağla</button></div>' +
+      '<div class="hud top"><div><b>' + esc(opts.name) + '</b>' + esc(opts.subtitle) + '</div><button class="g" data-a="close">✕ ' + esc(window.t('js.plots.3d.close', 'Bağla')) + '</button></div>' +
       '<div class="elev" hidden></div>' +
-      '<div class="attr">Peyk: Esri World Imagery · Relyef: AWS Terrain Tiles</div>' +
-      '<div class="pad" hidden><span></span><button data-k="f" aria-label="İrəli">▲</button><span></span><button data-k="l" aria-label="Sola">◀</button><button data-k="b" aria-label="Geri">▼</button><button data-k="r" aria-label="Sağa">▶</button></div>' +
-      '<div class="hint">Peyk görüntüsü və relyef yüklənir…</div>' +
-      '<div class="hud bot"><button class="g on" data-m="orbit">Quşbaxışı</button><button class="g" data-m="walk">Sahənin içində gəz</button><button class="g" data-a="tod">Gün / Qürub</button>' +
-      (opts.applyUrl ? '<a class="g pri" href="' + esc(opts.applyUrl) + '" style="text-decoration:none">Müraciət et</a>' : '') + '</div>';
+      '<div class="attr">' + esc(window.t('js.plots.3d.attribution', 'Peyk: Esri World Imagery · Relyef: AWS Terrain Tiles')) + '</div>' +
+      '<div class="pad" hidden><span></span><button data-k="f" aria-label="' + esc(window.t('js.plots.3d.forward', 'İrəli')) + '">▲</button><span></span><button data-k="l" aria-label="' + esc(window.t('js.plots.3d.left', 'Sola')) + '">◀</button><button data-k="b" aria-label="' + esc(window.t('js.plots.3d.back', 'Geri')) + '">▼</button><button data-k="r" aria-label="' + esc(window.t('js.plots.3d.right', 'Sağa')) + '">▶</button></div>' +
+      '<div class="hint">' + esc(window.t('js.plots.3d.loading', 'Peyk görüntüsü və relyef yüklənir…')) + '</div>' +
+      '<div class="hud bot"><button class="g on" data-m="orbit">' + esc(window.t('js.plots.3d.orbit', 'Quşbaxışı')) + '</button><button class="g" data-m="walk">' + esc(window.t('js.plots.3d.walk', 'Sahənin içində gəz')) + '</button><button class="g" data-a="tod">' + esc(window.t('js.plots.3d.dayDusk', 'Gün / Qürub')) + '</button>' +
+      (opts.applyUrl ? '<a class="g pri" href="' + esc(opts.applyUrl) + '" style="text-decoration:none">' + esc(window.t('js.plots.3d.apply', 'Müraciət et')) + '</a>' : '') + '</div>';
     document.body.appendChild(m);
     var prevOverflow = document.body.style.overflow; document.body.style.overflow = "hidden";
     var hint = m.querySelector(".hint"), canvas = m.querySelector("canvas");
@@ -194,7 +194,7 @@
     var R;
     try { R = new THREE.WebGLRenderer({ canvas: canvas, antialias: true }); }
     catch (e) {
-      hint.textContent = "Bu cihazda 3D dəstəklənmir.";
+      hint.textContent = window.t('js.plots.3d.unsupported', 'Bu cihazda 3D dəstəklənmir.');
       m.querySelector('[data-a="close"]').onclick = function () { m.remove(); document.body.style.overflow = prevOverflow; };
       return;
     }
@@ -213,16 +213,16 @@
     tod();
 
     var st = { mode: "orbit", th: 0.8, ph: 1.0, rad: Math.max(poly.extent, 300) * 1.15, yaw: 0, pit: -0.05, pos: new THREE.Vector3(0, 0, poly.extent / 3.2 + 60), k: {}, drag: false, sh: false };
-    var modeHint = function (md) { return md === "walk" ? "Sürüşdürün: ətrafa baxın · W A S D / oxlar: hərəkət · Shift: sürətli" : "Sürüşdürün: fırladın · Təkər: yaxınlaşdırın"; };
+    var modeHint = function (md) { return md === "walk" ? window.t('js.plots.3d.hintWalk', 'Sürüşdürün: ətrafa baxın · W A S D / oxlar: hərəkət · Shift: sürətli') : window.t('js.plots.3d.hintOrbit', 'Sürüşdürün: fırladın · Təkər: yaxınlaşdırın'); };
 
     buildTerrain(T, scene, poly, opts, function (msg) { hint.textContent = msg || modeHint(st.mode); })
       .then(function (r) {
         if (r && r.centerE !== null) {
           var box = m.querySelector(".elev"); box.hidden = false;
-          box.innerHTML = "Mərkəz: <b>" + Math.round(r.centerE) + " m</b><br>Ən aşağı / ən yuxarı: " + Math.round(r.minE) + " – " + Math.round(r.maxE) + " m";
+          box.innerHTML = esc(window.t('js.plots.3d.center', 'Mərkəz:')) + " <b>" + Math.round(r.centerE) + " m</b><br>" + esc(window.t('js.plots.3d.minMax', 'Ən aşağı / ən yuxarı:')) + " " + Math.round(r.minE) + " – " + Math.round(r.maxE) + " m";
         }
       })
-      .catch(function (e) { hint.textContent = "3D görünüş yüklənmədi: " + (e && e.message ? e.message : e); });
+      .catch(function (e) { hint.textContent = window.t('js.plots.3d.failed', '3D görünüş yüklənmədi:') + " " + (e && e.message ? e.message : e); });
 
     cam.rotation.order = "YXZ";
     var setMode = function (md) {

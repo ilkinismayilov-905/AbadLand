@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Bildirişlər')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{common.notifications.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-3xl mx-auto px-4 py-8 space-y-4">
-    <h1 class="text-2xl font-bold">Bildirişlər</h1>
-    <div th:if="${items.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Bildiriş yoxdur.</p></div>
+    <h1 class="text-2xl font-bold" th:text="#{common.notifications.title}"></h1>
+    <div th:if="${items.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p th:text="#{common.notifications.empty}"></p></div>
     <ul class="space-y-2">
         <li th:each="n : ${items}" th:class="'rounded-lg shadow p-4 ' + (${!unreadIds.contains(n.id)} ? 'bg-white' : 'bg-amber-50 border-l-4 border-amber-500')">
             <div class="text-xs text-gray-500"><span th:text="${@fmt.dateTime(n.at)}"></span>
-                <span th:if="${unreadIds.contains(n.id)}" class="ml-2 px-1.5 rounded bg-amber-500 text-white">yeni</span></div>
-            <a th:if="${n.link != null}" th:href="@{${n.link}}" class="text-sm text-leaf-800 hover:underline" th:text="${n.message}"></a>
-            <span th:if="${n.link == null}" class="text-sm" th:text="${n.message}"></span>
+                <span th:if="${unreadIds.contains(n.id)}" class="ml-2 px-1.5 rounded bg-amber-500 text-white" th:text="#{common.notifications.new}"></span></div>
+            <a th:if="${n.link != null}" th:href="@{${n.link}}" class="text-sm text-leaf-800 hover:underline" th:text="${@i18n.render(n.message)}"></a>
+            <span th:if="${n.link == null}" class="text-sm" th:text="${@i18n.render(n.message)}"></span>
         </li>
     </ul>
 </main>

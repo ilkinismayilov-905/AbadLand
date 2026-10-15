@@ -33,4 +33,10 @@ public class Crop {
     private int maxElevationM;
     @Enumerated(EnumType.STRING)
     private WaterNeed waterNeed;
+
+    /** Name in the current UI language (i18n key crop.CODE), nameAz as fallback. Templates: ${c.name}. */
+    public String getName() {
+        String n = az.aqroinvest.web.I18n.t("crop." + code);
+        return n.equals("crop." + code) ? nameAz : n;
+    }
 }

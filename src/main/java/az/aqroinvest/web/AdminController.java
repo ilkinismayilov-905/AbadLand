@@ -51,13 +51,13 @@ public class AdminController {
     @PostMapping("/idare/iqlim-yenile")
     public String refreshClimate(Authentication auth, RedirectAttributes ra) {
         if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            ra.addFlashAttribute("error", "Bu əməliyyat yalnız admin üçündür.");
+            ra.addFlashAttribute("error", I18n.t("staff.flash.adminOnly"));
             return "redirect:/idare";
         }
         int n = climate.refreshAll();
         audit.log("CLIMATE_REFRESH", "Plot", null, n + " plots");
-        if (n > 0) ra.addFlashAttribute("success", "İqlim məlumatı yeniləndi: " + n + " sahə (Open-Meteo).");
-        else ra.addFlashAttribute("error", "Open-Meteo əlçatan deyil — mövcud dəyərlər saxlanıldı.");
+        if (n > 0) ra.addFlashAttribute("success", I18n.t("staff.flash.climateRefreshed", n));
+        else ra.addFlashAttribute("error", I18n.t("staff.flash.climateUnavailable"));
         return "redirect:/idare";
     }
 
@@ -84,8 +84,8 @@ public class AdminController {
     public String retry(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
         try {
             var l = ektis.retry(id, auth.getName());
-            if (l.getStatus().name().equals("SUCCESS")) ra.addFlashAttribute("success", "Yenidən göndərildi: " + l.getEktisRef());
-            else ra.addFlashAttribute("error", "EKTİS yenə cavab vermədi — sonra təkrar edin.");
+            if (l.getStatus().name().equals("SUCCESS")) ra.addFlashAttribute("success", I18n.t("staff.flash.resent", l.getEktisRef()));
+            else ra.addFlashAttribute("error", I18n.t("staff.flash.ektisStillDown"));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -97,12 +97,12 @@ public class AdminController {
     public String toggleFail(Authentication auth, RedirectAttributes ra) {
         MockEktisClient mock = mockClient.getIfAvailable();
         if (mock == null || auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            ra.addFlashAttribute("error", "Bu əməliyyat yalnız admin üçün və MOCK rejimində mümkündür.");
+            ra.addFlashAttribute("error", I18n.t("staff.flash.mockAdminOnly"));
             return "redirect:/idare/inteqrasiya";
         }
         mock.setFail(!mock.isFail());
         audit.log("EKTIS_MOCK_FAIL", "Integration", null, String.valueOf(mock.isFail()));
-        ra.addFlashAttribute("success", mock.isFail() ? "Mock xəta rejimi AKTİV: göndərişlər uğursuz olacaq." : "Mock normal rejimdədir.");
+        ra.addFlashAttribute("success", I18n.t(mock.isFail() ? "staff.flash.mockFailOn" : "staff.flash.mockNormal"));
         return "redirect:/idare/inteqrasiya";
     }
 

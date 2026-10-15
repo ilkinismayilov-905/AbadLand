@@ -59,9 +59,9 @@ public class InvestorController {
         User u = me(auth);
         if (u.getInvestorType() == InvestorType.LEGAL) {
             if (form.getVoen() == null || !form.getVoen().trim().matches("\\d{10}"))
-                br.rejectValue("voen", "voen", "VÖEN 10 rəqəmdən ibarət olmalıdır");
+                br.rejectValue("voen", "voen", I18n.t("apply.error.voenInvalid"));
         } else if (form.getFin() == null || !form.getFin().trim().toUpperCase().matches("[0-9A-Z]{7}")) {
-            br.rejectValue("fin", "fin", "FİN 7 simvoldan (rəqəm və hərf) ibarət olmalıdır");
+            br.rejectValue("fin", "fin", I18n.t("apply.error.finInvalid"));
         }
         if (br.hasErrors()) return cabinet(auth, model);
         if (u.getInvestorType() == InvestorType.LEGAL) u.setVoen(form.getVoen().trim());
@@ -69,7 +69,7 @@ public class InvestorController {
         u.setExperienceYears(form.getExperienceYears());
         users.save(u);
         audit.log("PROFILE_UPDATE", "User", u.getId(), null);
-        ra.addFlashAttribute("success", "Profil yeniləndi.");
+        ra.addFlashAttribute("success", I18n.t("apply.flash.profileSaved"));
         return "redirect:/kabinet";
     }
 
@@ -77,7 +77,7 @@ public class InvestorController {
     public String newForm(@RequestParam Long plotId, Authentication auth, Model model, RedirectAttributes ra) {
         Plot plot = plots.findById(plotId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (service.openCompetition(plot) == null) {
-            ra.addFlashAttribute("error", "Bu sahə üzrə açıq müsabiqə yoxdur.");
+            ra.addFlashAttribute("error", I18n.t("apply.error.noOpenCompetition"));
             return "redirect:/saheler/" + plotId;
         }
         ApplicationForm form = new ApplicationForm();
@@ -96,7 +96,7 @@ public class InvestorController {
         NewApplication n = new NewApplication(form.getPlotId(), form.getPlannedCrop(), form.getInvestmentAzn(),
                 form.getJobs(), form.getMonths(), form.getBusinessPlan());
         // collect everything at once: field validation, files, business rules
-        if (businessPlanFile == null || businessPlanFile.isEmpty()) model.addAttribute("planFileError", "Biznes plan faylı tələb olunur");
+        if (businessPlanFile == null || businessPlanFile.isEmpty()) model.addAttribute("planFileError", I18n.t("apply.error.planFileRequired"));
         else model.addAttribute("planFileError", storage.check(businessPlanFile));
         model.addAttribute("otherFileError", storage.check(otherFile));
         Map<String, String> rules = service.checkSubmission(me(auth), n);
@@ -105,7 +105,7 @@ public class InvestorController {
             else if (!br.hasFieldErrors(field)) br.rejectValue(field, "rule", msg);
         });
         if (br.hasErrors() || model.getAttribute("planFileError") != null || model.getAttribute("otherFileError") != null) {
-            model.addAttribute("error", "Formada səhvlər var. Zəhmət olmasa düzəldin və faylları yenidən seçin.");
+            model.addAttribute("error", I18n.t("apply.error.formHasErrors"));
             return showForm(form, plot, auth, model);
         }
         try {
@@ -124,7 +124,7 @@ public class InvestorController {
         model.addAttribute("app", a);
         model.addAttribute("history", service.history(a));
         model.addAttribute("documents", documents.findByApplicationOrderByUploadedAtAsc(a));
-        model.addAttribute("cropName", crops.findByCode(a.getPlannedCrop()).map(Crop::getNameAz).orElse(a.getPlannedCrop()));
+        model.addAttribute("cropName", crops.findByCode(a.getPlannedCrop()).map(Crop::getName).orElse(a.getPlannedCrop()));
         model.addAttribute("replyTypes", List.of(DocType.SOIL_ANALYSIS, DocType.IDENTITY, DocType.OTHER));
         model.addAttribute("farm", farmRepo.findByApplication(a).orElse(null));
         return "muraciet";
@@ -136,7 +136,7 @@ public class InvestorController {
                           Authentication auth, RedirectAttributes ra) {
         try {
             service.respond(id, auth.getName(), response, file, fileType);
-            ra.addFlashAttribute("success", "Cavabınız göndərildi. Müraciət yenidən baxışdadır.");
+            ra.addFlashAttribute("success", I18n.t("apply.flash.replySent"));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
             ra.addFlashAttribute("draftResponse", response);

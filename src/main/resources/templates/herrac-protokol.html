@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head(${a.code} + ' — Protokol')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{auction.protocol.title(${a.code})})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-4">
     <div class="flex items-center gap-3 no-print">
-        <a th:href="@{/herraclar/{id}(id=${a.id})}" class="text-sm text-leaf-700 underline">← Hərrac</a>
-        <button onclick="window.print()" class="ml-auto px-3 py-1.5 rounded border text-sm bg-white">Çap et</button>
+        <a th:href="@{/herraclar/{id}(id=${a.id})}" class="text-sm text-leaf-700 underline" th:text="#{auction.protocol.back}"></a>
+        <button onclick="window.print()" class="ml-auto px-3 py-1.5 rounded border text-sm bg-white" th:text="#{auction.protocol.print}"></button>
     </div>
     <article class="bg-white rounded-lg shadow p-6 space-y-4 print-plain">
-        <h1 class="text-2xl font-bold" th:text="'Hərrac protokolu ' + ${a.code}"></h1>
-        <p th:if="${a.status.name() != 'CONFIRMED'}" class="text-sm text-amber-800">İlkin protokol (yalnız işçilər üçün) — nəticə hələ təsdiqlənməyib.</p>
+        <h1 class="text-2xl font-bold" th:text="#{auction.protocol.heading(${a.code})}"></h1>
+        <p th:if="${a.status.name() != 'CONFIRMED'}" class="text-sm text-amber-800" th:text="#{auction.protocol.preliminary}"></p>
         <table class="w-full text-sm">
-            <tr class="border-t"><td class="py-1.5 text-gray-500 w-56">Sahə</td><td th:text="${a.plot.code} + ' — ' + ${a.plot.name} + ', ' + ${a.plot.district} + ', ' + ${@fmt.dec(a.plot.areaHa)} + ' ha'"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Əqd növü</td><td th:text="${@statusLabels.label(a.dealType)} + (${a.leaseYears != null} ? ', ' + ${a.leaseYears} + ' il' : '')"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Vaxt</td><td th:text="${@fmt.dateTime(a.startsAt)} + ' – ' + ${@fmt.dateTime(a.endsAt)}"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Başlanğıc qiymət</td><td th:text="${@fmt.money(a.startPrice)}"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Yekun qiymət</td><td class="font-semibold" th:text="${@fmt.money(a.finalPrice)}"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Artım</td><td th:text="${a.upliftPct() == null} ? '—' : '+' + ${@fmt.dec(a.upliftPct())} + '%'"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">İştirakçılar / təkliflər</td><td th:text="${participants} + ' / ' + ${bids.size()}"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Vaxt uzadılması</td><td th:text="${a.extensions} + ' dəfə'"></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Qalib</td>
-                <td><span th:text="${winnerNo == null} ? '—' : 'İştirakçı #' + ${winnerNo}"></span>
+            <tr class="border-t"><td class="py-1.5 text-gray-500 w-56" th:text="#{auction.protocol.plot}"></td><td th:text="${a.plot.code} + ' — ' + ${a.plot.name} + ', ' + ${a.plot.district} + ', ' + #{auction.common.areaHa(${@fmt.dec(a.plot.areaHa)})}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.dealType}"></td><td th:text="${@statusLabels.label(a.dealType)} + (${a.leaseYears != null} ? ', ' + #{auction.common.years(${a.leaseYears})} : '')"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.time}"></td><td th:text="${@fmt.dateTime(a.startsAt)} + ' – ' + ${@fmt.dateTime(a.endsAt)}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.startPrice}"></td><td th:text="${@fmt.money(a.startPrice)}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.finalPrice}"></td><td class="font-semibold" th:text="${@fmt.money(a.finalPrice)}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.uplift}"></td><td th:text="${a.upliftPct() == null} ? '—' : '+' + ${@fmt.dec(a.upliftPct())} + '%'"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.participantsBids}"></td><td th:text="${participants} + ' / ' + ${bids.size()}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.extensions}"></td><td th:text="#{auction.protocol.extensionsCount(${a.extensions})}"></td></tr>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.winner}"></td>
+                <td><span th:text="${winnerNo == null} ? '—' : #{auction.common.participantNo(${#strings.toString(winnerNo)})}"></span>
                     <span th:if="${staff and a.winner != null}" class="text-gray-600" th:text="' — ' + ${a.winner.fullName}"></span></td></tr>
-            <tr class="border-t"><td class="py-1.5 text-gray-500">Təsdiq</td>
+            <tr class="border-t"><td class="py-1.5 text-gray-500" th:text="#{auction.protocol.approval}"></td>
                 <td th:text="${a.confirmedBy == null} ? '—' : ${a.confirmedBy.fullName} + ', ' + ${@fmt.dateTime(a.confirmedAt)}"></td></tr>
         </table>
-        <h2 class="font-semibold">Təkliflər</h2>
+        <h2 class="font-semibold" th:text="#{auction.protocol.bids}"></h2>
         <table class="w-full text-sm">
-            <tr class="text-left text-gray-500"><th class="py-1">Vaxt</th><th>İştirakçı</th><th class="text-right">Məbləğ</th><th></th></tr>
+            <tr class="text-left text-gray-500"><th class="py-1" th:text="#{auction.protocol.time}"></th><th th:text="#{auction.protocol.participant}"></th><th class="text-right" th:text="#{auction.protocol.amount}"></th><th></th></tr>
             <tr th:each="b : ${bids}" class="border-t">
                 <td class="py-1" th:text="${@fmt.dateTime(b.createdAt)}"></td>
                 <td th:text="'#' + ${b.participant.number}"></td>
                 <td class="text-right" th:text="${@fmt.money(b.amount)}"></td>
-                <td class="text-xs text-gray-500 pl-2" th:text="${b.extended} ? 'vaxt +2 dəq' : ''"></td>
+                <td class="text-xs text-gray-500 pl-2" th:text="${b.extended} ? #{auction.protocol.extendedNote} : ''"></td>
             </tr>
         </table>
         <p class="text-xs text-gray-500" th:text="${legalNote}"></p>

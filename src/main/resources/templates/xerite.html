@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Xəritə')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{plots.map.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
-    <h1 class="text-2xl font-bold">Sahələr xəritədə</h1>
+    <h1 class="text-2xl font-bold" th:text="#{plots.map.heading}"></h1>
     <div class="grid gap-4 md:grid-cols-[300px_minmax(0,1fr)] lg:grid-cols-[340px_minmax(0,1fr)] items-start">
         <aside class="md:sticky md:top-20"><div th:replace="~{layout :: plotFilter('/xerite', true)}"></div></aside>
         <div class="space-y-2 min-w-0">
-            <p class="text-sm text-gray-600" aria-live="polite" th:text="${mapPlots.size()} + ' sahə göstərilir. Sahəyə klikləyin — pasporta keçid.'"></p>
+            <p class="text-sm text-gray-600" aria-live="polite" th:text="#{plots.map.shown(${mapPlots.size()})}"></p>
             <div id="map" class="w-full rounded-[14px] shadow h-[65vh] min-h-[420px] md:h-[620px]"></div>
         </div>
     </div>

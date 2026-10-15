@@ -39,13 +39,13 @@ public class StaffCompetitionController {
                 form.getDeadline(), form.getPlotIds());
         service.check(n).forEach((field, msg) -> { if (!br.hasFieldErrors(field)) br.rejectValue(field, "rule", msg); });
         if (br.hasErrors()) {
-            model.addAttribute("error", "Formada səhvlər var.");
+            model.addAttribute("error", I18n.t("staff.flash.formErrors"));
             model.addAttribute("openForm", true);
             return list(model);
         }
         try {
             var c = service.create(n, auth.getName());
-            ra.addFlashAttribute("success", "Müsabiqə yaradıldı və komissiyanın təsdiqinə göndərildi: " + c.getCode());
+            ra.addFlashAttribute("success", I18n.t("staff.flash.compCreated", c.getCode()));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -56,7 +56,7 @@ public class StaffCompetitionController {
     public String approve(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
         try {
             service.approve(id, auth.getName());
-            ra.addFlashAttribute("success", "Müsabiqə təsdiqləndi və dərc edildi.");
+            ra.addFlashAttribute("success", I18n.t("staff.flash.compApproved"));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -68,7 +68,7 @@ public class StaffCompetitionController {
                          RedirectAttributes ra) {
         try {
             service.reject(id, auth.getName(), comment);
-            ra.addFlashAttribute("success", "Müsabiqə rədd edildi.");
+            ra.addFlashAttribute("success", I18n.t("staff.flash.compRejected"));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }

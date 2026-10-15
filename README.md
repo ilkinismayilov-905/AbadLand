@@ -7,6 +7,8 @@ Qarabağ və Şərqi Zəngəzurda kənd təsərrüfatına investisiya portalı (
 müsabiqəyə müraciət edir və statusu izləyir. Operator baxır, komissiya qərar verir, qərar EKTİS-ə (mock) gedir.
 Təsdiqdən sonra investor təsərrüfatı idarə edir (əkin planı, əkin təqvimi, işçi heyəti, rüblük hesabat), operator monitorinq aparır.
 
+> Dillər: **AZ** (susmaya görə) · **EN** · **RU** — header-dəki seçici (`?lang=en`, cookie-də yadda qalır).
+>
 > Bütün məlumatlar uydurmadır. ROI, proqnoz və bitki parametrləri "Sınaq dəyəri", AI nəticələri "AI tövsiyəsidir" kimi işarələnib.
 
 ## İşə salma

@@ -3,6 +3,7 @@ package az.aqroinvest.service;
 import az.aqroinvest.domain.*;
 import az.aqroinvest.integration.EktisService;
 import az.aqroinvest.repo.*;
+import az.aqroinvest.web.I18n;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -68,25 +69,25 @@ public class ApplicationService {
         Map<String, String> errors = new LinkedHashMap<>();
         Plot plot = n.plotId() == null ? null : plots.findById(n.plotId()).orElse(null);
         Competition c = plot == null ? null : openCompetition(plot);
-        if (c == null) errors.put("", "Bu sahə üzrə açıq müsabiqə yoxdur və ya son tarix keçib");
+        if (c == null) errors.put("", I18n.t("apply.error.competitionClosed"));
         else if (n.investmentAzn() != null && n.investmentAzn() < c.getMinInvestment())
-            errors.put("investmentAzn", "İnvestisiya minimumdan az ola bilməz: " + money(c.getMinInvestment()));
+            errors.put("investmentAzn", I18n.t("apply.error.belowMinimum", money(c.getMinInvestment())));
         if (plot != null && n.plannedCrop() != null && crops.findByCode(n.plannedCrop())
                 .filter(cr -> cr.getActivityType() == plot.getPurpose()).isEmpty())
-            errors.put("plannedCrop", "Bu sahə üçün uyğun bitki seçin");
+            errors.put("plannedCrop", I18n.t("apply.error.cropNotSuitable"));
         if (investor.getInvestorType() == InvestorType.LEGAL ? isBlank(investor.getVoen()) : isBlank(investor.getFin()))
-            errors.put("", "Profilinizdə " + (investor.getInvestorType() == InvestorType.LEGAL ? "VÖEN" : "FİN")
-                    + " qeyd olunmayıb — əvvəlcə kabinetdə profili tamamlayın");
+            errors.put("", I18n.t("apply.error.profileIncomplete",
+                    I18n.t(investor.getInvestorType() == InvestorType.LEGAL ? "apply.cabinet.voen" : "apply.cabinet.fin")));
         return errors;
     }
 
     @Transactional
     public Application submit(String email, NewApplication n, MultipartFile businessPlanFile, MultipartFile otherFile) {
         User investor = users.findByEmailIgnoreCase(email).orElseThrow();
-        if (investor.getRole() != Role.INVESTOR) throw new BusinessException("Yalnız investor müraciət edə bilər");
+        if (investor.getRole() != Role.INVESTOR) throw new BusinessException(I18n.t("apply.error.investorOnly"));
         Map<String, String> errors = checkSubmission(investor, n);
         if (!errors.isEmpty()) throw new BusinessException(errors.values().iterator().next());
-        if (businessPlanFile == null || businessPlanFile.isEmpty()) throw new BusinessException("Biznes plan faylı tələb olunur");
+        if (businessPlanFile == null || businessPlanFile.isEmpty()) throw new BusinessException(I18n.t("apply.error.planFileRequired"));
 
         Plot plot = plots.findById(n.plotId()).orElseThrow();
         LocalDateTime now = LocalDateTime.now(BAKU);
@@ -107,8 +108,8 @@ public class ApplicationService {
         storage.store(businessPlanFile, DocType.BUSINESS_PLAN, a);
         if (otherFile != null && !otherFile.isEmpty()) storage.store(otherFile, DocType.OTHER, a);
 
-        record(a, null, ApplicationStatus.SUBMITTED, investor, null, "Müraciətiniz qeydə alındı: " + a.getNumber());
-        notifications.notifyRole(Role.OPERATOR, "Yeni müraciət: " + a.getNumber() + " (" + plot.getCode() + ")", staffLink(a));
+        record(a, null, ApplicationStatus.SUBMITTED, investor, null, I18n.stored("apply.notify.submitted", a.getNumber()));
+        notifications.notifyRole(Role.OPERATOR, I18n.stored("apply.notify.newApplication", a.getNumber(), plot.getCode()), staffLink(a));
         return a;
     }
 
@@ -129,7 +130,7 @@ public class ApplicationService {
         User actor = actor(actorEmail, Role.OPERATOR);
         Application a = get(id);
         require(a, ApplicationStatus.SUBMITTED);
-        change(a, ApplicationStatus.UNDER_REVIEW, actor, null, "Müraciətinizə baxılmağa başlanıldı: " + a.getNumber());
+        change(a, ApplicationStatus.UNDER_REVIEW, actor, null, I18n.stored("apply.notify.reviewStarted", a.getNumber()));
     }
 
     @Transactional
@@ -137,24 +138,24 @@ public class ApplicationService {
         User actor = actor(actorEmail, Role.OPERATOR);
         Application a = get(id);
         require(a, ApplicationStatus.UNDER_REVIEW);
-        if (isBlank(message)) throw new BusinessException("Tələb olunan məlumatı yazın");
+        if (isBlank(message)) throw new BusinessException(I18n.t("apply.error.infoRequired"));
         a.setInfoRequest(message.trim());
         a.setInfoResponse(null);
         change(a, ApplicationStatus.INFO_REQUESTED, actor, message.trim(),
-                "Əlavə məlumat tələb olunur (" + a.getNumber() + "): " + message.trim());
+                I18n.stored("apply.notify.infoRequested", a.getNumber(), message.trim()));
     }
 
     @Transactional
     public void respond(Long id, String investorEmail, String response, MultipartFile file, DocType fileType) {
         Application a = getOwned(id, investorEmail);
         require(a, ApplicationStatus.INFO_REQUESTED);
-        if (isBlank(response)) throw new BusinessException("Cavab mətni tələb olunur");
+        if (isBlank(response)) throw new BusinessException(I18n.t("apply.error.replyRequired"));
         String fileError = storage.check(file);
         if (fileError != null) throw new BusinessException(fileError);
         if (file != null && !file.isEmpty()) storage.store(file, fileType == null ? DocType.OTHER : fileType, a);
         a.setInfoResponse(response.trim());
-        change(a, ApplicationStatus.UNDER_REVIEW, a.getInvestor(), response.trim(), "Cavabınız göndərildi: " + a.getNumber());
-        notifications.notifyRole(Role.OPERATOR, "İnvestor cavab verdi: " + a.getNumber(), staffLink(a));
+        change(a, ApplicationStatus.UNDER_REVIEW, a.getInvestor(), response.trim(), I18n.stored("apply.notify.replySent", a.getNumber()));
+        notifications.notifyRole(Role.OPERATOR, I18n.stored("apply.notify.investorReplied", a.getNumber()), staffLink(a));
     }
 
     @Transactional
@@ -162,12 +163,12 @@ public class ApplicationService {
         User actor = actor(actorEmail, Role.COMMISSION);
         Application a = get(id);
         require(a, ApplicationStatus.UNDER_REVIEW);
-        if (decision == null) throw new BusinessException("Qərarı seçin");
-        if (reason == null || reason.trim().length() < 10) throw new BusinessException("Qərarın əsaslandırması ən azı 10 simvol olmalıdır");
+        if (decision == null) throw new BusinessException(I18n.t("apply.error.decisionRequired"));
+        if (reason == null || reason.trim().length() < 10) throw new BusinessException(I18n.t("apply.error.reasonTooShort"));
         a.setDecision(decision);
         a.setDecisionReason(reason.trim());
-        change(a, ApplicationStatus.DECIDED, actor, reason.trim(), "Qərar verilib: "
-                + (decision == Decision.APPROVED ? "Müsbət" : "Mənfi") + " (" + a.getNumber() + ")");
+        change(a, ApplicationStatus.DECIDED, actor, reason.trim(), I18n.stored(decision == Decision.APPROVED
+                ? "apply.notify.decidedApproved" : "apply.notify.decidedRejected", a.getNumber()));
         ektis.sendDecision(a);
         if (decision == Decision.APPROVED) createFarm(a);
     }
@@ -184,8 +185,7 @@ public class ApplicationService {
         f.setCommittedMonths(a.getMonths());
         farms.save(f);
         audit.log("FARM_CREATE", "FarmProject", f.getId(), a.getNumber());
-        notifications.notify(a.getInvestor(), "Təsərrüfat layihəniz yaradıldı: " + a.getPlot().getCode()
-                + " — əkin planını və işçi heyətini əlavə edin.", "/kabinet/teserrufat/" + f.getId());
+        notifications.notify(a.getInvestor(), I18n.stored("apply.notify.farmCreated", a.getPlot().getCode()), "/kabinet/teserrufat/" + f.getId());
     }
 
     // ---------------------------------------------------------------- helpers
@@ -216,12 +216,12 @@ public class ApplicationService {
     /** Actor must have the role (ADMIN may do everything). */
     private User actor(String email, Role role) {
         User u = users.findByEmailIgnoreCase(email).orElseThrow();
-        if (u.getRole() != role && u.getRole() != Role.ADMIN) throw new BusinessException("Bu əməliyyat üçün icazəniz yoxdur");
+        if (u.getRole() != role && u.getRole() != Role.ADMIN) throw new BusinessException(I18n.t("apply.error.forbidden"));
         return u;
     }
 
     private static void require(Application a, ApplicationStatus expected) {
-        if (a.getStatus() != expected) throw new BusinessException("Bu əməliyyat müraciətin hazırkı statusunda mümkün deyil");
+        if (a.getStatus() != expected) throw new BusinessException(I18n.t("apply.error.wrongStatus"));
     }
 
     private static String staffLink(Application a) {

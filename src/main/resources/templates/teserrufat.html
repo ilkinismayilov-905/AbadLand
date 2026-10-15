@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Təsərrüfatım')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{apply.farm.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
@@ -8,10 +8,10 @@
     <div class="flex flex-wrap items-center gap-3">
         <div>
             <div class="text-sm text-gray-500" th:text="${v.project.sourceLabel()} + ' · ' + ${v.project.plot.code}"></div>
-            <h1 class="text-2xl font-bold" th:text="'Təsərrüfatım: ' + ${v.project.plot.name}"></h1>
-            <div class="text-sm text-gray-600" th:text="${v.project.plot.district} + ' · ' + ${@fmt.dec(v.project.plot.areaHa)} + ' ha'"></div>
+            <h1 class="text-2xl font-bold" th:text="#{apply.farm.heading(${v.project.plot.name})}"></h1>
+            <div class="text-sm text-gray-600" th:text="${v.project.plot.district} + ' · ' + ${@fmt.dec(v.project.plot.areaHa)} + ' ' + #{apply.unit.ha}"></div>
         </div>
-        <a th:href="@{/kabinet}" class="ml-auto text-sm text-leaf-700 underline">← Kabinet</a>
+        <a th:href="@{/kabinet}" class="ml-auto text-sm text-leaf-700 underline" th:text="#{apply.detail.backCabinet}"></a>
     </div>
     <section th:replace="~{farm-fragments :: commitments(${v})}"></section>
     <section th:replace="~{farm-fragments :: plan(${v}, ${editable}, ${crops})}"></section>

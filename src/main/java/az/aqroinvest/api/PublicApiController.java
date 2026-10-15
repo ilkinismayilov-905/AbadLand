@@ -46,7 +46,7 @@ public class PublicApiController {
         ClimateDto climate = climates.findByPlot(p).map(c -> new ClimateDto(c.getElevationM(), c.getMeanTempC(),
                 c.getAbsMinTempC(), c.getFrostDays(), c.getPrecipMm())).orElse(null);
         List<SuitabilityDto> suits = suitability.forPlot(p).stream().map(s -> new SuitabilityDto(s.crop().getCode(),
-                s.crop().getNameAz(), s.score(), s.source().name(), s.reason())).toList();
+                s.crop().getName(), s.score(), s.source().name(), s.reason())).toList();
         return new PlotDetailDto(dto(p, plotService.openCompetitionByPlot().get(p.getId())), p.getVillage(), p.getWaterSource(),
                 p.getSoilType(), p.getLeaseYears(), p.getFeePerHa(), p.getDescription(), climate, suits);
     }

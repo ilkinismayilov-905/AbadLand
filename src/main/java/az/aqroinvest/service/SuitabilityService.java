@@ -6,6 +6,7 @@ import az.aqroinvest.repo.CropRepository;
 import az.aqroinvest.repo.PlotClimateRepository;
 import az.aqroinvest.repo.PlotCropSuitabilityRepository;
 import az.aqroinvest.repo.PlotRepository;
+import az.aqroinvest.web.I18n;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -79,21 +80,31 @@ public class SuitabilityService {
 
     /** Effective suitability per crop, best first. */
     public List<Suit> forPlot(Plot plot) {
-        return effective(repo.findByPlot(plot));
+        PlotClimate climate = climates.findByPlot(plot).orElse(null);
+        return effective(repo.findByPlot(plot), r -> reason(r, climate));
     }
 
     /** Effective suitability for all plots, keyed by plot id (one query). */
     public Map<Long, List<Suit>> forAllPlots() {
+        Map<Long, PlotClimate> climateByPlot = climates.findAll().stream().collect(Collectors.toMap(c -> c.getPlot().getId(), c -> c, (a, b) -> a));
         return repo.findAll().stream()
-                .collect(Collectors.groupingBy(s -> s.getPlot().getId(), Collectors.collectingAndThen(Collectors.toList(), SuitabilityService::effective)));
+                .collect(Collectors.groupingBy(s -> s.getPlot().getId(), Collectors.collectingAndThen(Collectors.toList(),
+                        rows -> effective(rows, r -> reason(r, climateByPlot.get(r.getPlot().getId()))))));
     }
 
-    static List<Suit> effective(List<PlotCropSuitability> rows) {
+    /** RULE reasons are stored in AZ; re-derive them so they show in the request language. */
+    private String reason(PlotCropSuitability r, PlotClimate climate) {
+        if (r.getSource() != SuitabilitySource.RULE) return r.getReason();
+        RuleScore s = ruleScore(r.getPlot(), climate, r.getCrop());
+        return s == null ? r.getReason() : s.reason();
+    }
+
+    static List<Suit> effective(List<PlotCropSuitability> rows, java.util.function.Function<PlotCropSuitability, String> reason) {
         Map<Long, PlotCropSuitability> best = new HashMap<>();
         for (PlotCropSuitability r : rows)
             best.merge(r.getCrop().getId(), r, (a, b) -> priority(a.getSource()) >= priority(b.getSource()) ? a : b);
         return best.values().stream()
-                .map(r -> new Suit(r.getCrop(), r.getScore(), r.getSource(), r.getReason()))
+                .map(r -> new Suit(r.getCrop(), r.getScore(), r.getSource(), reason.apply(r)))
                 .sorted(Comparator.comparingInt(Suit::score).reversed().thenComparing(s -> s.crop().getNameAz()))
                 .toList();
     }
@@ -110,33 +121,33 @@ public class SuitabilityService {
     /** RULE score from SPEC; null = no score (no climate and crop not recommended). */
     public RuleScore ruleScore(Plot plot, PlotClimate climate, Crop crop) {
         boolean recommended = isRecommended(plot, crop);
-        if (climate == null) return recommended ? new RuleScore(70, "Tövsiyə olunan bitki (iqlim məlumatı yoxdur)") : null;
+        if (climate == null) return recommended ? new RuleScore(70, I18n.t("plots.suit.recommendedNoClimate")) : null;
         int score = 100;
         List<String> why = new ArrayList<>();
         if (climate.getAbsMinTempC() != null && climate.getAbsMinTempC() < crop.getFrostToleranceC()) {
             score -= 40;
-            why.add(String.format(Locale.ROOT, "Şaxta riski: minimum %.0f °C, bitki %d °C-yə dözür", climate.getAbsMinTempC(), crop.getFrostToleranceC()));
+            why.add(I18n.t("plots.suit.frost", String.format(Locale.ROOT, "%.0f", climate.getAbsMinTempC()), String.valueOf(crop.getFrostToleranceC())));
         }
         if (climate.getElevationM() != null && climate.getElevationM() > crop.getMaxElevationM()) {
             score -= 30;
-            why.add("Hündürlük " + climate.getElevationM() + " m > " + crop.getMaxElevationM() + " m");
+            why.add(I18n.t("plots.suit.elevation", String.valueOf(climate.getElevationM()), String.valueOf(crop.getMaxElevationM())));
         }
         if (!plot.isIrrigation() && crop.getWaterNeed() == WaterNeed.HIGH) {
             score -= 30;
-            why.add("Çox su tələb edir, suvarma yoxdur");
+            why.add(I18n.t("plots.suit.highWater"));
         } else if (!plot.isIrrigation() && crop.getWaterNeed() == WaterNeed.MEDIUM) {
             score -= 15;
-            why.add("Orta su tələbi, suvarma yoxdur");
+            why.add(I18n.t("plots.suit.mediumWater"));
         }
         if (!plot.isIrrigation() && climate.getPrecipMm() != null && climate.getPrecipMm() < 300) {
             score -= 15;
-            why.add(String.format(Locale.ROOT, "Az yağıntı (%.0f mm), suvarma yoxdur", climate.getPrecipMm()));
+            why.add(I18n.t("plots.suit.lowPrecip", String.format(Locale.ROOT, "%.0f", climate.getPrecipMm())));
         }
         if (!recommended) {
             score -= 20;
-            why.add("Sahə üçün tövsiyə olunan bitkilər siyahısında deyil");
+            why.add(I18n.t("plots.suit.notRecommended"));
         }
-        return new RuleScore(clamp(score), why.isEmpty() ? "İqlim və infrastruktur uyğundur" : String.join("; ", why));
+        return new RuleScore(clamp(score), why.isEmpty() ? I18n.t("plots.suit.ok") : String.join("; ", why));
     }
 
     static boolean isRecommended(Plot plot, Crop crop) {

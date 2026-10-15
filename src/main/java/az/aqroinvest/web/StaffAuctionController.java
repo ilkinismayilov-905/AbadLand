@@ -41,28 +41,28 @@ public class StaffAuctionController {
                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startsAt,
                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endsAt,
                          @RequestParam(required = false) String rules, Authentication auth, RedirectAttributes ra) {
-        return act(ra, () -> "Hərrac yaradıldı və komissiyanın təsdiqinə göndərildi: " + auctions.create(
-                new NewAuction(plotId, dealType, startPrice, step, deposit, leaseYears, startsAt, endsAt, rules), auth.getName()).getCode());
+        return act(ra, () -> I18n.t("auction.flash.created", auctions.create(
+                new NewAuction(plotId, dealType, startPrice, step, deposit, leaseYears, startsAt, endsAt, rules), auth.getName()).getCode()));
     }
 
     @PostMapping("/{id}/tesdiq")
     public String approve(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
-        return act(ra, () -> { auctions.approve(id, auth.getName()); return "Hərrac təsdiqləndi."; });
+        return act(ra, () -> { auctions.approve(id, auth.getName()); return I18n.t("auction.flash.approved"); });
     }
 
     @PostMapping("/{id}/redd")
     public String reject(@PathVariable Long id, @RequestParam(required = false) String comment, Authentication auth, RedirectAttributes ra) {
-        return act(ra, () -> { auctions.reject(id, auth.getName(), comment); return "Hərrac rədd edildi."; });
+        return act(ra, () -> { auctions.reject(id, auth.getName(), comment); return I18n.t("auction.flash.rejected"); });
     }
 
     @PostMapping("/{id}/legv")
     public String cancel(@PathVariable Long id, @RequestParam(required = false) String comment, Authentication auth, RedirectAttributes ra) {
-        return act(ra, () -> { auctions.cancel(id, auth.getName(), comment); return "Hərrac ləğv edildi."; });
+        return act(ra, () -> { auctions.cancel(id, auth.getName(), comment); return I18n.t("auction.flash.cancelled"); });
     }
 
     @PostMapping("/{id}/netice")
     public String confirm(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
-        return act(ra, () -> { auctions.confirm(id, auth.getName()); return "Nəticə təsdiqləndi, protokol dərc edildi."; });
+        return act(ra, () -> { auctions.confirm(id, auth.getName()); return I18n.t("auction.flash.confirmed"); });
     }
 
     private String act(RedirectAttributes ra, java.util.function.Supplier<String> action) {

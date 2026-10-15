@@ -1,6 +1,7 @@
 package az.aqroinvest.service;
 
 import az.aqroinvest.domain.*;
+import az.aqroinvest.web.I18n;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,11 +32,11 @@ public class RoiService {
     public Roi calculate(Plot plot, Crop crop, PlotClimate climate, Integer suitability) {
         double area = plot.getAreaHa();
         long investment = Math.round(area * crop.getInvestmentPerHa());
-        Scenario base = scenario("Baza", plot, crop, 1.0, 0, investment);
+        Scenario base = scenario(I18n.t("plots.roi.base"), plot, crop, 1.0, 0, investment);
         List<Scenario> scenarios = List.of(
-                scenario("Pessimist", plot, crop, 0.7, 1, investment),
+                scenario(I18n.t("plots.roi.pessimist"), plot, crop, 0.7, 1, investment),
                 base,
-                scenario("Optimist", plot, crop, 1.2, 0, investment));
+                scenario(I18n.t("plots.roi.optimist"), plot, crop, 1.2, 0, investment));
         double factor = suitability == null ? 0.8 : suitability / 100.0;
         double yield = Math.round(area * crop.getYieldTPerHa() * factor * 10) / 10.0;
         return new Roi(crop, investment, base.annualNet(), base.payback(), yield, scenarios, risks(plot, crop, climate));
@@ -56,18 +57,18 @@ public class RoiService {
             double min = climate.getAbsMinTempC();
             RiskLevel l = min < crop.getFrostToleranceC() ? RiskLevel.HIGH
                     : min < crop.getFrostToleranceC() + 3 ? RiskLevel.MEDIUM : RiskLevel.LOW;
-            risks.add(new Risk("Şaxta", l, String.format(java.util.Locale.ROOT,
-                    "Mütləq minimum %.0f °C, bitkinin dözümü %d °C", min, crop.getFrostToleranceC())));
+            risks.add(new Risk(I18n.t("plots.roi.frost"), l, I18n.t("plots.roi.frostText",
+                    String.format(java.util.Locale.ROOT, "%.0f", min), String.valueOf(crop.getFrostToleranceC()))));
         }
         if (climate != null && climate.getPrecipMm() != null) {
             double p = climate.getPrecipMm();
             RiskLevel l = plot.isIrrigation() ? RiskLevel.LOW : p < 300 ? RiskLevel.HIGH : p < 500 ? RiskLevel.MEDIUM : RiskLevel.LOW;
-            risks.add(new Risk("Quraqlıq", l, String.format(java.util.Locale.ROOT,
-                    "İllik yağıntı %.0f mm, suvarma %s", p, plot.isIrrigation() ? "var" : "yoxdur")));
+            risks.add(new Risk(I18n.t("plots.roi.drought"), l, I18n.t(plot.isIrrigation() ? "plots.roi.droughtTextIrrigated" : "plots.roi.droughtText",
+                    String.format(java.util.Locale.ROOT, "%.0f", p))));
         }
         RiskLevel w = crop.getWaterNeed() == WaterNeed.HIGH && !plot.isIrrigation() ? RiskLevel.HIGH : RiskLevel.LOW;
-        risks.add(new Risk("Su çatışmazlığı", w, "Su tələbi: " + switch (crop.getWaterNeed()) {
-            case LOW -> "az"; case MEDIUM -> "orta"; case HIGH -> "çox"; } + (plot.isIrrigation() ? ", suvarma var" : ", suvarma yoxdur")));
+        risks.add(new Risk(I18n.t("plots.roi.water"), w, I18n.t(plot.isIrrigation() ? "plots.roi.waterTextIrrigated" : "plots.roi.waterText",
+                I18n.t("plots.roi.waterNeed." + crop.getWaterNeed().name()))));
         return risks;
     }
 }

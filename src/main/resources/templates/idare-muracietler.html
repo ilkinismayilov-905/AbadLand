@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Müraciətlər')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{staff.apps.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
     <nav th:replace="~{app-fragments :: staffNav('apps')}"></nav>
     <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-2xl font-bold">Müraciətlər</h1>
+        <h1 class="text-2xl font-bold" th:text="#{staff.apps.title}"></h1>
         <div class="ml-auto flex flex-wrap gap-1 text-sm">
-            <a th:href="@{/idare/muracietler}" th:class="'px-3 py-1 rounded border ' + (${status == null} ? 'bg-leaf-700 text-white' : 'bg-white')">Hamısı</a>
+            <a th:href="@{/idare/muracietler}" th:class="'px-3 py-1 rounded border ' + (${status == null} ? 'bg-leaf-700 text-white' : 'bg-white')" th:text="#{staff.apps.all}"></a>
             <a th:each="s : ${statuses}" th:href="@{/idare/muracietler(status=${s})}"
                th:class="'px-3 py-1 rounded border ' + (${s == status} ? 'bg-leaf-700 text-white' : 'bg-white')" th:text="${@statusLabels.label(s)}"></a>
         </div>
     </div>
     <div class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="w-full text-sm">
-            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3">Nömrə</th><th>İnvestor</th><th>FİN / VÖEN</th><th>Sahə</th>
-                <th>Müsabiqə</th><th class="text-right">İnvestisiya</th><th class="pl-4">Status</th><th>Yeniləndi</th></tr>
-            <tr th:if="${applications.isEmpty()}"><td colspan="8" class="p-4 text-gray-500">Müraciət yoxdur.</td></tr>
+            <tr class="text-left text-gray-500 bg-earth-50"><th class="p-3" th:text="#{staff.col.number}"></th><th th:text="#{staff.col.investor}"></th><th th:text="#{staff.col.finVoen}"></th><th th:text="#{staff.col.plot}"></th>
+                <th th:text="#{staff.col.competition}"></th><th class="text-right" th:text="#{staff.col.investment}"></th><th class="pl-4" th:text="#{staff.col.status}"></th><th th:text="#{staff.col.updated}"></th></tr>
+            <tr th:if="${applications.isEmpty()}"><td colspan="8" class="p-4 text-gray-500" th:text="#{staff.apps.empty}"></td></tr>
             <tr th:each="a : ${applications}" class="border-t hover:bg-gray-50">
                 <td class="p-3"><a th:href="@{/idare/muracietler/{id}(id=${a.id})}" class="text-leaf-700 font-medium underline" th:text="${a.number}"></a></td>
                 <td th:text="${a.investor.fullName}"></td>

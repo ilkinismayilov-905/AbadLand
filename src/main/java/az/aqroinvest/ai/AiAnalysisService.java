@@ -78,13 +78,13 @@ public class AiAnalysisService {
     public AiAnalysis analyze(Plot plot, String email, boolean rerun) {
         User user = users.findByEmailIgnoreCase(email).orElseThrow();
         boolean admin = user.getRole() == Role.ADMIN;
-        if (rerun && !admin) throw new BusinessException("Yenidən analiz yalnız admin üçündür");
+        if (rerun && !admin) throw new BusinessException(az.aqroinvest.web.I18n.t("plots.ai.rerunAdminOnly"));
         Optional<AiAnalysis> cached = latest(plot).filter(a -> !SAMPLE_MODEL.equals(a.getModel()));
         if (cached.isPresent() && !rerun) return cached.get();
-        if (!ai.isConfigured()) throw new BusinessException("AI açarı konfiqurasiya edilməyib");
+        if (!ai.isConfigured()) throw new BusinessException(az.aqroinvest.web.I18n.t("plots.ai.noKey"));
         if (!admin && usedToday(email) >= maxPerDay)
-            throw new BusinessException("Gündəlik AI analizi limitinə çatdınız (" + maxPerDay + "). Sabah yenidən cəhd edin.");
-        if (!running.add(plot.getId())) throw new BusinessException("Bu sahə üçün analiz artıq gedir — bir neçə saniyə sonra səhifəni yeniləyin.");
+            throw new BusinessException(az.aqroinvest.web.I18n.t("plots.ai.dailyLimit", String.valueOf(maxPerDay)));
+        if (!running.add(plot.getId())) throw new BusinessException(az.aqroinvest.web.I18n.t("plots.ai.running"));
         try {
             PlotClimate climate = climates.findByPlot(plot).orElse(null);
             if (climate == null || climate.getFetchedAt() == null) {
@@ -107,7 +107,7 @@ public class AiAnalysisService {
                 a.setError(e.getMessage());
             } catch (Exception e) {
                 a.setStatus("FAILED");
-                a.setError("AI cavabı gözlənilən formatda deyil.");
+                a.setError(az.aqroinvest.web.I18n.t("plots.ai.badFormat"));
             }
             analyses.save(a);
             audit.log(email, user.getRole().name(), "AI_ANALYSIS", "Plot", plot.getCode(), a.getStatus() + " " + a.getModel());
@@ -115,7 +115,7 @@ public class AiAnalysisService {
             suitability.applyAi(a);
             return a;
         } catch (java.io.IOException e) {
-            throw new BusinessException("Peyk görüntüsünü oxumaq mümkün olmadı.");
+            throw new BusinessException(az.aqroinvest.web.I18n.t("plots.ai.imageReadFailed"));
         } finally {
             running.remove(plot.getId());
         }

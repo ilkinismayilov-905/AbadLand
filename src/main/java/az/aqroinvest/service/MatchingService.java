@@ -2,6 +2,7 @@ package az.aqroinvest.service;
 
 import az.aqroinvest.domain.*;
 import az.aqroinvest.repo.CropRepository;
+import az.aqroinvest.web.I18n;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,23 +30,23 @@ public class MatchingService {
                     && experience != null && !experience.isBlank();
         }
 
-        /** First problem with the typed values in Azerbaijani, or null when the answers can be scored. */
+        /** First problem with the typed values (current language), or null when the answers can be scored. */
         public String invalid() {
             if (budget != null && budget == BUDGET_CUSTOM) {
                 Long v = parseLong(budgetCustom);
-                if (v == null) return "Büdcə məbləğini yazın.";
-                if (v < BUDGET_CUSTOM_MIN) return "Büdcə ən azı 10 000 AZN olmalıdır.";
-                if (v % 1000 != 0) return "Büdcə 1 000 AZN-ə bölünən məbləğ olmalıdır.";
+                if (v == null) return I18n.t("plots.match.budgetMissing");
+                if (v < BUDGET_CUSTOM_MIN) return I18n.t("plots.match.budgetMin");
+                if (v % 1000 != 0) return I18n.t("plots.match.budgetStep");
             }
             if (activity == ActivityType.OTHER) {
-                if (otherText == null || otherText.isBlank()) return "Fəaliyyət növünü yazın.";
-                if (otherText.strip().length() > 100) return "Fəaliyyət növü ən çoxu 100 simvol ola bilər.";
+                if (otherText == null || otherText.isBlank()) return I18n.t("plots.match.activityMissing");
+                if (otherText.strip().length() > 100) return I18n.t("plots.match.activityTooLong");
             }
             if (CUSTOM_SIZE.equals(size)) {
                 Double lo = parseHa(minHa), hi = parseHa(maxHa);
-                if (lo == null || hi == null) return "Sahə üçün minimum və maksimum hektarı yazın.";
-                if (lo < 0.5) return "Minimum sahə ən azı 0,5 ha olmalıdır.";
-                if (hi < lo) return "Maksimum sahə minimumdan kiçik ola bilməz.";
+                if (lo == null || hi == null) return I18n.t("plots.match.sizeMissing");
+                if (lo < 0.5) return I18n.t("plots.match.sizeMin");
+                if (hi < lo) return I18n.t("plots.match.sizeOrder");
             }
             return null;
         }
@@ -98,37 +99,37 @@ public class MatchingService {
         List<Reason> reasons = new ArrayList<>();
 
         boolean activityOk = p.getPurpose() == a.activity();
-        comps.add(new Component("Fəaliyyət növü", activityOk ? 30 : 0, 30));
-        if (!activityOk) reasons.add(new Reason(false, "Təyinat uyğun deyil: " + labels.label(p.getPurpose())));
+        comps.add(new Component(I18n.t("plots.match.cActivity"), activityOk ? 30 : 0, 30));
+        if (!activityOk) reasons.add(new Reason(false, I18n.t("plots.match.purposeMismatch", labels.label(p.getPurpose()))));
 
         long est = Math.round(p.getAreaHa() * (firstCrop == null ? 0 : firstCrop.getInvestmentPerHa()));
         long budget = a.effectiveBudget() >= BUDGET_NO_LIMIT ? Long.MAX_VALUE : a.effectiveBudget();
         int budgetPts = est <= budget ? 25 : est <= budget * 1.25 ? 12 : 0;
-        comps.add(new Component("Büdcə", budgetPts, 25));
+        comps.add(new Component(I18n.t("plots.match.cBudget"), budgetPts, 25));
         reasons.add(est <= budget
-                ? new Reason(true, "Büdcənizə sığır (təxmini " + money(est) + ")")
-                : new Reason(false, "Büdcəni ~" + Math.round((est / (double) budget - 1) * 100) + "% aşır"));
+                ? new Reason(true, I18n.t("plots.match.withinBudget", money(est)))
+                : new Reason(false, I18n.t("plots.match.overBudget", String.valueOf(Math.round((est / (double) budget - 1) * 100)))));
 
         double[] range = range(a);
         double area = p.getAreaHa();
         int sizePts = area >= range[0] && area <= range[1] ? 20 : area >= range[0] * 0.8 && area <= range[1] * 1.2 ? 10 : 0;
-        comps.add(new Component("Sahə ölçüsü", sizePts, 20));
+        comps.add(new Component(I18n.t("plots.match.cSize"), sizePts, 20));
 
         int deminingPts = switch (p.getDemining()) { case CLEARED -> 10; case PARTIALLY_CLEARED -> 3; case IN_PROGRESS -> 0; };
-        comps.add(new Component("Minalardan təmizlənmə", deminingPts, 10));
+        comps.add(new Component(I18n.t("plots.compare.demining"), deminingPts, 10));
 
         int roadPts = p.getRoadKm() <= 5 ? 2 : p.getRoadKm() <= 15 ? 1 : 0;
-        comps.add(new Component("İnfrastruktur", (p.isIrrigation() ? 5 : 0) + (p.isElectricity() ? 3 : 0) + roadPts, 10));
-        reasons.add(new Reason(p.isIrrigation(), p.isIrrigation() ? "Suvarma var" : "Suvarma yoxdur"));
-        reasons.add(new Reason(p.getRoadKm() <= 5, "Yola " + km(p.getRoadKm()) + " km məsafə"));
+        comps.add(new Component(I18n.t("plots.match.cInfra"), (p.isIrrigation() ? 5 : 0) + (p.isElectricity() ? 3 : 0) + roadPts, 10));
+        reasons.add(new Reason(p.isIrrigation(), I18n.t(p.isIrrigation() ? "plots.match.irrigationYes" : "plots.match.irrigationNo")));
+        reasons.add(new Reason(p.getRoadKm() <= 5, I18n.t("plots.match.road", km(p.getRoadKm()))));
         reasons.add(switch (p.getDemining()) {
-            case CLEARED -> new Reason(true, "Minalardan tam təmizlənib");
-            case PARTIALLY_CLEARED -> new Reason(false, "Qismən təmizlənib — əlavə yoxlama lazımdır");
-            case IN_PROGRESS -> new Reason(false, "Minalardan təmizlənmə davam edir");
+            case CLEARED -> new Reason(true, I18n.t("plots.match.cleared"));
+            case PARTIALLY_CLEARED -> new Reason(false, I18n.t("plots.match.partial"));
+            case IN_PROGRESS -> new Reason(false, I18n.t("plots.match.inProgress"));
         });
 
         boolean regionOk = a.district() == null || a.district().isBlank() || a.district().equals(p.getDistrict());
-        comps.add(new Component("Region", regionOk ? 5 : 0, 5));
+        comps.add(new Component(I18n.t("plots.match.cRegion"), regionOk ? 5 : 0, 5));
 
         int total = comps.stream().mapToInt(Component::points).sum();
         return new Match(p, null, null, total, comps, reasons);

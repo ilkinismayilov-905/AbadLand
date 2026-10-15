@@ -7,7 +7,7 @@ Web portal for agricultural investment in Azerbaijan's liberated territories (Qa
 ## Rules
 1. Work step by step (`steps/STEP-N-*.md`). Only the current step. Short plan (≤ 15 lines), then implement; ask only if truly ambiguous.
 2. One Spring Boot app serves backend and HTML pages (server-side rendering). **No SPA, no Node/npm, no Docker required.**
-3. All UI text in **Azerbaijani** (ə, ı, ö, ü, ğ, ş, ç). Code and comments in English.
+3. UI in **az (default) / en / ru**: no hard-coded UI text — templates use `#{key}`, Java `I18n.t("key")`, static JS `t('js.key', 'AZ fallback')`; bundles `src/main/resources/i18n/<group>*.properties` (same keys in all three). Notifications are stored with `I18n.stored(...)`. Seed data and AI output stay Azerbaijani. Code and comments in English.
 4. The demo path in `docs/SPEC.md` must always work.
 5. After each step: `./mvnw spring-boot:run` starts with no errors; update `PROGRESS.md` (3–5 lines); suggest a commit message.
 6. All seed data is fictional. ROI, prediction and crop parameters are labelled "Sınaq dəyəri". AI output is labelled "AI tövsiyəsidir".
@@ -43,7 +43,7 @@ uploads/  (gitignored)
 
 ## Conventions
 - Application status changes **only** in `ApplicationService`; every change → StatusHistory + AuditLog + Notification.
-- Thin controllers; `jakarta.validation`; errors shown in the form in Azerbaijani; POST → redirect → flash.
+- Thin controllers; `jakarta.validation`; errors shown in the form in the user's language; POST → redirect → flash.
 - Money `410 000 AZN`, dates `dd.MM.yyyy HH:mm` (Asia/Baku).
 - Enum labels + badge colors only via `StatusLabels`.
 - Mask FİN/VÖEN in staff lists (first 3 chars + `****`); show share holders by initials.

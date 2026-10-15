@@ -120,3 +120,8 @@ body { min-height: 100vh; }
 @media (prefers-reduced-motion: reduce) { .pf-panel { transition: none; } }
 /* White bands on the home page: cards get a border instead of a shadow so they still read as cards */
 .home-band .card { box-shadow: none; border: 1px solid #DDE3DC; background: #fbfcfa; }
+/* Language switcher AZ | EN | RU (header, always visible) */
+.lang-switch { display: flex; border: 1px solid #DDE3DC; border-radius: 9999px; overflow: hidden; font-size: .75rem; font-weight: 600; }
+.lang-switch a { padding: .35rem .55rem; color: #4b5563; min-width: 2.1rem; text-align: center; }
+.lang-switch a:hover { background: #f1f8ee; color: #1E4A28; }
+.lang-switch a.on { background: #2E6B3A; color: #fff; }

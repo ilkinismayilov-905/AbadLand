@@ -6,6 +6,7 @@ import az.aqroinvest.service.AuditService;
 import az.aqroinvest.service.BusinessException;
 import az.aqroinvest.service.NotificationService;
 import az.aqroinvest.service.StorageService;
+import az.aqroinvest.web.I18n;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,6 @@ public class FarmService {
     private final StorageService storage;
     private final NotificationService notifications;
     private final AuditService audit;
-    private final az.aqroinvest.web.StatusLabels labels;
 
     // ---------------------------------------------------------------- reads
 
@@ -104,8 +104,8 @@ public class FarmService {
         for (CalendarTask t : all) {
             TaskStatus now = CalendarService.statusOf(t, today);
             if (now == TaskStatus.DELAYED && t.getStatus() != TaskStatus.DELAYED)
-                notifications.notify(f.getInvestor(), "Əkin tapşırığı gecikir: " + t.getCropPlanItem().getCrop().getNameAz()
-                        + " — " + labels.label(t.getStage()) + " (" + f.getPlot().getCode() + ")", "/kabinet/teserrufat/" + f.getId());
+                notifications.notify(f.getInvestor(), I18n.stored("apply.notify.taskDelayed." + t.getStage().name(),
+                        I18n.keyArg("crop." + t.getCropPlanItem().getCrop().getCode()), f.getPlot().getCode()), "/kabinet/teserrufat/" + f.getId());
             t.setStatus(now);
         }
         return all;
@@ -125,12 +125,12 @@ public class FarmService {
         int delayed = (int) all.stream().filter(t -> CalendarService.statusOf(t, today) == TaskStatus.DELAYED).count();
 
         List<String> reasons = new ArrayList<>();
-        if (timePct >= 25 && invPct < timePct * 0.5) reasons.add("İnvestisiya vaxta görə geridə qalır (" + invPct + "% / vaxt " + timePct + "%)");
-        if (timePct >= 25 && jobsPct < timePct * 0.5) reasons.add("İş yerləri vaxta görə geridə qalır (" + jobsPct + "% / vaxt " + timePct + "%)");
+        if (timePct >= 25 && invPct < timePct * 0.5) reasons.add(I18n.t("apply.risk.investmentBehind", String.valueOf(invPct), String.valueOf(timePct)));
+        if (timePct >= 25 && jobsPct < timePct * 0.5) reasons.add(I18n.t("apply.risk.jobsBehind", String.valueOf(jobsPct), String.valueOf(timePct)));
         LocalDate lastReportDate = last == null ? f.getStartDate() : last.getSubmittedAt().toLocalDate();
-        if (ChronoUnit.DAYS.between(lastReportDate, today) > 100) reasons.add("100 gündən çoxdur hesabat yoxdur");
+        if (ChronoUnit.DAYS.between(lastReportDate, today) > 100) reasons.add(I18n.t("apply.risk.noReport"));
         boolean longDelay = all.stream().anyMatch(t -> t.getActualDate() == null && ChronoUnit.DAYS.between(t.getPlannedEnd(), today) > 30);
-        if (longDelay) reasons.add("Əkin tapşırığı 30 gündən çox gecikir");
+        if (longDelay) reasons.add(I18n.t("apply.risk.taskDelayed"));
         return new Progress(invPct, jobsPct, timePct, localPct, invested, workers, local, delayed, last,
                 reasons.isEmpty() ? FarmStatus.ACTIVE : FarmStatus.AT_RISK, reasons);
     }
@@ -140,15 +140,14 @@ public class FarmService {
     @Transactional
     public void addCropPlan(Long id, String email, String cropCode, Double areaHa, Integer seasonYear) {
         FarmProject f = getOwned(id, email);
-        Crop crop = crops.findByCode(cropCode == null ? "" : cropCode).orElseThrow(() -> new BusinessException("Bitkini seçin"));
-        if (areaHa == null || areaHa <= 0) throw new BusinessException("Sahə müsbət olmalıdır");
+        Crop crop = crops.findByCode(cropCode == null ? "" : cropCode).orElseThrow(() -> new BusinessException(I18n.t("apply.form.cropRequired")));
+        if (areaHa == null || areaHa <= 0) throw new BusinessException(I18n.t("apply.error.areaPositive"));
         int year = LocalDate.now(BAKU).getYear();
         if (seasonYear == null || seasonYear < year - 1 || seasonYear > year + 5)
-            throw new BusinessException("Mövsüm ili " + (year - 1) + "–" + (year + 5) + " aralığında olmalıdır");
+            throw new BusinessException(I18n.t("apply.error.seasonRange", String.valueOf(year - 1), String.valueOf(year + 5)));
         double used = plans.findByProjectOrderByIdAsc(f).stream().mapToDouble(CropPlanItem::getAreaHa).sum();
         if (used + areaHa > f.getPlot().getAreaHa() + 1e-9)
-            throw new BusinessException(String.format(Locale.ROOT, "Ümumi əkin sahəsi sahənin ölçüsünü (%.1f ha) aşa bilməz; boş qalıb: %.1f ha",
-                    f.getPlot().getAreaHa(), f.getPlot().getAreaHa() - used).replace('.', ','));
+            throw new BusinessException(I18n.t("apply.error.areaExceeded", ha(f.getPlot().getAreaHa()), ha(f.getPlot().getAreaHa() - used)));
         CropPlanItem i = new CropPlanItem();
         i.setProject(f);
         i.setCrop(crop);
@@ -163,8 +162,8 @@ public class FarmService {
     public void markDone(Long taskId, String email, LocalDate date, String note) {
         CalendarTask t = tasks.findById(taskId).orElseThrow(FarmService::notFound);
         getOwned(t.getProject().getId(), email);
-        if (date == null) throw new BusinessException("İcra tarixini seçin");
-        if (date.isAfter(LocalDate.now(BAKU))) throw new BusinessException("İcra tarixi gələcəkdə ola bilməz");
+        if (date == null) throw new BusinessException(I18n.t("apply.error.dateRequired"));
+        if (date.isAfter(LocalDate.now(BAKU))) throw new BusinessException(I18n.t("apply.error.dateFuture"));
         t.setActualDate(date);
         t.setNote(note == null || note.isBlank() ? null : note.trim());
         t.setStatus(TaskStatus.DONE);
@@ -174,8 +173,8 @@ public class FarmService {
     @Transactional
     public void addWorkers(Long id, String email, WorkRole role, Integer count, boolean local) {
         FarmProject f = getOwned(id, email);
-        if (role == null) throw new BusinessException("Vəzifəni seçin");
-        if (count == null || count < 1 || count > 1000) throw new BusinessException("Say 1–1000 aralığında olmalıdır");
+        if (role == null) throw new BusinessException(I18n.t("apply.error.roleRequired"));
+        if (count == null || count < 1 || count > 1000) throw new BusinessException(I18n.t("apply.error.countRange"));
         WorkforceItem w = new WorkforceItem();
         w.setProject(f);
         w.setRole(role);
@@ -188,14 +187,14 @@ public class FarmService {
     @Transactional
     public void submitReport(Long id, String email, String period, Long investedToDate, String note, List<MultipartFile> photos) {
         FarmProject f = getOwned(id, email);
-        if (period == null || !period.trim().matches("20\\d{2}-Q[1-4]")) throw new BusinessException("Dövrü 2026-Q4 formatında yazın");
-        if (investedToDate == null || investedToDate < 0) throw new BusinessException("Faktiki investisiyanı yazın");
-        if (note != null && note.length() > 2000) throw new BusinessException("Qeyd ən çox 2000 simvol ola bilər");
+        if (period == null || !period.trim().matches("20\\d{2}-Q[1-4]")) throw new BusinessException(I18n.t("apply.error.periodFormat"));
+        if (investedToDate == null || investedToDate < 0) throw new BusinessException(I18n.t("apply.error.investedRequired"));
+        if (note != null && note.length() > 2000) throw new BusinessException(I18n.t("apply.error.noteTooLong"));
         List<MultipartFile> files = photos == null ? List.of() : photos.stream().filter(p -> p != null && !p.isEmpty()).toList();
-        if (files.size() > MAX_PHOTOS) throw new BusinessException("Ən çox " + MAX_PHOTOS + " şəkil yükləyin");
+        if (files.size() > MAX_PHOTOS) throw new BusinessException(I18n.t("apply.error.maxPhotos", MAX_PHOTOS));
         for (MultipartFile p : files) {
             String ext = p.getOriginalFilename() == null ? "" : p.getOriginalFilename().toLowerCase(Locale.ROOT);
-            if (!(ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png"))) throw new BusinessException("Şəkillər yalnız JPG və ya PNG olmalıdır");
+            if (!(ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png"))) throw new BusinessException(I18n.t("apply.error.photoType"));
             String err = storage.check(p);
             if (err != null) throw new BusinessException(err);
         }
@@ -209,7 +208,7 @@ public class FarmService {
         reports.save(r);
         files.forEach(p -> storage.store(p, DocType.OTHER, null, r));
         audit.log("FARM_REPORT", "FarmProject", f.getId(), r.getPeriod() + " " + investedToDate + " AZN, " + files.size() + " photos");
-        notifications.notifyRole(Role.OPERATOR, "Yeni rüblük hesabat: " + f.getPlot().getCode() + " (" + r.getPeriod() + ")",
+        notifications.notifyRole(Role.OPERATOR, I18n.stored("apply.notify.newReport", f.getPlot().getCode(), r.getPeriod()),
                 "/idare/monitorinq/" + f.getId());
     }
 
@@ -218,19 +217,25 @@ public class FarmService {
     @Transactional
     public void reviewReport(Long reportId, String actorEmail, boolean accept, String comment) {
         User actor = users.findByEmailIgnoreCase(actorEmail).orElseThrow();
-        if (actor.getRole() != Role.OPERATOR && actor.getRole() != Role.ADMIN) throw new BusinessException("Bu əməliyyat üçün icazəniz yoxdur");
-        ProgressReport r = reports.findById(reportId).orElseThrow(() -> new BusinessException("Hesabat tapılmadı"));
-        if (r.getStatus() != ReportStatus.SUBMITTED) throw new BusinessException("Hesabata artıq baxılıb");
-        if (!accept && (comment == null || comment.isBlank())) throw new BusinessException("Nəyin düzəldilməli olduğunu yazın");
+        if (actor.getRole() != Role.OPERATOR && actor.getRole() != Role.ADMIN) throw new BusinessException(I18n.t("apply.error.forbidden"));
+        ProgressReport r = reports.findById(reportId).orElseThrow(() -> new BusinessException(I18n.t("apply.error.reportNotFound")));
+        if (r.getStatus() != ReportStatus.SUBMITTED) throw new BusinessException(I18n.t("apply.error.reportReviewed"));
+        if (!accept && (comment == null || comment.isBlank())) throw new BusinessException(I18n.t("apply.error.fixRequired"));
         r.setStatus(accept ? ReportStatus.ACCEPTED : ReportStatus.NEEDS_FIX);
         r.setReviewerComment(comment == null || comment.isBlank() ? null : comment.trim());
         FarmProject f = r.getProject();
         audit.log(actor.getEmail(), actor.getRole().name(), accept ? "FARM_REPORT_ACCEPT" : "FARM_REPORT_FIX", "ProgressReport", r.getId(), r.getReviewerComment());
-        notifications.notify(f.getInvestor(), "Hesabat " + r.getPeriod() + (accept ? " qəbul edildi" : " üçün düzəliş tələb olunur: " + comment.trim()),
+        notifications.notify(f.getInvestor(), accept ? I18n.stored("apply.notify.reportAccepted", r.getPeriod())
+                        : I18n.stored("apply.notify.reportNeedsFix", r.getPeriod(), comment.trim()),
                 "/kabinet/teserrufat/" + f.getId());
     }
 
     // ---------------------------------------------------------------- helpers
+
+    /** 12.5 → "12,5" (AZ decimal comma, as before). */
+    private static String ha(double v) {
+        return String.format(Locale.ROOT, "%.1f", v).replace('.', ',');
+    }
 
     static int pct(double value, double of) {
         return of <= 0 ? 0 : (int) Math.round(value * 100 / of);

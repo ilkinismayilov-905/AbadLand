@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Müsabiqələr')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{plots.competitions.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
-    <h1 class="text-2xl font-bold">Açıq müsabiqələr</h1>
-    <div th:if="${competitions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Hazırda dərc edilmiş müsabiqə yoxdur.</p></div>
+    <h1 class="text-2xl font-bold" th:text="#{plots.competitions.heading}"></h1>
+    <div th:if="${competitions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p th:text="#{plots.competitions.empty}"></p></div>
     <section th:each="c : ${competitions}" class="bg-white rounded-lg shadow p-5 space-y-2">
         <div class="flex flex-wrap items-center gap-3">
             <span class="text-sm text-gray-500" th:text="${c.code}"></span>
             <span th:class="${@statusLabels.badge(c.status)}" th:text="${@statusLabels.label(c.status)}"></span>
             <span class="ml-auto text-sm" th:with="d=${@fmt.daysUntil(c.deadline)}">
-                Son tarix <b th:text="${@fmt.date(c.deadline)}"></b> ·
-                <span th:class="${d <= 7} ? 'text-red-600 font-semibold' : ''" th:text="${d < 0} ? 'Bitib' : ${d} + ' gün qalıb'"></span>
+                [[#{plots.competitions.deadline}]] <b th:text="${@fmt.date(c.deadline)}"></b> ·
+                <span th:class="${d <= 7} ? 'text-red-600 font-semibold' : ''" th:text="${d < 0} ? #{plots.competitions.ended} : #{plots.daysLeft(${d})}"></span>
             </span>
         </div>
         <h2 class="text-lg font-semibold" th:text="${c.title}"></h2>
         <p class="text-sm text-gray-700" th:text="${c.requirements}"></p>
-        <div class="text-sm">Minimum investisiya: <b th:text="${@fmt.money(c.minInvestment)}"></b></div>
+        <div class="text-sm">[[#{plots.minInvestment}]] <b th:text="${@fmt.money(c.minInvestment)}"></b></div>
         <div class="flex flex-wrap gap-2 pt-2">
             <a th:each="p : ${c.plots}" th:href="@{/saheler/{id}(id=${p.id})}"
-               class="px-3 py-1 rounded border text-sm hover:bg-leaf-50" th:text="${p.code} + ' · ' + ${p.district} + ' · ' + ${@fmt.dec(p.areaHa)} + ' ha'"></a>
+               class="px-3 py-1 rounded border text-sm hover:bg-leaf-50" th:text="${p.code} + ' · ' + ${p.district} + ' · ' + #{plots.ha(${@fmt.dec(p.areaHa)})}"></a>
         </div>
     </section>
 </main>

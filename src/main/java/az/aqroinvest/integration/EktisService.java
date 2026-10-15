@@ -8,6 +8,7 @@ import az.aqroinvest.service.AuditService;
 import az.aqroinvest.service.BusinessException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import az.aqroinvest.web.I18n;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,13 +88,13 @@ public class EktisService {
     @Transactional
     public IntegrationLog retry(Long logId, String actorEmail) {
         User actor = users.findByEmailIgnoreCase(actorEmail).orElseThrow();
-        if (actor.getRole() != Role.ADMIN) throw new BusinessException("Yenidən göndərmə yalnız admin üçündür");
-        IntegrationLog failed = logs.findById(logId).orElseThrow(() -> new BusinessException("Jurnal tapılmadı"));
-        if (failed.getStatus() != IntegrationStatus.FAILED) throw new BusinessException("Yalnız uğursuz göndərişlər təkrarlana bilər");
-        if (!"SEND_DECISION".equals(failed.getOperation())) throw new BusinessException("Bu növ göndəriş üçün təkrar hələ mövcud deyil");
+        if (actor.getRole() != Role.ADMIN) throw new BusinessException(I18n.t("staff.ektis.err.adminOnly"));
+        IntegrationLog failed = logs.findById(logId).orElseThrow(() -> new BusinessException(I18n.t("staff.ektis.err.logNotFound")));
+        if (failed.getStatus() != IntegrationStatus.FAILED) throw new BusinessException(I18n.t("staff.ektis.err.onlyFailed"));
+        if (!"SEND_DECISION".equals(failed.getOperation())) throw new BusinessException(I18n.t("staff.ektis.err.unsupported"));
         Application app = applications.findByNumber(failed.getApplicationNumber())
-                .orElseThrow(() -> new BusinessException("Müraciət tapılmadı"));
-        if (app.getEktisRef() != null) throw new BusinessException("Bu qərar artıq EKTİS-ə çatdırılıb: " + app.getEktisRef());
+                .orElseThrow(() -> new BusinessException(I18n.t("staff.ektis.err.appNotFound")));
+        if (app.getEktisRef() != null) throw new BusinessException(I18n.t("staff.ektis.err.alreadyDelivered", app.getEktisRef()));
         return sendDecision(app);
     }
 

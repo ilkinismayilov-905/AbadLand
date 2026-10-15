@@ -61,7 +61,7 @@ public class ClaudeAiClient implements AiClient {
 
     @Override
     public String analyze(byte[] jpeg, String userText) {
-        if (!isConfigured()) throw new AiException("AI açarı konfiqurasiya edilməyib");
+        if (!isConfigured()) throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.noKey"));
         HttpRequest.Builder req = HttpRequest.newBuilder(URI.create(URL))
                 .timeout(Duration.ofSeconds(90)) // image analysis takes ~10–30 s; connect timeout is 10 s
                 .header("x-api-key", apiKey)
@@ -73,12 +73,12 @@ public class ClaudeAiClient implements AiClient {
         try {
             r = http.send(req.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         } catch (java.net.http.HttpTimeoutException e) {
-            throw new AiException("AI cavab vermədi (vaxt bitdi). Bir az sonra yenidən cəhd edin.");
+            throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.timeout"));
         } catch (IOException e) {
-            throw new AiException("AI xidmətinə qoşulmaq mümkün olmadı.");
+            throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.connectFailed"));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new AiException("AI sorğusu dayandırıldı.");
+            throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.interrupted"));
         }
         if (r.statusCode() != 200) throw httpError(r.statusCode(), r.body());
         return extractJson(r.body());
@@ -113,11 +113,11 @@ public class ClaudeAiClient implements AiClient {
         try {
             r = json.readTree(responseBody);
         } catch (IOException e) {
-            throw new AiException("AI cavabı oxunmadı.");
+            throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.unreadable"));
         }
         String stop = r.path("stop_reason").asText("");
-        if (stop.equals("refusal")) throw new AiException("AI bu sorğunu cavablandırmadı (təhlükəsizlik filtri).");
-        if (stop.equals("max_tokens")) throw new AiException("AI cavabı yarımçıq qaldı. Yenidən cəhd edin.");
+        if (stop.equals("refusal")) throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.refusal"));
+        if (stop.equals("max_tokens")) throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.truncated"));
         StringBuilder text = new StringBuilder();
         for (JsonNode block : r.path("content")) if (block.path("type").asText().equals("text")) text.append(block.path("text").asText());
         return jsonObject(text.toString());
@@ -126,7 +126,7 @@ public class ClaudeAiClient implements AiClient {
     static String jsonObject(String text) {
         String t = text.trim().replaceAll("^```(?:json)?\\s*", "").replaceAll("\\s*```$", "");
         int start = t.indexOf('{'), end = t.lastIndexOf('}');
-        if (start < 0 || end <= start) throw new AiException("AI JSON formatında cavab vermədi.");
+        if (start < 0 || end <= start) throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.notJson"));
         return t.substring(start, end + 1);
     }
 
@@ -139,10 +139,10 @@ public class ClaudeAiClient implements AiClient {
         }
         log.warn("Claude API error: HTTP {} {}", status, type); // never log the body or the key
         return new AiException(switch (status) {
-            case 401, 403 -> "AI açarı etibarsızdır və ya icazəsi yoxdur.";
-            case 429 -> "AI limitinə çatıldı. Bir dəqiqə sonra yenidən cəhd edin.";
-            case 400 -> "AI sorğusu qəbul edilmədi (" + type + ").";
-            default -> status >= 500 ? "AI xidməti hazırda əlçatan deyil (HTTP " + status + "). Sonra yenidən cəhd edin." : "AI xətası: HTTP " + status;
+            case 401, 403 -> az.aqroinvest.web.I18n.t("plots.ai.http401");
+            case 429 -> az.aqroinvest.web.I18n.t("plots.ai.http429");
+            case 400 -> az.aqroinvest.web.I18n.t("plots.ai.http400", type);
+            default -> az.aqroinvest.web.I18n.t(status >= 500 ? "plots.ai.http5xx" : "plots.ai.httpOther", String.valueOf(status));
         });
     }
 }

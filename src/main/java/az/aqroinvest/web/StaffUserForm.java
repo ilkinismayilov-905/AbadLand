@@ -6,15 +6,15 @@ import lombok.Data;
 
 @Data
 public class StaffUserForm {
-    @NotBlank(message = "Ad və soyad tələb olunur")
-    @Size(max = 120, message = "Ad çox uzundur")
+    @NotBlank(message = "{staff.form.fullNameRequired}")
+    @Size(max = 120, message = "{staff.form.nameTooLong}")
     private String fullName;
-    @NotBlank(message = "E-poçt tələb olunur")
-    @Email(message = "E-poçt düzgün deyil")
+    @NotBlank(message = "{staff.form.emailRequired}")
+    @Email(message = "{staff.form.emailInvalid}")
     private String email;
-    @NotBlank(message = "Telefon tələb olunur")
-    @Pattern(regexp = "\\+?[0-9 ()-]{7,20}", message = "Telefon nömrəsi düzgün deyil")
+    @NotBlank(message = "{staff.form.phoneRequired}")
+    @Pattern(regexp = "\\+?[0-9 ()-]{7,20}", message = "{staff.form.phoneInvalid}")
     private String phone;
-    @NotNull(message = "Rolu seçin")
+    @NotNull(message = "{staff.form.roleRequired}")
     private Role role;
 }

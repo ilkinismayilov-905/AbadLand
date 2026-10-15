@@ -44,15 +44,15 @@ public class AuthController {
         String email = form.getEmail() == null ? "" : form.getEmail().trim().toLowerCase();
         if (form.getInvestorType() == InvestorType.INDIVIDUAL) {
             if (form.getFin() == null || !form.getFin().trim().toUpperCase().matches("[0-9A-Z]{7}"))
-                br.rejectValue("fin", "fin", "FİN 7 simvoldan (rəqəm və hərf) ibarət olmalıdır");
+                br.rejectValue("fin", "fin", I18n.t("common.register.finInvalid"));
         } else if (form.getInvestorType() == InvestorType.LEGAL) {
             if (form.getVoen() == null || !form.getVoen().trim().matches("\\d{10}"))
-                br.rejectValue("voen", "voen", "VÖEN 10 rəqəmdən ibarət olmalıdır");
+                br.rejectValue("voen", "voen", I18n.t("common.register.voenInvalid"));
             if (form.getCompanyName() == null || form.getCompanyName().isBlank())
-                br.rejectValue("companyName", "companyName", "Şirkətin adı tələb olunur");
+                br.rejectValue("companyName", "companyName", I18n.t("common.register.companyRequired"));
         }
         if (!email.isEmpty() && users.existsByEmailIgnoreCase(email))
-            br.rejectValue("email", "email", "Bu e-poçt artıq qeydiyyatdan keçib");
+            br.rejectValue("email", "email", I18n.t("common.register.emailTaken"));
         if (br.hasErrors()) return "qeydiyyat";
 
         User u = new User();
@@ -70,7 +70,7 @@ public class AuthController {
         }
         users.save(u);
         audit.log(email, "INVESTOR", "REGISTER", "User", u.getId(), form.getInvestorType().name());
-        ra.addFlashAttribute("success", "Qeydiyyat uğurla tamamlandı. İndi daxil ola bilərsiniz.");
+        ra.addFlashAttribute("success", I18n.t("common.register.success"));
         return "redirect:/giris";
     }
 }

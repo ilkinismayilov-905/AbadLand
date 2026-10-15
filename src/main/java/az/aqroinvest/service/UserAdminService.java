@@ -3,6 +3,7 @@ package az.aqroinvest.service;
 import az.aqroinvest.domain.Role;
 import az.aqroinvest.domain.User;
 import az.aqroinvest.repo.UserRepository;
+import az.aqroinvest.web.I18n;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,9 +40,9 @@ public class UserAdminService {
     @Transactional
     public String createStaff(String fullName, String email, String phone, Role role, String actorEmail) {
         requireAdmin(actorEmail);
-        if (role == null || !STAFF_ROLES.contains(role)) throw new BusinessException("Yalnız Operator, Komissiya və ya Admin yaratmaq olar");
+        if (role == null || !STAFF_ROLES.contains(role)) throw new BusinessException(I18n.t("staff.users.err.staffOnly"));
         String normalized = email.trim().toLowerCase();
-        if (users.existsByEmailIgnoreCase(normalized)) throw new BusinessException("Bu e-poçt artıq istifadə olunur");
+        if (users.existsByEmailIgnoreCase(normalized)) throw new BusinessException(I18n.t("staff.users.err.emailTaken"));
         String password = tempPassword();
         User u = new User();
         u.setFullName(fullName.trim());
@@ -58,8 +59,8 @@ public class UserAdminService {
     @Transactional
     public User setActive(Long id, boolean active, String actorEmail) {
         User actor = requireAdmin(actorEmail);
-        User u = users.findById(id).orElseThrow(() -> new BusinessException("İstifadəçi tapılmadı"));
-        if (u.getId().equals(actor.getId()) && !active) throw new BusinessException("Özünüzü deaktiv edə bilməzsiniz");
+        User u = users.findById(id).orElseThrow(() -> new BusinessException(I18n.t("staff.users.err.notFound")));
+        if (u.getId().equals(actor.getId()) && !active) throw new BusinessException(I18n.t("staff.users.err.self"));
         if (u.isActive() == active) return u;
         u.setActive(active);
         audit.log(active ? "USER_ENABLED" : "USER_DISABLED", "User", u.getEmail(), u.getRole().name());
@@ -76,7 +77,7 @@ public class UserAdminService {
 
     private User requireAdmin(String email) {
         User u = users.findByEmailIgnoreCase(email).orElseThrow();
-        if (u.getRole() != Role.ADMIN) throw new BusinessException("Bu əməliyyat yalnız admin üçündür");
+        if (u.getRole() != Role.ADMIN) throw new BusinessException(I18n.t("staff.users.err.adminOnly"));
         return u;
     }
 

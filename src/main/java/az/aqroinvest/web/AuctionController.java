@@ -43,7 +43,8 @@ public class AuctionController {
         model.addAttribute("a", a);
         model.addAttribute("me", auctions.participantOf(a, auth == null ? null : auth.getName()).orElse(null));
         model.addAttribute("plot3d", viewer3d.of(a.getPlot(), false, auth));
-        model.addAttribute("legalNote", AuctionService.LEGAL_NOTE);
+        model.addAttribute("rules", AuctionService.displayRules(a));
+        model.addAttribute("legalNote", AuctionService.legalNote());
         return "herrac";
     }
 
@@ -56,7 +57,7 @@ public class AuctionController {
         model.addAttribute("participants", auctions.participantCount(a));
         model.addAttribute("staff", staff(auth));
         model.addAttribute("winnerNo", a.getWinner() == null ? null : auctions.participantOf(a, a.getWinner().getEmail()).map(AuctionParticipant::getNumber).orElse(null));
-        model.addAttribute("legalNote", AuctionService.LEGAL_NOTE);
+        model.addAttribute("legalNote", AuctionService.legalNote());
         return "herrac-protokol";
     }
 
@@ -64,7 +65,7 @@ public class AuctionController {
     public String register(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean rules, Authentication auth, RedirectAttributes ra) {
         try {
             var p = auctions.register(id, auth.getName(), rules);
-            ra.addFlashAttribute("success", "Qeydiyyat tamamlandı: siz İştirakçı #" + p.getNumber() + " oldunuz. İndi zaminatı təsdiqləyin.");
+            ra.addFlashAttribute("success", I18n.t("auction.flash.registered", String.valueOf(p.getNumber())));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -75,7 +76,7 @@ public class AuctionController {
     public String deposit(@PathVariable Long id, Authentication auth, RedirectAttributes ra) {
         try {
             auctions.confirmDeposit(id, auth.getName());
-            ra.addFlashAttribute("success", "Zaminat təsdiqləndi (simulyasiya). Təklif verə bilərsiniz.");
+            ra.addFlashAttribute("success", I18n.t("auction.flash.depositOk"));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }

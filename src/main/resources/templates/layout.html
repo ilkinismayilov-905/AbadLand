@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
-    <title th:text="${title} + ' · AgroInvest Qarabağ'">AgroInvest Qarabağ</title>
+    <title th:text="${title} + ' · ' + #{common.brand}"></title>
     <link rel="icon" th:href="@{/img/favicon.ico}" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/favicon-32.png}">
     <link rel="apple-touch-icon" th:href="@{/img/favicon-180.png}">
@@ -18,28 +18,33 @@
             earth: {50:'#faf6f0',100:'#f1e7d6',500:'#a0703c',700:'#6e4a25'} } } } };
     </script>
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <!-- Texts for static JS files (keys "js.*" in the current language): t('js.key', 'AZ fallback') -->
+    <script th:inline="javascript">
+        window.I18N = /*[[${@i18n.js()}]]*/ {};
+        window.t = function (k, fallback) { return window.I18N[k] || fallback || k; };
+    </script>
 </head>
 <body>
 
 <header th:fragment="header" id="site-header" class="site-header">
     <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <a th:href="@{/}" class="shrink-0 mr-2"><img th:src="@{/img/agroinvest-logo.png}" alt="AgroInvest Qarabağ" class="site-logo"></a>
+        <a th:href="@{/}" class="shrink-0 mr-2"><img th:src="@{/img/agroinvest-logo.png}" th:alt="#{common.brand}" class="site-logo"></a>
         <!-- < 900px: menu drops below the bar (order-last); bell and ☰ stay in the bar -->
         <div id="site-menu" class="hidden min-[900px]:flex order-last min-[900px]:order-none w-full min-[900px]:w-auto min-[900px]:flex-1 flex-col min-[900px]:flex-row min-[900px]:items-center gap-3 pb-3 min-[900px]:pb-0">
             <nav class="site-nav flex flex-col min-[900px]:flex-row min-[900px]:flex-wrap gap-1 text-sm" th:with="p=${currentPath ?: ''}">
-                <a th:href="@{/xerite}" th:classappend="${p.startsWith('/xerite')} ? 'active'">Xəritə</a>
-                <a th:href="@{/saheler}" th:classappend="${p.startsWith('/saheler')} ? 'active'">Sahələr</a>
-                <a th:href="@{/musabiqeler}" th:classappend="${p.startsWith('/musabiqeler')} ? 'active'">Müsabiqələr</a>
-                <a th:href="@{/uygunluq}" th:classappend="${p.startsWith('/uygunluq')} ? 'active'">Uyğunluq testi</a>
-                <a th:href="@{/herraclar}" th:classappend="${p.startsWith('/herraclar')} ? 'active'">Hərraclar</a>
+                <a th:href="@{/xerite}" th:classappend="${p.startsWith('/xerite')} ? 'active'" th:text="#{common.nav.map}"></a>
+                <a th:href="@{/saheler}" th:classappend="${p.startsWith('/saheler')} ? 'active'" th:text="#{common.nav.plots}"></a>
+                <a th:href="@{/musabiqeler}" th:classappend="${p.startsWith('/musabiqeler')} ? 'active'" th:text="#{common.nav.competitions}"></a>
+                <a th:href="@{/uygunluq}" th:classappend="${p.startsWith('/uygunluq')} ? 'active'" th:text="#{common.nav.quiz}"></a>
+                <a th:href="@{/herraclar}" th:classappend="${p.startsWith('/herraclar')} ? 'active'" th:text="#{common.nav.auctions}"></a>
                 <!-- "Pay layihələri" (/pay-layiheleri) comes back with Step 8 -->
-                <a sec:authorize="hasRole('INVESTOR')" th:href="@{/kabinet}" th:classappend="${p.startsWith('/kabinet')} ? 'active'" class="font-semibold">Kabinet</a>
-                <a sec:authorize="hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/idare}" th:classappend="${p.startsWith('/idare')} ? 'active'" class="font-semibold">İdarəetmə</a>
+                <a sec:authorize="hasRole('INVESTOR')" th:href="@{/kabinet}" th:classappend="${p.startsWith('/kabinet')} ? 'active'" class="font-semibold" th:text="#{common.nav.cabinet}"></a>
+                <a sec:authorize="hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/idare}" th:classappend="${p.startsWith('/idare')} ? 'active'" class="font-semibold" th:text="#{common.nav.admin}"></a>
             </nav>
             <div class="min-[900px]:ml-auto flex flex-wrap items-center gap-3 text-sm text-[#1F2933]">
                 <th:block sec:authorize="isAnonymous()">
-                    <a th:href="@{/giris}" class="btn-primary !min-h-[40px] !px-4">Daxil ol</a>
-                    <a th:href="@{/qeydiyyat}" class="hover:underline px-2 py-2">Qeydiyyat</a>
+                    <a th:href="@{/giris}" class="btn-primary !min-h-[40px] !px-4" th:text="#{common.nav.login}"></a>
+                    <a th:href="@{/qeydiyyat}" class="hover:underline px-2 py-2" th:text="#{common.nav.register}"></a>
                 </th:block>
                 <th:block sec:authorize="isAuthenticated()">
                     <span th:title="${#authentication.name}">
@@ -47,17 +52,21 @@
                         <span class="text-gray-500" th:text="'(' + ${@statusLabels.roleLabel(#authentication.authorities[0].authority)} + ')'"></span>
                     </span>
                     <form th:action="@{/cixis}" method="post">
-                        <button class="px-3 min-h-[40px] rounded-lg border border-[#DDE3DC] hover:bg-leaf-50">Çıxış</button>
+                        <button class="px-3 min-h-[40px] rounded-lg border border-[#DDE3DC] hover:bg-leaf-50" th:text="#{common.nav.logout}"></button>
                     </form>
                 </th:block>
             </div>
         </div>
         <div class="ml-auto min-[900px]:ml-0 flex items-center gap-1">
-            <a sec:authorize="isAuthenticated()" th:href="@{/bildirisler}" class="relative p-2 text-lg" title="Bildirişlər" aria-label="Bildirişlər">🔔
+            <nav class="lang-switch" aria-label="Dil / Language / Язык">
+                <a th:each="l : ${langUrls}" th:href="${l.value}" th:text="${#strings.toUpperCase(l.key)}"
+                   th:classappend="${l.key == @i18n.lang()} ? 'on'" th:attr="aria-current=${l.key == @i18n.lang()} ? 'true', hreflang=${l.key}, lang=${l.key}"></a>
+            </nav>
+            <a sec:authorize="isAuthenticated()" th:href="@{/bildirisler}" class="relative p-2 text-lg" th:title="#{common.nav.notifications}" th:attr="aria-label=#{common.nav.notifications}">🔔
                 <span th:if="${unreadCount > 0}" th:text="${unreadCount}"
                       class="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full px-1.5"></span>
             </a>
-            <button type="button" class="min-[900px]:hidden p-2 w-11 h-11 rounded-lg text-2xl leading-none text-[#1F2933] hover:bg-leaf-50" aria-label="Menyu"
+            <button type="button" class="min-[900px]:hidden p-2 w-11 h-11 rounded-lg text-2xl leading-none text-[#1F2933] hover:bg-leaf-50" th:attr="aria-label=#{common.nav.menu}"
                     aria-controls="site-menu" aria-expanded="false"
                     onclick="const m=document.getElementById('site-menu');m.classList.toggle('hidden');this.setAttribute('aria-expanded',!m.classList.contains('hidden'))">☰</button>
         </div>
@@ -80,86 +89,86 @@
 <div th:fragment="plotFilter(action, side)" class="space-y-3">
 <form th:action="@{${action}}" method="get" class="pf card p-4" th:classappend="${side} ? 'pf--side'" data-plot-filter
       th:with="adv=${filter.advancedCount()}, total=${adv + (filter.fruit != null and !filter.fruit.isEmpty() ? 1 : 0) + (filter.activity != null ? 1 : 0)}">
-    <label class="pf-search"><span class="field-label">Axtarış</span>
-        <input type="search" name="q" th:value="${filter.q}" class="field" placeholder="Ad, kod və ya kənd üzrə axtar" autocomplete="off"></label>
+    <label class="pf-search"><span class="field-label" th:text="#{common.filter.search}"></span>
+        <input type="search" name="q" th:value="${filter.q}" class="field" th:placeholder="#{common.filter.searchPlaceholder}" autocomplete="off"></label>
     <button type="button" class="pf-mobile btn-secondary self-end" data-pf-open aria-controls="pf-panel" aria-expanded="false">
-        ⚙ Filtrlər<span th:if="${total > 0}" class="pf-badge" th:text="${total}"></span></button>
+        ⚙ [[#{common.filter.filters}]]<span th:if="${total > 0}" class="pf-badge" th:text="${total}"></span></button>
 
     <div class="pf-backdrop" data-pf-close></div>
-    <div id="pf-panel" class="pf-panel" role="dialog" aria-label="Filtrlər">
+    <div id="pf-panel" class="pf-panel" role="dialog" th:attr="aria-label=#{common.filter.filters}">
         <div class="pf-mobile flex items-center justify-between pb-2">
-            <b class="text-lg">Filtrlər</b>
-            <button type="button" class="w-11 h-11 rounded-lg text-xl hover:bg-gray-100" data-pf-close aria-label="Bağla">✕</button>
+            <b class="text-lg" th:text="#{common.filter.filters}"></b>
+            <button type="button" class="w-11 h-11 rounded-lg text-xl hover:bg-gray-100" data-pf-close th:attr="aria-label=#{common.filter.close}">✕</button>
         </div>
-        <label><span class="field-label">🍎 Hansı meyvə üçün?</span>
+        <label><span class="field-label" th:text="#{common.filter.fruit}"></span>
             <select name="fruit" class="field pf-fruit">
-                <option value="">— hamısı —</option>
-                <option th:each="f : ${fruits}" th:value="${f.code}" th:text="${f.nameAz}" th:selected="${f.code == filter.fruit}"></option>
+                <option value="" th:text="#{common.filter.allFruits}"></option>
+                <option th:each="f : ${fruits}" th:value="${f.code}" th:text="${f.name}" th:selected="${f.code == filter.fruit}"></option>
             </select></label>
-        <label><span class="field-label">Sıralama</span>
+        <label><span class="field-label" th:text="#{common.filter.sort}"></span>
             <select name="sort" class="field">
-                <option value="">Kod üzrə</option>
-                <option value="deadline" th:selected="${filter.sort == 'deadline'}">Son tarix</option>
-                <option value="area-asc" th:selected="${filter.sort == 'area-asc'}">Sahə ↑</option>
-                <option value="area-desc" th:selected="${filter.sort == 'area-desc'}">Sahə ↓</option>
-                <option value="score" th:selected="${filter.sort == 'score'}">Uyğunluq</option>
+                <option value="" th:text="#{common.filter.sortCode}"></option>
+                <option value="deadline" th:selected="${filter.sort == 'deadline'}" th:text="#{common.filter.sortDeadline}"></option>
+                <option value="area-asc" th:selected="${filter.sort == 'area-asc'}" th:text="#{common.filter.sortAreaAsc}"></option>
+                <option value="area-desc" th:selected="${filter.sort == 'area-desc'}" th:text="#{common.filter.sortAreaDesc}"></option>
+                <option value="score" th:selected="${filter.sort == 'score'}" th:text="#{common.filter.sortScore}"></option>
             </select></label>
-        <div><span class="field-label">Görünüş</span>
-            <div class="pf-toggle" role="group" aria-label="Görünüş">
-                <a th:href="@{${cardsUrl}}" th:classappend="${action == '/saheler'} ? 'on'" th:attr="aria-current=${action == '/saheler'} ? 'page'">Kart</a>
-                <a th:href="@{${mapUrl}}" th:classappend="${action == '/xerite'} ? 'on'" th:attr="aria-current=${action == '/xerite'} ? 'page'">Xəritə</a>
+        <div><span class="field-label" th:text="#{common.filter.view}"></span>
+            <div class="pf-toggle" role="group" th:attr="aria-label=#{common.filter.view}">
+                <a th:href="@{${cardsUrl}}" th:classappend="${action == '/saheler'} ? 'on'" th:attr="aria-current=${action == '/saheler'} ? 'page'" th:text="#{common.filter.viewCards}"></a>
+                <a th:href="@{${mapUrl}}" th:classappend="${action == '/xerite'} ? 'on'" th:attr="aria-current=${action == '/xerite'} ? 'page'" th:text="#{common.filter.viewMap}"></a>
             </div></div>
 
         <fieldset class="pf-full">
-            <legend class="field-label">Fəaliyyət</legend>
+            <legend class="field-label" th:text="#{common.filter.activity}"></legend>
             <div class="flex flex-wrap gap-2">
-                <label class="chip"><input type="radio" name="activity" value="" class="sr-only" th:checked="${filter.activity == null}"><span>Hamısı</span></label>
+                <label class="chip"><input type="radio" name="activity" value="" class="sr-only" th:checked="${filter.activity == null}"><span th:text="#{common.filter.all}"></span></label>
                 <label th:each="x : ${activities}" class="chip"><input type="radio" name="activity" th:value="${x}" class="sr-only" th:checked="${x == filter.activity}">
                     <span th:text="${@statusLabels.label(x)}"></span></label>
             </div>
         </fieldset>
 
         <details class="pf-full pf-adv" th:open="${adv > 0}">
-            <summary>Ətraflı filtrlər <span th:if="${adv > 0}" class="pf-badge" th:text="${adv}"></span></summary>
+            <summary>[[#{common.filter.advanced}]] <span th:if="${adv > 0}" class="pf-badge" th:text="${adv}"></span></summary>
             <div class="pf-adv-grid">
-                <label><span class="field-label">Region</span>
+                <label><span class="field-label" th:text="#{common.filter.region}"></span>
                     <select name="region" class="field" data-pf-region>
-                        <option value="">Hamısı</option>
+                        <option value="" th:text="#{common.filter.all}"></option>
                         <option th:each="r : ${regions}" th:value="${r}" th:text="${@statusLabels.label(r)}" th:selected="${r == filter.region}"></option>
                     </select></label>
-                <label><span class="field-label">Rayon</span>
+                <label><span class="field-label" th:text="#{common.filter.district}"></span>
                     <select name="district" class="field" data-pf-district>
-                        <option value="">Hamısı</option>
+                        <option value="" th:text="#{common.filter.all}"></option>
                         <option th:each="d : ${districts}" th:value="${d}" th:text="${d}" th:selected="${d == filter.district}"
                                 th:attr="data-region=${districtRegions.get(d)}"></option>
                     </select></label>
-                <label><span class="field-label">Mina vəziyyəti</span>
+                <label><span class="field-label" th:text="#{common.filter.demining}"></span>
                     <select name="demining" class="field">
-                        <option value="">Hamısı</option>
+                        <option value="" th:text="#{common.filter.all}"></option>
                         <option th:each="d : ${deminings}" th:value="${d}" th:text="${@statusLabels.label(d)}" th:selected="${d == filter.demining}"></option>
                     </select></label>
-                <div><span class="field-label">Sahə (ha)</span>
+                <div><span class="field-label" th:text="#{common.filter.area}"></span>
                     <div class="field pf-range">
-                        <input name="minHa" type="number" min="0" step="any" th:value="${filter.minHa}" placeholder="min" aria-label="Minimum ha">
+                        <input name="minHa" type="number" min="0" step="any" th:value="${filter.minHa}" th:placeholder="#{common.filter.min}" th:attr="aria-label=#{common.filter.minHa}">
                         <span class="text-gray-400">–</span>
-                        <input name="maxHa" type="number" min="0" step="any" th:value="${filter.maxHa}" placeholder="maks" aria-label="Maksimum ha">
+                        <input name="maxHa" type="number" min="0" step="any" th:value="${filter.maxHa}" th:placeholder="#{common.filter.max}" th:attr="aria-label=#{common.filter.maxHa}">
                     </div></div>
                 <label class="pf-switch"><input type="checkbox" name="open" value="true" th:checked="${filter.open}">
-                    <span>Yalnız müsabiqədə olanlar</span></label>
+                    <span th:text="#{common.filter.openOnly}"></span></label>
             </div>
         </details>
 
         <div class="pf-mobile pf-actions">
-            <a th:href="@{${action}}" class="btn-secondary flex-1">Sıfırla</a>
-            <button class="btn-primary flex-1">Tətbiq et</button>
+            <a th:href="@{${action}}" class="btn-secondary flex-1" th:text="#{common.filter.reset}"></a>
+            <button class="btn-primary flex-1" th:text="#{common.filter.apply}"></button>
         </div>
-        <noscript><button class="btn-primary pf-full">Filtrlə</button></noscript>
+        <noscript><button class="btn-primary pf-full" th:text="#{common.filter.submit}"></button></noscript>
     </div>
 </form>
 <div th:unless="${activeChips.isEmpty()}" class="flex flex-wrap items-center gap-2 text-sm">
-    <a th:each="c : ${activeChips}" th:href="@{${c.removeUrl}}" class="active-chip" th:attr="aria-label=${c.label} + ' filtrini sil'">
+    <a th:each="c : ${activeChips}" th:href="@{${c.removeUrl}}" class="active-chip" th:attr="aria-label=#{common.filter.removeChip(${c.label})}">
         <span th:text="${c.label}"></span><span aria-hidden="true">×</span></a>
-    <a th:href="@{${clearUrl}}" class="text-[#2E6B3A] font-medium hover:underline px-1 py-2">Hamısını təmizlə</a>
+    <a th:href="@{${clearUrl}}" class="text-[#2E6B3A] font-medium hover:underline px-1 py-2" th:text="#{common.filter.clearAll}"></a>
 </div>
 </div>
 
@@ -167,7 +176,7 @@
 <img th:fragment="emptyIcon" th:src="@{/img/agroinvest-icon.png}" alt="" class="empty-icon">
 
 <!-- Centered logo above the login / register forms -->
-<a th:fragment="authLogo" th:href="@{/}" class="block mx-auto w-fit mb-6"><img th:src="@{/img/agroinvest-logo.png}" alt="AgroInvest Qarabağ" class="h-16 w-auto"></a>
+<a th:fragment="authLogo" th:href="@{/}" class="block mx-auto w-fit mb-6"><img th:src="@{/img/agroinvest-logo.png}" th:alt="#{common.brand}" class="h-16 w-auto"></a>
 
 <!-- 3D viewer scripts (passport, map only). Order matters: three.js before plot3d.js -->
 <th:block th:fragment="scripts3d">
@@ -179,7 +188,7 @@
 <span th:fragment="suitChips(list)" class="flex flex-wrap gap-1">
     <span th:each="s : ${list}" th:title="${s.reason}"
           th:class="'inline-block px-2 py-0.5 rounded text-xs font-medium ' + (${s.score >= 75} ? 'bg-green-100 text-green-800' : (${s.score >= 60} ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'))">
-        <span th:text="${s.crop.nameAz} + ' ' + ${s.score} + '%'"></span>
+        <span th:text="${s.crop.name} + ' ' + ${s.score} + '%'"></span>
         <span class="opacity-60" th:text="'· ' + ${@statusLabels.label(s.source)}"></span>
     </span>
 </span>
@@ -187,30 +196,30 @@
 <footer th:fragment="footer" class="mt-16 bg-[#1E4A28] text-sm text-white/80">
     <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div class="space-y-3">
-            <img th:src="@{/img/agroinvest-logo-white.png}" alt="AgroInvest Qarabağ" class="h-10 w-auto">
-            <p>Qarabağ və Şərqi Zəngəzurda kənd təsərrüfatına investisiya portalı — hakaton MVP.</p>
+            <img th:src="@{/img/agroinvest-logo-white.png}" th:alt="#{common.brand}" class="h-10 w-auto">
+            <p th:text="#{common.footer.about}"></p>
         </div>
-        <nav class="flex flex-col gap-2" aria-label="Portal">
-            <span class="font-semibold text-white">Portal</span>
-            <a th:href="@{/xerite}" class="hover:text-white">Xəritə</a>
-            <a th:href="@{/saheler}" class="hover:text-white">Sahələr</a>
-            <a th:href="@{/musabiqeler}" class="hover:text-white">Müsabiqələr</a>
-            <a th:href="@{/herraclar}" class="hover:text-white">Hərraclar</a>
+        <nav class="flex flex-col gap-2" th:attr="aria-label=#{common.footer.portal}">
+            <span class="font-semibold text-white" th:text="#{common.footer.portal}"></span>
+            <a th:href="@{/xerite}" class="hover:text-white" th:text="#{common.nav.map}"></a>
+            <a th:href="@{/saheler}" class="hover:text-white" th:text="#{common.nav.plots}"></a>
+            <a th:href="@{/musabiqeler}" class="hover:text-white" th:text="#{common.nav.competitions}"></a>
+            <a th:href="@{/herraclar}" class="hover:text-white" th:text="#{common.nav.auctions}"></a>
         </nav>
-        <nav class="flex flex-col gap-2" aria-label="İnvestor">
-            <span class="font-semibold text-white">İnvestor</span>
-            <a th:href="@{/uygunluq}" class="hover:text-white">Uyğunluq testi</a>
-            <a th:href="@{/qeydiyyat}" class="hover:text-white">Qeydiyyat</a>
+        <nav class="flex flex-col gap-2" th:attr="aria-label=#{common.footer.investor}">
+            <span class="font-semibold text-white" th:text="#{common.footer.investor}"></span>
+            <a th:href="@{/uygunluq}" class="hover:text-white" th:text="#{common.nav.quiz}"></a>
+            <a th:href="@{/qeydiyyat}" class="hover:text-white" th:text="#{common.nav.register}"></a>
             <a th:href="@{/swagger-ui.html}" class="hover:text-white">API (Swagger)</a>
         </nav>
         <div class="flex flex-col gap-2">
-            <span class="font-semibold text-white">Əlaqə</span>
-            <span>E-poçt: info@example.az (nümunə)</span>
-            <span>Telefon: +994 XX XXX XX XX (nümunə)</span>
+            <span class="font-semibold text-white" th:text="#{common.footer.contact}"></span>
+            <span th:text="#{common.footer.email}"></span>
+            <span th:text="#{common.footer.phone}"></span>
         </div>
     </div>
     <div class="border-t border-white/15">
-        <div class="max-w-7xl mx-auto px-4 py-4 text-white/70">AgroInvest Qarabağ · Bütün məlumatlar sınaq məlumatıdır.</div>
+        <div class="max-w-7xl mx-auto px-4 py-4 text-white/70" th:text="#{common.brand} + ' · ' + #{common.footer.disclaimer}"></div>
     </div>
     <!-- Dev only: auto-refresh after code changes (Spring DevTools LiveReload, spring-boot:run) -->
     <script th:if="${liveReload}">

@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="az" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout :: head('Hərraclar')}"></head>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(#{auction.list.title})}"></head>
 <body class="bg-gray-50 text-gray-900">
 <header th:replace="~{layout :: header}"></header>
 <div th:replace="~{layout :: flash}"></div>
 <main class="max-w-7xl mx-auto px-4 py-6 space-y-4">
     <div>
-        <h1 class="text-2xl font-bold">Açıq hərraclar</h1>
-        <p class="text-sm text-gray-600">Torpaq sahələrinin icarəsi və satışı üzrə şəffaf açıq artırma: vaxt bitəndə ən yüksək təklif qalib gəlir.</p>
+        <h1 class="text-2xl font-bold" th:text="#{auction.list.heading}"></h1>
+        <p class="text-sm text-gray-600" th:text="#{auction.list.intro}"></p>
     </div>
     <form method="get" class="flex flex-wrap gap-2 text-sm items-end">
-        <label>Status <select name="status" class="block border rounded px-2 py-1.5">
-            <option value="">Hamısı</option>
+        <label>[[#{auction.list.status}]] <select name="status" class="block border rounded px-2 py-1.5">
+            <option value="" th:text="#{auction.list.all}"></option>
             <option th:each="s : ${statuses}" th:value="${s}" th:text="${@statusLabels.label(s)}" th:selected="${s == status}"></option></select></label>
-        <label>Əqd növü <select name="dealType" class="block border rounded px-2 py-1.5">
-            <option value="">Hamısı</option>
+        <label>[[#{auction.list.dealType}]] <select name="dealType" class="block border rounded px-2 py-1.5">
+            <option value="" th:text="#{auction.list.all}"></option>
             <option th:each="d : ${dealTypes}" th:value="${d}" th:text="${@statusLabels.label(d)}" th:selected="${d == dealType}"></option></select></label>
-        <button class="px-4 py-1.5 rounded bg-leaf-600 text-white">Filtrlə</button>
+        <button class="px-4 py-1.5 rounded bg-leaf-600 text-white" th:text="#{auction.list.filter}"></button>
     </form>
-    <div th:if="${auctions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p>Filtrə uyğun hərrac yoxdur.</p></div>
+    <div th:if="${auctions.isEmpty()}" class="bg-white rounded-lg shadow p-6 text-gray-600 text-center"><img th:replace="~{layout :: emptyIcon}"><p th:text="#{auction.list.empty}"></p></div>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         <a th:each="a : ${auctions}" th:href="@{/herraclar/{id}(id=${a.id})}" class="bg-white rounded-lg shadow p-4 hover:ring-2 hover:ring-leaf-500 flex flex-col gap-2">
             <div class="flex items-center gap-2">
@@ -27,13 +27,13 @@
                 <span class="ml-auto" th:classappend="${@statusLabels.badge(a.status)}" th:text="${@statusLabels.label(a.status)}"></span>
             </div>
             <div class="font-semibold" th:text="${a.plot.code} + ' — ' + ${a.plot.name}"></div>
-            <div class="text-sm text-gray-600" th:text="${a.plot.district} + ' · ' + ${@fmt.dec(a.plot.areaHa)} + ' ha'"></div>
-            <div class="text-sm">Başlanğıc: <b th:text="${@fmt.money(a.startPrice)}"></b>
-                <span th:if="${a.dealType.name() == 'LEASE'}" class="text-gray-500">/il</span></div>
-            <div th:if="${a.currentPrice != null}" class="text-sm">Cari: <b class="text-leaf-700" th:text="${@fmt.money(a.currentPrice)}"></b>
+            <div class="text-sm text-gray-600" th:text="${a.plot.district} + ' · ' + #{auction.common.areaHa(${@fmt.dec(a.plot.areaHa)})}"></div>
+            <div class="text-sm">[[#{auction.list.start}]] <b th:text="${@fmt.money(a.startPrice)}"></b>
+                <span th:if="${a.dealType.name() == 'LEASE'}" class="text-gray-500" th:text="#{auction.list.perYear}"></span></div>
+            <div th:if="${a.currentPrice != null}" class="text-sm">[[#{auction.list.current}]] <b class="text-leaf-700" th:text="${@fmt.money(a.currentPrice)}"></b>
                 <span th:if="${a.upliftPct() != null}" class="text-gray-500" th:text="'(+' + ${@fmt.dec(a.upliftPct())} + '%)'"></span></div>
             <div class="text-xs text-gray-500 mt-auto pt-2 border-t"
-                 th:text="${a.status.name() == 'SCHEDULED'} ? 'Başlayır: ' + ${@fmt.dateTime(a.startsAt)} : 'Bitir / bitib: ' + ${@fmt.dateTime(a.endsAt)}"></div>
+                 th:text="${a.status.name() == 'SCHEDULED'} ? #{auction.list.startsAt(${@fmt.dateTime(a.startsAt)})} : #{auction.list.endsAt(${@fmt.dateTime(a.endsAt)})}"></div>
         </a>
     </div>
 </main>

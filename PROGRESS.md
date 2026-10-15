@@ -96,3 +96,8 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - Multi-stage `Dockerfile` (maven:3.9-eclipse-temurin-21 → eclipse-temurin:21-jre, non-root `app`, `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75`), `.dockerignore`, `server.port=${PORT:8080}`. Docker stays optional for local runs.
 - Verified locally: `docker run --memory=512m -e PORT=10000` → Tomcat on 10000, all main pages 200, max heap 384 MB, ~400 MiB used after start. README "Deploy (Render)" added.
 - Memory tuning: `-XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k`, Tomcat `threads.max=20`, `accept-count=50`. In-container walk (`--memory=512m`, PORT=10000): Elvin login → FZL-001 passport → AI (fake key → 401 handled, satellite image fetched) → 3D → application QAR-2026-000008 → operator review → commission approve (EKTİS ref). docker stats: 377 MiB after start → 412 MiB (80 %) after the walk; cgroup peak 419 MiB, heap max 308 MB.
+
+### Languages az / en / ru — 2026-10-15
+- `I18n` (static `t()`, `stored()`/`render()` for notifications, `js()` dictionary for static JS), `WebConfig` (MessageSource from `I18n.BASENAMES`, `lang` cookie, `?lang=`), header switcher AZ | EN | RU, `<html lang>` per language. Enum labels + crop names in `i18n/enums*`; pages in `i18n/{common,plots,apply,staff,auction}*` (~1 000 keys × 3). Notifications stored as key + args (crop names via `I18n.keyArg`).
+- Kept Azerbaijani on purpose: seed data, user text, audit details, EKTİS payloads, AI analysis text, Swagger annotations. CLAUDE.md rule 3 and SPEC "Languages" updated.
+- Tests 56 green (+`I18nTest`). Crawled every page as anon/investor/farm owner/operator/commission/admin in en+ru: no missing keys, no 500; 375 px sweep in ru clean (passport columns got `min-w-0`).

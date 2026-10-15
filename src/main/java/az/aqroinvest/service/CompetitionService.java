@@ -4,6 +4,7 @@ import az.aqroinvest.domain.*;
 import az.aqroinvest.repo.CompetitionRepository;
 import az.aqroinvest.repo.PlotRepository;
 import az.aqroinvest.repo.UserRepository;
+import az.aqroinvest.web.I18n;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -39,11 +40,11 @@ public class CompetitionService {
     public Map<String, String> check(NewCompetition n) {
         Map<String, String> errors = new LinkedHashMap<>();
         if (n.deadline() != null && !n.deadline().isAfter(LocalDate.now(BAKU)))
-            errors.put("deadline", "Son tarix gələcəkdə olmalıdır");
-        if (n.plotIds() == null || n.plotIds().isEmpty()) errors.put("plotIds", "Ən azı bir sahə seçin");
+            errors.put("deadline", I18n.t("staff.comp.deadlineFuture"));
+        if (n.plotIds() == null || n.plotIds().isEmpty()) errors.put("plotIds", I18n.t("staff.comp.plotRequired"));
         else {
             Set<Long> free = new HashSet<>(freePlots().stream().map(Plot::getId).toList());
-            if (!free.containsAll(n.plotIds())) errors.put("plotIds", "Seçilən sahələrdən biri artıq dərc edilmiş müsabiqədədir");
+            if (!free.containsAll(n.plotIds())) errors.put("plotIds", I18n.t("staff.comp.plotTaken"));
         }
         return errors;
     }
@@ -64,7 +65,7 @@ public class CompetitionService {
         c.getPlots().addAll(plots.findAllById(n.plotIds()));
         competitions.save(c);
         audit.log("COMPETITION_CREATE", "Competition", c.getCode(), c.getTitle());
-        notifications.notifyRole(Role.COMMISSION, "Təsdiq gözləyən müsabiqə: " + c.getCode() + " — " + c.getTitle(), "/idare/musabiqeler");
+        notifications.notifyRole(Role.COMMISSION, I18n.stored("staff.notify.compPending", c.getCode(), c.getTitle()), "/idare/musabiqeler");
         return c;
     }
 
@@ -73,23 +74,23 @@ public class CompetitionService {
         User actor = actor(actorEmail, Role.COMMISSION);
         Competition c = pending(id);
         if (!c.getDeadline().isAfter(LocalDate.now(BAKU).minusDays(1)))
-            throw new BusinessException("Son tarix keçib — müsabiqəni dərc etmək olmaz");
+            throw new BusinessException(I18n.t("staff.comp.deadlinePassed"));
         c.setStatus(CompetitionStatus.PUBLISHED);
         c.setApprovedBy(actor);
         audit.log("COMPETITION_APPROVE", "Competition", c.getCode(), null);
-        notifications.notify(c.getCreatedBy(), "Müsabiqə təsdiqləndi və dərc edildi: " + c.getCode(), "/idare/musabiqeler");
+        notifications.notify(c.getCreatedBy(), I18n.stored("staff.notify.compApproved", c.getCode()), "/idare/musabiqeler");
     }
 
     @Transactional
     public void reject(Long id, String actorEmail, String comment) {
         User actor = actor(actorEmail, Role.COMMISSION);
         Competition c = pending(id);
-        if (comment == null || comment.isBlank()) throw new BusinessException("Rədd etmənin səbəbini yazın");
+        if (comment == null || comment.isBlank()) throw new BusinessException(I18n.t("staff.comp.rejectReasonRequired"));
         c.setStatus(CompetitionStatus.REJECTED);
         c.setApprovedBy(actor);
         c.setComment(comment.trim());
         audit.log("COMPETITION_REJECT", "Competition", c.getCode(), comment.trim());
-        notifications.notify(c.getCreatedBy(), "Müsabiqə rədd edildi: " + c.getCode() + " — " + comment.trim(), "/idare/musabiqeler");
+        notifications.notify(c.getCreatedBy(), I18n.stored("staff.notify.compRejected", c.getCode(), comment.trim()), "/idare/musabiqeler");
     }
 
     synchronized String nextCode(int year) {
@@ -100,14 +101,14 @@ public class CompetitionService {
     }
 
     private Competition pending(Long id) {
-        Competition c = competitions.findById(id).orElseThrow(() -> new BusinessException("Müsabiqə tapılmadı"));
-        if (c.getStatus() != CompetitionStatus.PENDING_APPROVAL) throw new BusinessException("Müsabiqə təsdiq gözləmir");
+        Competition c = competitions.findById(id).orElseThrow(() -> new BusinessException(I18n.t("staff.comp.notFound")));
+        if (c.getStatus() != CompetitionStatus.PENDING_APPROVAL) throw new BusinessException(I18n.t("staff.comp.notPending"));
         return c;
     }
 
     private User actor(String email, Role role) {
         User u = users.findByEmailIgnoreCase(email).orElseThrow();
-        if (u.getRole() != role && u.getRole() != Role.ADMIN) throw new BusinessException("Bu əməliyyat üçün icazəniz yoxdur");
+        if (u.getRole() != role && u.getRole() != Role.ADMIN) throw new BusinessException(I18n.t("staff.comp.forbidden"));
         return u;
     }
 }

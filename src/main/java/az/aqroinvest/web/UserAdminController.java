@@ -53,7 +53,7 @@ public class UserAdminController {
     public String toggle(@PathVariable Long id, @RequestParam boolean active, Authentication auth, RedirectAttributes ra) {
         try {
             var u = service.setActive(id, active, auth.getName());
-            ra.addFlashAttribute("success", u.getEmail() + (active ? " aktivləşdirildi." : " deaktiv edildi və sistemdən çıxarıldı."));
+            ra.addFlashAttribute("success", I18n.t(active ? "staff.flash.userEnabled" : "staff.flash.userDisabled", u.getEmail()));
         } catch (BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }

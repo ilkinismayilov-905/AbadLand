@@ -18,9 +18,7 @@ public record AiView(String summary, String landCover, String terrain, String wa
 
     public String confidenceLabel() {
         return confidence == null ? "—" : switch (confidence) {
-            case "HIGH" -> "Yüksək";
-            case "MEDIUM" -> "Orta";
-            case "LOW" -> "Aşağı";
+            case "HIGH", "MEDIUM", "LOW" -> az.aqroinvest.web.I18n.t("plots.ai.confidence." + confidence);
             default -> confidence;
         };
     }

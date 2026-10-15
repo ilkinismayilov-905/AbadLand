@@ -25,7 +25,7 @@ public class Viewer3dData {
         m.put("id", p.getId());
         m.put("code", p.getCode());
         m.put("name", p.getName());
-        m.put("subtitle", p.getDistrict() + " · " + fmt.dec(p.getAreaHa()) + " ha · " + labels.label(p.getPurpose()));
+        m.put("subtitle", p.getDistrict() + " · " + I18n.t("plots.ha", fmt.dec(p.getAreaHa())) + " · " + labels.label(p.getPurpose()));
         m.put("purpose", p.getPurpose().name());
         m.put("geoJson", p.getGeoJson());
         m.put("applyUrl", openCompetition && !staff ? "/kabinet/muraciet/yeni?plotId=" + p.getId() : null);

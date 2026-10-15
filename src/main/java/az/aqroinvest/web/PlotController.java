@@ -121,7 +121,7 @@ public class PlotController {
         Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         try {
             aiService.analyze(plot, auth.getName(), yeniden != null);
-            ra.addFlashAttribute("success", "AI analizi hazırdır.");
+            ra.addFlashAttribute("success", I18n.t("plots.ai.ready"));
         } catch (az.aqroinvest.service.BusinessException e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -134,22 +134,22 @@ public class PlotController {
         List<PlotCard> cards = list.stream().map(plotService::card).toList();
         List<Row> rows = new ArrayList<>();
         if (!cards.isEmpty()) {
-            rows.add(row("Rayon", cards, c -> c.plot().getDistrict() + " (" + c.plot().getVillage() + ")", null, false));
-            rows.add(row("Sahə, ha", cards, c -> c.plot().getAreaHa(), c -> c.plot().getAreaHa(), true));
-            rows.add(row("Təyinat", cards, c -> c.plot().getPurpose(), null, false));
-            rows.add(row("Minalardan təmizlənmə", cards, c -> c.plot().getDemining(),
+            rows.add(row(I18n.t("plots.compare.district"), cards, c -> c.plot().getDistrict() + " (" + c.plot().getVillage() + ")", null, false));
+            rows.add(row(I18n.t("plots.compare.area"), cards, c -> c.plot().getAreaHa(), c -> c.plot().getAreaHa(), true));
+            rows.add(row(I18n.t("plots.compare.purpose"), cards, c -> c.plot().getPurpose(), null, false));
+            rows.add(row(I18n.t("plots.compare.demining"), cards, c -> c.plot().getDemining(),
                     c -> (double) -c.plot().getDemining().ordinal(), true));
-            rows.add(row("Su mənbəyi", cards, c -> c.plot().getWaterSource(), null, false));
-            rows.add(row("Suvarma", cards, c -> c.plot().isIrrigation() ? "Var" : "Yoxdur", c -> c.plot().isIrrigation() ? 1.0 : 0.0, true));
-            rows.add(row("Torpaq", cards, c -> c.plot().getSoilType(), null, false));
-            rows.add(row("Yola məsafə, km", cards, c -> c.plot().getRoadKm(), c -> c.plot().getRoadKm(), false));
-            rows.add(row("Elektrik", cards, c -> c.plot().isElectricity() ? "Var" : "Yoxdur", c -> c.plot().isElectricity() ? 1.0 : 0.0, true));
-            rows.add(row("İcarə haqqı, AZN/ha/il", cards, c -> c.plot().getFeePerHa(), c -> (double) c.plot().getFeePerHa(), false));
-            rows.add(row("İcarə müddəti, il", cards, c -> c.plot().getLeaseYears(), null, false));
-            rows.add(row("Ən uyğun bitki", cards, c -> c.suitability().isEmpty() ? "—"
-                            : c.suitability().get(0).crop().getNameAz() + " " + c.suitability().get(0).score() + "%",
+            rows.add(row(I18n.t("plots.compare.waterSource"), cards, c -> c.plot().getWaterSource(), null, false));
+            rows.add(row(I18n.t("plots.compare.irrigation"), cards, c -> I18n.t(c.plot().isIrrigation() ? "plots.passport.yes" : "plots.passport.no"), c -> c.plot().isIrrigation() ? 1.0 : 0.0, true));
+            rows.add(row(I18n.t("plots.passport.soil"), cards, c -> c.plot().getSoilType(), null, false));
+            rows.add(row(I18n.t("plots.compare.roadKm"), cards, c -> c.plot().getRoadKm(), c -> c.plot().getRoadKm(), false));
+            rows.add(row(I18n.t("plots.passport.electricity"), cards, c -> I18n.t(c.plot().isElectricity() ? "plots.passport.yes" : "plots.passport.no"), c -> c.plot().isElectricity() ? 1.0 : 0.0, true));
+            rows.add(row(I18n.t("plots.compare.fee"), cards, c -> c.plot().getFeePerHa(), c -> (double) c.plot().getFeePerHa(), false));
+            rows.add(row(I18n.t("plots.compare.leaseYears"), cards, c -> c.plot().getLeaseYears(), null, false));
+            rows.add(row(I18n.t("plots.compare.bestCrop"), cards, c -> c.suitability().isEmpty() ? "—"
+                            : c.suitability().get(0).crop().getName() + " " + c.suitability().get(0).score() + "%",
                     c -> c.suitability().isEmpty() ? 0.0 : c.suitability().get(0).score(), true));
-            rows.add(row("Müsabiqə", cards, c -> c.competition() == null ? "—" : c.competition().getCode() + " (" + c.daysLeft() + " gün)", null, false));
+            rows.add(row(I18n.t("plots.passport.competition"), cards, c -> c.competition() == null ? "—" : I18n.t("plots.compare.competitionDays", c.competition().getCode(), String.valueOf(c.daysLeft())), null, false));
         }
         model.addAttribute("cards", cards);
         model.addAttribute("rows", rows);
@@ -203,15 +203,15 @@ public class PlotController {
         List<Chip> chips = new java.util.ArrayList<>();
         if (notBlank(f.q())) chips.add(new Chip("“" + f.q().strip() + "”", without.apply(new String[]{"q"})));
         if (notBlank(f.fruit())) fruits.stream().filter(c -> c.getCode().equals(f.fruit())).findFirst()
-                .ifPresent(c -> chips.add(new Chip(c.getNameAz(), without.apply(new String[]{"fruit"}))));
+                .ifPresent(c -> chips.add(new Chip(c.getName(), without.apply(new String[]{"fruit"}))));
         if (f.activity() != null) chips.add(new Chip(labels.label(f.activity()), without.apply(new String[]{"activity"})));
         if (f.region() != null) chips.add(new Chip(labels.label(f.region()), without.apply(new String[]{"region"})));
         if (notBlank(f.district())) chips.add(new Chip(f.district(), without.apply(new String[]{"district"})));
         if (f.demining() != null) chips.add(new Chip(labels.label(f.demining()), without.apply(new String[]{"demining"})));
         if (f.minHa() != null || f.maxHa() != null)
-            chips.add(new Chip((f.minHa() == null ? "0" : fmt.dec(f.minHa())) + "–" + (f.maxHa() == null ? "∞" : fmt.dec(f.maxHa())) + " ha",
+            chips.add(new Chip(I18n.t("plots.ha", (f.minHa() == null ? "0" : fmt.dec(f.minHa())) + "–" + (f.maxHa() == null ? "∞" : fmt.dec(f.maxHa()))),
                     without.apply(new String[]{"minHa", "maxHa"})));
-        if (Boolean.TRUE.equals(f.open())) chips.add(new Chip("Yalnız müsabiqədə olanlar", without.apply(new String[]{"open"})));
+        if (Boolean.TRUE.equals(f.open())) chips.add(new Chip(I18n.t("plots.filter.openOnly"), without.apply(new String[]{"open"})));
         model.addAttribute("activeChips", chips);
         model.addAttribute("clearUrl", path);
     }
