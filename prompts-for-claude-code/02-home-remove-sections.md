@@ -1,0 +1,1 @@
+Home page (/): remove completely the sections "Müraciəti tezliklə bitən sahələr", "Regionlar üzrə" and "Aktiv hərraclar". Delete their markup, CSS used only by them, and the controller/DashboardService queries only they used (keep stats strip counts). Re-check spacing at 375 / 768 / 1280 px. Update SPEC/PROGRESS if they list these sections. Do not change other pages.

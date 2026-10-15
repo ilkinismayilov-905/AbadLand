@@ -1,0 +1,21 @@
+Sahə: {code} — {name}
+Rayon: {district} ({economicRegion}), kənd: {village}
+Koordinat (mərkəz): {lat}, {lng}
+Sahə: {areaHa} ha, təyinat: {purpose}
+Minadan təmizlənmə statusu (rəsmi məlumat): {deminingStatus}
+Su mənbəyi: {waterSource}, suvarma: {irrigation}
+Torpaq növü (operator məlumatı): {soilType}
+Yola məsafə: {roadKm} km, elektrik: {electricity}
+
+İqlim (Open-Meteo, {climateYear}):
+- hündürlük: {elevationM} m
+- orta illik temperatur: {meanTempC} °C
+- mütləq minimum: {absMinTempC} °C
+- şaxtalı günlər: {frostDays}
+- illik yağıntı: {precipMm} mm
+(Məlumat yoxdursa "məlum deyil" yazılır.)
+
+İcazə verilən bitkilər (kod | ad | şaxtaya davamlılıq °C | maks. hündürlük m | su tələbi):
+{cropTable}
+
+Şəkildə sarı xətt sahənin sərhədidir. Yalnız JSON cavab ver.

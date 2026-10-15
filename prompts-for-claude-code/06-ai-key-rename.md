@@ -1,0 +1,1 @@
+Rename the AI key env var from ANTHROPIC_API_KEY to AGROINVEST_AI_KEY everywhere: application.properties (ai.api-key=${AGROINVEST_AI_KEY:}), ClaudeAiClient, .env.example, README (local + Render), CLAUDE.md, docs/SPEC.md. Blank key → AI button disabled. Never log the key. Do not start the app yourself after this change.

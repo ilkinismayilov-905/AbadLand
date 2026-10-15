@@ -1,0 +1,3 @@
+Prepare for Render: multi-stage Dockerfile (maven + JDK 21 → eclipse-temurin:21-jre, non-root user), server.port=${PORT:8080}, .dockerignore (target, uploads, .env, .git, docs, steps), README "Deploy (Render)".
+Memory for a 512 MB instance: JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k"; server.tomcat.threads.max=20; server.tomcat.accept-count=50.
+Rebuild, run with --memory=512m -e PORT=10000 on host port 8081 and test inside the container: login as elvin@demo.az, FZL-001 passport, one AI analysis, 3D, submit an application, operator + komissiya approve it. Report docker stats after.
