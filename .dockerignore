@@ -1,0 +1,12 @@
+target
+uploads
+.env
+.git
+# Not needed in the image (keeps the build context small)
+.idea
+.vscode
+.playwright-cli
+graft
+docs
+steps
+*.log

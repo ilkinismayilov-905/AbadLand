@@ -91,3 +91,7 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - Home: sections from one `DashboardService.home()` call (hero with a sample plot, stats, how it works, features, sources, potential partners with the "rəsmi tərəfdaşlıq deyil" note, FAQ, CTA); richer footer. Later removed: closing-soon plots, region overview, auction teaser (alternating white/gray bands now).
 - Catalog/map filter: one `layout :: plotFilter(action, side)` component — search `q`, fruit, sort, Kart/Xəritə toggle, activity chips, "Ətraflı filtrlər" with badge, removable active chips, auto-apply (`filters.js`), mobile bottom sheet; `/xerite` uses the sidebar version. Header collapses below 900 px, shows the user's name; shared `.card/.field/.btn-*` scale (14 px radius, 44 px controls).
 - Tests: OTHER/custom budget/custom range + page tests → 54 green. Checked 375/768/1280 px: no horizontal scroll; demo answers still put FZL-001 first.
+
+### Deploy (Render) — 2026-10-15
+- Multi-stage `Dockerfile` (maven:3.9-eclipse-temurin-21 → eclipse-temurin:21-jre, non-root `app`, `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75`), `.dockerignore`, `server.port=${PORT:8080}`. Docker stays optional for local runs.
+- Verified locally: `docker run --memory=512m -e PORT=10000` → Tomcat on 10000, all main pages 200, max heap 384 MB, ~400 MiB used after start. README "Deploy (Render)" added.

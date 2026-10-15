@@ -59,6 +59,34 @@ export AI_MODEL=claude-sonnet-5-5
 
 **Demodan əvvəl:** tətbiqi yenidən başladın → admin: Dashboard → "İqlim məlumatını yenilə" → LCN-001 üçün AI analizini bir dəfə işə salın (keşə düşür).
 
+## Deploy (Render)
+
+Kök qovluqdakı `Dockerfile` iki mərhələlidir: Maven + JDK 21 ilə jar yığır, sonra `eclipse-temurin:21-jre` üzərində işə salır (root olmayan istifadəçi ilə). Lokal işə salmaq üçün Docker **lazım deyil** — bu yalnız deploy üçündür.
+
+1. Render → **New → Web Service** → GitHub reposunu seçin → **Runtime: Docker** (Dockerfile avtomatik tapılır).
+2. **Instance:** 512 MB kifayətdir — `JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"` heap-i konteyner limitinin 75%-i ilə məhdudlaşdırır.
+3. **Environment** (dəyərləri yalnız Render panelində yazın, fayla yox):
+
+   | Dəyişən | Qeyd |
+   |---|---|
+   | `ANTHROPIC_API_KEY` | AI analizi üçün (olmasa AI düyməsi deaktivdir) |
+   | `AI_MODEL` | demo üçün `claude-sonnet-5-5` |
+   | `APP_EXTERNALAPIKEY` | `/api/v1/external/**` üçün güclü təsadüfi dəyər (`change-me` qalmasın) |
+
+   `PORT`-u Render özü verir; tətbiq `server.port=${PORT:8080}` ilə onu oxuyur.
+4. **Health check path:** `/`.
+
+Qeydlər:
+- Baza H2 in-memory-dir: hər restart və ya deploy = təmiz demo məlumatı. Pulsuz instans boş qalanda yatır, oyananda (~1 dəq) demo sıfırlanır.
+- `uploads/` konteynerin içindədir və restartda silinir (demo üçün normaldır; daimi saxlama üçün Render Disk və ya obyekt anbarı lazımdır).
+
+Lokal yoxlama:
+
+```bash
+docker build -t agroinvest .
+docker run -p 8080:8080 -e ANTHROPIC_API_KEY=test agroinvest   # http://localhost:8080
+```
+
 ## Səhifələr
 
 | URL | Kim | Nə |
