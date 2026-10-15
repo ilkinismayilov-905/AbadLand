@@ -125,3 +125,13 @@ body { min-height: 100vh; }
 .lang-switch a { padding: .35rem .55rem; color: #4b5563; min-width: 2.1rem; text-align: center; }
 .lang-switch a:hover { background: #f1f8ee; color: #1E4A28; }
 .lang-switch a.on { background: #2E6B3A; color: #fff; }
+
+/* Home hero photo (LCP image): 4:3 card, soft shadow, bottom gradient so the floating plot card stands out */
+.hero-photo { position: relative; aspect-ratio: 4 / 3; border-radius: 24px; overflow: hidden; background: #cfe5c4;
+  box-shadow: 0 18px 40px -14px rgba(31, 41, 51, .35); }
+.hero-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hero-photo::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, transparent 55%, rgba(0, 0, 0, .25)); }
+/* Floating sample plot card: centred over the bottom edge on phones, bottom-right corner from 768 px */
+.hero-float { position: absolute; left: 50%; bottom: -3.5rem; transform: translateX(-50%); width: calc(100% - 2rem); max-width: 20rem; }
+@media (min-width: 768px) { .hero-float { left: auto; right: -12px; bottom: -2rem; transform: none; width: 18rem; } }

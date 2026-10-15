@@ -18,9 +18,17 @@
                     <a th:href="@{/xerite}" class="btn-secondary text-base px-6" th:text="#{common.home.viewMap}"></a>
                 </div>
             </div>
-            <!-- Visual: field rows + a real sample plot card -->
-            <div class="relative mx-auto w-full max-w-md" aria-hidden="true">
-                <svg viewBox="0 0 400 300" class="w-full rounded-2xl shadow-lg">
+            <!-- Visual: hero photo (LCP, no lazy loading) or the SVG fallback + a real sample plot card -->
+            <div class="relative mx-auto w-full max-w-xl lg:max-w-none mb-16 lg:mb-0">
+                <div th:if="${heroPhoto}" class="hero-photo">
+                    <picture>
+                        <source type="image/webp" th:srcset="@{/img/hero-800.webp} + ' 800w, ' + @{/img/hero-1200.webp} + ' 1200w, ' + @{/img/hero-1448.webp} + ' 1448w'"
+                                sizes="(min-width: 1280px) 600px, (min-width: 1024px) 50vw, 100vw">
+                        <img th:src="@{/img/hero-1200.jpg}" width="1448" height="1086" fetchpriority="high" decoding="async"
+                             th:alt="#{common.home.heroAlt}">
+                    </picture>
+                </div>
+                <svg th:unless="${heroPhoto}" viewBox="0 0 400 300" class="w-full rounded-2xl shadow-lg" aria-hidden="true">
                     <rect width="400" height="300" fill="#cfe5c4"/>
                     <path d="M0 210 Q100 170 200 190 T400 160 V300 H0Z" fill="#a9cf98"/>
                     <path d="M0 240 Q120 205 220 225 T400 200 V300 H0Z" fill="#8bbd76"/>
@@ -30,8 +38,8 @@
                     <path d="M0 140 Q80 80 160 120 T300 90 T400 110 V170 Q300 150 200 175 T0 190Z" fill="#b8a37f" opacity=".55"/>
                     <circle cx="330" cy="55" r="26" fill="#f6d77a"/>
                 </svg>
-                <th:block th:if="${h.sample != null}"><div th:with="c=${h.sample}"
-                     class="card absolute -bottom-6 left-4 right-4 sm:left-auto sm:right-[-12px] sm:w-72 p-4">
+                <th:block th:if="${h.sample != null}"><div th:with="c=${h.sample}" class="hero-float">
+                <div class="card p-4">
                     <div class="flex items-center justify-between gap-2">
                         <div class="min-w-0">
                             <div class="text-xs text-gray-500" th:text="${c.plot.code} + ' · ' + ${c.plot.district}"></div>
@@ -41,6 +49,8 @@
                             <b th:text="${c.suitability[0].score} + '%'"></b><span class="text-[10px] -mt-1" th:text="#{common.home.suitable}"></span></div>
                     </div>
                     <div class="mt-2"><span th:replace="~{layout :: suitChips(${c.top3()})}"></span></div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 text-center md:text-right" th:text="#{common.home.sampleImage}"></p>
                 </div></th:block>
             </div>
         </div>
