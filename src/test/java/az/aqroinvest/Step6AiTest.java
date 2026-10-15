@@ -95,7 +95,7 @@ class Step6AiTest {
                 containsString("Alma 90%"), containsString("· AI"), containsString("Dağ yamacında"), containsString("✗ Nar — Soyuq qış"),
                 containsString("fake-model"), containsString("AI analizinə bax (keşdə)"),
                 containsString("Yüksək"), containsString("Yazda gec şaxta"), containsString("Mütləq minimum aşağıdır"),
-                containsString("Sahədə kol örtüyü var"), containsString("Yerində yoxlanılmalıdır"), containsString("ANAMA sertifikatı"),
+                containsString("Sahədə kol örtüyü var"), containsString("Sahədə yoxlayın"), containsString("ANAMA sertifikatı"),
                 containsString("750 000 AZN")))); // ROI pre-selects AI top crop: 30 ha × 25 000 (Alma)
 
         // FZL-001 keeps the sample label and its demo default crop (Fındıq)

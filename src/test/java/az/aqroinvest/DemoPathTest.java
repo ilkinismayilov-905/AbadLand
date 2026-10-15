@@ -35,8 +35,11 @@ class DemoPathTest {
                 public boolean isConfigured() { return true; }
                 public String model() { return "fake"; }
                 public String analyze(byte[] jpeg, String text) {
-                    return "{\"summary\":\"Dağ vadisi\",\"risks\":[\"Şaxta\"],\"suitableCrops\":[{\"code\":\"WALNUT\",\"name\":\"Qoz\",\"score\":88,\"reason\":\"Hündürlük\"}],"
-                            + "\"notRecommended\":[],\"confidence\":\"MEDIUM\",\"dataGaps\":[]}";
+                    return """
+                            {"summary":"Dağ vadisi","landCover":"Ot","terrain":"Yamac","waterSigns":"Çay","observations":[],
+                             "risks":[{"title":"Şaxta","level":"MEDIUM","reason":"Qış soyuqdur"}],
+                             "suitableCrops":[{"code":"WALNUT","name":"Qoz","score":88,"reason":"Hündürlük"}],
+                             "notRecommended":[],"irrigationAdvice":"Damcı","recommendedChecks":[],"confidence":"MEDIUM","dataGaps":[]}""";
                 }
             };
         }

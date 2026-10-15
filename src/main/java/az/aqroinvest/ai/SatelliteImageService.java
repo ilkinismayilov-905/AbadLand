@@ -111,7 +111,7 @@ public class SatelliteImageService {
         return new double[]{(p[0] - extent[0]) / (extent[2] - extent[0]) * size, (extent[3] - p[1]) / (extent[3] - extent[1]) * size};
     }
 
-    /** Draws the boundary: dark halo + 3 px yellow line, so it reads on both bright and dark ground. */
+    /** Draws the boundary: dark halo + 4 px yellow line, so it reads on both bright and dark ground. */
     static byte[] withOutline(byte[] jpeg, List<double[]> ring, double[] extent) throws java.io.IOException {
         BufferedImage src = ImageIO.read(new ByteArrayInputStream(jpeg));
         if (src == null) return jpeg;
@@ -126,10 +126,10 @@ public class SatelliteImageService {
             else path.lineTo(px[0], px[1]);
         }
         path.closePath();
-        g.setStroke(new BasicStroke(7f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.setStroke(new BasicStroke(8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g.setColor(new Color(0, 0, 0, 140));
         g.draw(path);
-        g.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.setStroke(new BasicStroke(4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g.setColor(new Color(255, 214, 0));
         g.draw(path);
         g.dispose();

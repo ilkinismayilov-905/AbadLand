@@ -98,8 +98,9 @@ public class AiAnalysisService {
             a.setModel(ai.model());
             a.setCreatedAt(LocalDateTime.now(BAKU));
             try {
-                String result = ai.analyze(jpeg, userText(plot, climate, jpeg != null));
-                json.readValue(result, AiView.class); // must match the SPEC shape
+                Set<String> codes = crops.findAll().stream().map(Crop::getCode).collect(Collectors.toSet());
+                String result = analyzeValid(ai, jpeg, userText(plot, climate, jpeg != null), codes, json);
+                json.readValue(result, AiView.class); // the shape the passport renders
                 a.setResultJson(result);
                 a.setStatus("DONE");
             } catch (AiException e) {
@@ -118,6 +119,27 @@ public class AiAnalysisService {
             throw new BusinessException(az.aqroinvest.web.I18n.t("plots.ai.imageReadFailed"));
         } finally {
             running.remove(plot.getId());
+        }
+    }
+
+    /** Sent with the second attempt when the first answer did not match the schema. */
+    static final String RETRY_NOTE = "Cavab etibarlı JSON deyildi. Yalnız sxemə uyğun JSON qaytar.";
+
+    /**
+     * One call, validated; if the answer is not valid schema JSON, exactly one retry with RETRY_NOTE appended.
+     * Still invalid → AiException with a polite message (HTTP, refusal and timeout errors are not retried).
+     */
+    static String analyzeValid(AiClient ai, byte[] jpeg, String userText, Set<String> codes, ObjectMapper json) {
+        try {
+            return AiResultValidator.normalize(ai.analyze(jpeg, userText), codes, json);
+        } catch (AiResultValidator.Invalid first) {
+            log.warn("AI answer invalid ({}), retrying once", first.getMessage());
+        }
+        try {
+            return AiResultValidator.normalize(ai.analyze(jpeg, userText + "\n\n" + RETRY_NOTE), codes, json);
+        } catch (AiResultValidator.Invalid second) {
+            log.warn("AI answer invalid again ({})", second.getMessage());
+            throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.invalidAfterRetry"));
         }
     }
 

@@ -126,7 +126,7 @@ public class ClaudeAiClient implements AiClient {
     static String jsonObject(String text) {
         String t = text.trim().replaceAll("^```(?:json)?\\s*", "").replaceAll("\\s*```$", "");
         int start = t.indexOf('{'), end = t.lastIndexOf('}');
-        if (start < 0 || end <= start) throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.notJson"));
+        if (start < 0 || end <= start) throw new AiResultValidator.Invalid(az.aqroinvest.web.I18n.t("plots.ai.notJson"));
         return t.substring(start, end + 1);
     }
 
