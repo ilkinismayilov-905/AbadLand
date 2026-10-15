@@ -12,4 +12,3 @@ Söhbət boyu yazılmış bütün əlavə promptlar. Hər birini istifadə etmə
 | 06-ai-key-rename.md | AGROINVEST_AI_KEY | AI açarını qoşmazdan əvvəl |
 | 07-ai-prompt-upgrade.md | Yeni AI promptları, sarı sərhəd, validasiya | 06-dan sonra |
 | 08-small-legal-fixes.md | Bal qeydi, icarə müddəti | Step 9-dan əvvəl |
-| 09-rename-fermer-to-sahibkar.md | "Fermer" sözünü silir | Yalnız 10a artıq icra olunubsa |

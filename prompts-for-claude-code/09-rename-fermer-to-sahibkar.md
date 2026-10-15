@@ -1,1 +1,0 @@
-Rename everywhere in UI, seed and docs: "Fermer" / "fermer" → "Sahibkar". Remove the person type "Fermer təsərrüfatı". Rename demo user fermer@demo.az → sahibkar@demo.az and the previous sahibkar@demo.az → sahibkar2@demo.az. Field label "EKTİS fermer qeydiyyat nömrəsi" → "EKTİS qeydiyyat nömrəsi" (column ektisRegNo).
