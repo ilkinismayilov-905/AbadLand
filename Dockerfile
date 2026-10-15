@@ -14,8 +14,9 @@ WORKDIR /app
 RUN useradd --system --uid 1001 app && mkdir -p /app/uploads && chown -R app /app
 COPY --from=build /src/app.jar app.jar
 USER app
-# Fits a 512 MB instance (Render free/starter): heap ≤ 75% of the container limit
-ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"
+# Fits a 512 MB instance (Render free/starter): heap ≤ 60% of the limit, serial GC (smallest footprint),
+# capped metaspace, smaller thread stacks
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k"
 # Render sets PORT; application.properties reads ${PORT:8080}
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

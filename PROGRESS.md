@@ -95,3 +95,4 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 ### Deploy (Render) — 2026-10-15
 - Multi-stage `Dockerfile` (maven:3.9-eclipse-temurin-21 → eclipse-temurin:21-jre, non-root `app`, `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75`), `.dockerignore`, `server.port=${PORT:8080}`. Docker stays optional for local runs.
 - Verified locally: `docker run --memory=512m -e PORT=10000` → Tomcat on 10000, all main pages 200, max heap 384 MB, ~400 MiB used after start. README "Deploy (Render)" added.
+- Memory tuning: `-XX:MaxRAMPercentage=60 -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k`, Tomcat `threads.max=20`, `accept-count=50`. In-container walk (`--memory=512m`, PORT=10000): Elvin login → FZL-001 passport → AI (fake key → 401 handled, satellite image fetched) → 3D → application QAR-2026-000008 → operator review → commission approve (EKTİS ref). docker stats: 377 MiB after start → 412 MiB (80 %) after the walk; cgroup peak 419 MiB, heap max 308 MB.
