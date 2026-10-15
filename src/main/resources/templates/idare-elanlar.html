@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head(#{listing.list.title})}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<div th:replace="~{layout :: flash}"></div>
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-5">
+    <nav th:replace="~{app-fragments :: staffNav('listings')}"></nav>
+    <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-2xl font-bold" th:text="#{listing.list.title}"></h1>
+        <div class="ml-auto rounded-xl border px-4 py-2 text-sm" th:classappend="${agriShare < agriMin} ? 'bg-red-50 border-red-300 text-red-900' : 'bg-white border-[#DDE3DC]'">
+            <span th:text="#{listing.agriShare}"></span> <b th:text="${@fmt.dec(agriShare)} + '%'"></b>
+            <div th:if="${agriShare < agriMin}" class="text-xs" th:text="#{listing.agriShareLow(${agriMin})}"></div>
+        </div>
+        <a th:href="@{/idare/elan/yeni}" class="btn-primary" th:text="#{listing.new}"></a>
+    </div>
+
+    <form method="get" class="flex flex-wrap gap-2 items-end text-sm">
+        <label class="block"><span class="field-label" th:text="#{listing.col.status}"></span>
+            <select name="status" class="field"><option value="" th:text="#{listing.f.all}"></option>
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="${@statusLabels.label(s)}" th:selected="${sel[0] == s.name()}"></option></select></label>
+        <label class="block"><span class="field-label" th:text="#{listing.col.category}"></span>
+            <select name="category" class="field"><option value="" th:text="#{listing.f.all}"></option>
+                <option th:each="c : ${categories}" th:value="${c}" th:text="${@statusLabels.label(c)}" th:selected="${sel[1] == c.name()}"></option></select></label>
+        <label class="block"><span class="field-label" th:text="#{listing.col.district}"></span>
+            <select name="district" class="field"><option value="" th:text="#{listing.f.all}"></option>
+                <option th:each="d : ${districts}" th:value="${d}" th:text="${d}" th:selected="${sel[2] == d}"></option></select></label>
+        <button class="btn-secondary" th:text="#{listing.filter}"></button>
+    </form>
+
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <table class="w-full text-sm">
+            <tr class="text-left text-gray-500 bg-earth-50">
+                <th class="p-3" th:text="#{listing.col.code}"></th><th th:text="#{listing.col.name}"></th><th th:text="#{listing.col.district}"></th>
+                <th th:text="#{listing.col.category}"></th><th class="text-right pr-3" th:text="#{listing.col.ha}"></th><th th:text="#{listing.col.status}"></th>
+                <th th:text="#{listing.col.engagement}"></th><th th:text="#{listing.col.createdBy}"></th><th th:text="#{listing.col.date}"></th><th class="w-64"></th></tr>
+            <tr th:each="p : ${plots}" class="border-t align-top">
+                <td class="p-3 font-medium whitespace-nowrap" th:text="${p.code}"></td>
+                <td th:text="${p.name} ?: #{listing.untitled}"></td>
+                <td th:text="${p.district}"></td>
+                <td th:text="${@statusLabels.label(p.category)}"></td>
+                <td class="text-right pr-3" th:text="${@fmt.dec(p.areaHa)}"></td>
+                <td><span th:class="${@statusLabels.badge(p.listingStatus)}" th:text="${@statusLabels.label(p.listingStatus)}"></span>
+                    <span th:if="${p.recent}" class="ml-1 text-xs text-[#2E6B3A] font-semibold" th:text="#{listing.newBadge}"></span></td>
+                <td th:text="${engagement.get(p.id)} ?: '—'"></td>
+                <td th:text="${p.createdBy} != null ? ${p.createdBy.fullName} : #{listing.seed}"></td>
+                <td class="whitespace-nowrap" th:text="${@fmt.dateTime(p.publishedAt ?: p.createdAt)}"></td>
+                <td class="py-2 pr-3">
+                    <div class="flex flex-wrap gap-2 justify-end">
+                        <a th:href="@{/saheler/{id}(id=${p.id})}" class="underline" th:text="#{listing.view}"></a>
+                        <a th:unless="${p.published}" th:href="@{/idare/elan/{id}/addim/1(id=${p.id})}" class="underline" th:text="#{listing.edit}"></a>
+                        <a sec:authorize="hasRole('ADMIN')" th:unless="${p.published}" th:href="@{/idare/elan/{id}/addim/4(id=${p.id})}" class="underline font-semibold" th:text="#{listing.publish}"></a>
+                        <form sec:authorize="hasRole('ADMIN')" th:if="${p.published}" th:action="@{/idare/elan/{id}/dercden-cixar(id=${p.id})}" method="post">
+                            <button class="underline text-red-700 disabled:text-gray-400 disabled:no-underline" th:disabled="${blockers.get(p.id) != null}"
+                                    th:title="${blockers.get(p.id)}" th:text="#{listing.unpublish}"></button></form>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <p th:if="${plots.isEmpty()}" class="p-6 text-center text-gray-500" th:text="#{listing.list.empty}"></p>
+    </div>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

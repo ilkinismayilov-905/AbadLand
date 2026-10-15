@@ -8,12 +8,12 @@
     <nav th:replace="~{app-fragments :: staffNav('auctions')}"></nav>
     <h1 class="text-2xl font-bold" th:text="#{auction.staff.heading}"></h1>
 
-    <details sec:authorize="hasAnyRole('OPERATOR','ADMIN')" class="bg-white rounded-lg shadow p-5">
+    <details id="yeni" sec:authorize="hasAnyRole('OPERATOR','ADMIN')" class="bg-white rounded-lg shadow p-5" th:attr="open=${preselectPlot != null} ? 'open'">
         <summary class="cursor-pointer font-semibold text-leaf-700" th:text="#{auction.staff.new}"></summary>
         <form th:action="@{/idare/herraclar}" method="post" class="mt-4 grid sm:grid-cols-3 gap-4 text-sm">
             <label class="block sm:col-span-2">[[#{auction.staff.plot}]]
                 <select name="plotId" required class="mt-1 w-full border rounded px-2 py-1.5">
-                    <option th:each="p : ${freePlots}" th:value="${p.id}" th:text="${p.code} + ' · ' + ${p.district} + ' · ' + #{auction.common.areaHa(${@fmt.dec(p.areaHa)})}"></option>
+                    <option th:each="p : ${freePlots}" th:value="${p.id}" th:selected="${p.id == preselectPlot}" th:text="${p.code} + ' · ' + ${p.district} + ' · ' + #{auction.common.areaHa(${@fmt.dec(p.areaHa)})}"></option>
                 </select></label>
             <label class="block">[[#{auction.staff.dealType}]]
                 <select name="dealType" class="mt-1 w-full border rounded px-2 py-1.5">

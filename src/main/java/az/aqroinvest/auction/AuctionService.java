@@ -160,7 +160,7 @@ public class AuctionService {
         if (inCompetition) throw new BusinessException(I18n.t("auction.error.plotInCompetition"));
         if (auctions.findByPlotOrderByStartsAtDesc(plot).stream().anyMatch(x -> OPEN.contains(x.getStatus())))
             throw new BusinessException(I18n.t("auction.error.alreadyOpen"));
-        if (plot.getStatus() != PlotStatus.AVAILABLE) throw new BusinessException(I18n.t("auction.error.plotNotFree"));
+        if (plot.getStatus() != PlotStatus.AVAILABLE || !plot.isPublished()) throw new BusinessException(I18n.t("auction.error.plotNotFree"));
     }
 
     @Transactional

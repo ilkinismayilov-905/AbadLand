@@ -86,6 +86,7 @@ public class SecurityConfig {
                         .requestMatchers("/kabinet/**").hasRole("INVESTOR")
                         .requestMatchers("/idare/audit").hasAnyRole("COMMISSION", "ADMIN")
                         .requestMatchers("/idare/istifadeciler", "/idare/istifadeciler/**").hasRole("ADMIN")
+                        .requestMatchers("/idare/elanlar", "/idare/elan/**").hasAnyRole("OPERATOR", "ADMIN") // publish: ADMIN (service)
                         .requestMatchers("/idare/**").hasAnyRole("OPERATOR", "COMMISSION", "ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(f -> f.loginPage("/giris").successHandler(onLogin).permitAll()

@@ -36,13 +36,13 @@ public class PublicApiController {
     @Operation(summary = "Bütün sahələr")
     public List<PlotDto> plots() {
         Map<Long, Competition> open = plotService.openCompetitionByPlot();
-        return plots.findAll(Sort.by("code")).stream().map(p -> dto(p, open.get(p.getId()))).toList();
+        return plots.findAll(Sort.by("code")).stream().filter(Plot::isPublished).map(p -> dto(p, open.get(p.getId()))).toList();
     }
 
     @GetMapping("/plots/{code}")
     @Operation(summary = "Sahə pasportu (iqlim və bitki uyğunluğu ilə)")
     public PlotDetailDto plot(@PathVariable String code) {
-        Plot p = plots.findByCode(code).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Plot p = plots.findByCode(code).filter(Plot::isPublished).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         ClimateDto climate = climates.findByPlot(p).map(c -> new ClimateDto(c.getElevationM(), c.getMeanTempC(),
                 c.getAbsMinTempC(), c.getFrostDays(), c.getPrecipMm())).orElse(null);
         List<SuitabilityDto> suits = suitability.forPlot(p).stream().map(s -> new SuitabilityDto(s.crop().getCode(),

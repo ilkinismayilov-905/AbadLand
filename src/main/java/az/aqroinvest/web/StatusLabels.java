@@ -30,6 +30,9 @@ public class StatusLabels {
         put(ActivityType.LIVESTOCK, ORANGE);
         put(ActivityType.HORTICULTURE, GREEN);
         put(ActivityType.OTHER, GRAY);
+        put(ListingStatus.DRAFT, GRAY);
+        put(ListingStatus.PUBLISHED, GREEN);
+        put(ListingStatus.UNPUBLISHED, ORANGE);
         put(DeminingStatus.CLEARED, GREEN);
         put(DeminingStatus.PARTIALLY_CLEARED, YELLOW);
         put(DeminingStatus.IN_PROGRESS, RED);

@@ -33,7 +33,7 @@ public class CompetitionService {
         Set<Long> taken = new HashSet<>();
         competitions.findByStatusOrderByDeadlineAsc(CompetitionStatus.PUBLISHED).forEach(c -> c.getPlots().forEach(p -> taken.add(p.getId())));
         return plots.findAll(Sort.by("code")).stream()
-                .filter(p -> !taken.contains(p.getId()) && p.getStatus() == PlotStatus.AVAILABLE).toList();
+                .filter(p -> !taken.contains(p.getId()) && p.getStatus() == PlotStatus.AVAILABLE && p.isPublished()).toList();
     }
 
     /** Rule errors (form field → message) beyond bean validation. */

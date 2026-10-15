@@ -199,6 +199,17 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 - Implementation notes: "verified FİN/VÖEN" = the investor profile has a FİN (individual) or VÖEN (legal) — no real verification in the MVP. `Plot.status` (`PlotStatus`: AVAILABLE, IN_AUCTION, LEASED, SOLD) added. `FarmProject.application` is optional; an auction-won farm has `auction` set instead.
 
 
+## Plot listings (staff; all land is state land)
+- OPERATOR and ADMIN create and edit drafts; only ADMIN publishes / unpublishes. Every action is audited (`LISTING_*`). Status only changes in `PlotListingService`.
+- `Plot` fields: `category` (`PlotCategory`), `listingStatus` (`ListingStatus` DRAFT / PUBLISHED / UNPUBLISHED; seed plots PUBLISHED), `createdBy`, `createdAt`, `publishedAt`, `conceptLinkToAgri`, `estimatedInvestment`, `expectedJobs`; the title is `Plot.name`. Photos / certificate / PDFs are `Document`s with `plot` + `sortOrder` (first photo = cover). `DocType` + PHOTO, DEMINING_CERT.
+- `PlotCategory` → `ActivityType` (for matching): Əkinçilik CROP_FARMING → CROP_FARMING; Bağçılıq → HORTICULTURE; Heyvandarlıq, Arıçılıq → LIVESTOCK; İstixana, Emal və saxlama, Restoran, Qonaq evi, Otel / istirahət kompleksi → OTHER. Aqroturizm = RESTAURANT, GUEST_HOUSE, HOTEL. Recommended crops are required for Əkinçilik, Bağçılıq, İstixana (the crop list has no bees / processing items — deviation from "all agricultural"); agrotourism requires "Kənd təsərrüfatı ilə əlaqə".
+- Wizard: 1 Torpaq (Leaflet Xəritə/Peyk, click points, "Sıfırla", paste GeoJSON, area auto-calculated and editable; region → district → village) · 2 Təyinat (title, category, description ≤ 3000, crops, concept) · 3 Sahə məlumatları və şərtlər (demining + ANAMA certificate when not CLEARED, water, irrigation, soil, road, electricity, lease years, fee AZN/ha, optional investment and jobs) · 4 Sənədlər və fotolar (≥ 3 JPG/PNG ≤ 5 MB, ≤ 10, reorder, optional PDFs) + summary, "Qaralama kimi saxla", "Dərc et" (A) with "Dərcdən sonra": Yalnız kataloqda / Müsabiqəyə əlavə et (a PENDING_APPROVAL competition; the commission then approves it as usual) / Hərrac qaralaması yarat (opens the auction form with the plot preselected).
+- Rules (rejected on save, all errors at once): area 0.5–5 000 ha; polygon parsed as GeoJSON Polygon inside Azerbaijan (44.5–51 E, 38.2–42 N), 0.1–5 000 ha; road 0–200 km; lease 1–49 years; fee ≥ 0; title 10–120 chars and not generic ("Elan", "Test", digits…). Warnings (never block): entered vs drawn area differ > 20 %; polygon centre outside the district box (`listing/Districts`). Publish also needs category, description, crops / concept as above, demining not IN_PROGRESS, certificate when not CLEARED, ≥ 3 photos.
+- Codes: district prefix + next number (`FZL-013`); prefixes in `listing/Districts`.
+- Publishing: listingStatus PUBLISHED, plot AVAILABLE, `publishedAt`; Open-Meteo climate fetched (offline → RULE suitability without climate). Only PUBLISHED plots appear in catalog, map, API, competition / auction plot pickers; drafts' passports are 404 for non-staff. "Yeni" badge for 7 days; cover photo on catalog cards; photo strip on the passport.
+- Unpublish is refused when the plot is in a PUBLISHED competition, has an auction in PENDING_APPROVAL / SCHEDULED / LIVE / ENDED, or an APPROVED application. Published listings must be unpublished before editing.
+- "Aqrar payı" = published non-agrotourism plots / published plots; warning below 85 %.
+
 ## Farm project (post-lease)
 - Created on APPROVED. Commitments copied from the application.
 - Progress: investment% = latest investedToDate / committed; jobs% = Σ workforce / committedJobs; time% = months elapsed / committedMonths; local% = local / total.
@@ -241,6 +252,9 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 | `/idare` | staff | dashboard |
 | `/idare/muracietler` + `/{id}` | O, C, A | list + detail with actions |
 | `/idare/musabiqeler` | O, C, A | create (O), approve/reject (C) |
+| `/idare/elanlar` | O, A | staff plot listings: table + filters, "Aqrar payı" KPI, Bax / Redaktə / Dərc et (A) / Dərcdən çıxar (A) — see "Plot listings" |
+| `/idare/elan/yeni`, `/idare/elan/{id}`, `/idare/elan/{id}/addim/{1-4}` | O, A | 4-step listing wizard (draft autosave) |
+| `/saheler/{id}/foto/{docId}` | all (published plot) / staff (draft) | listing photo |
 | `/idare/monitorinq` + `/{id}` | O, C, A | farm projects, risk, calendar delays, report review |
 | `/idare/inteqrasiya` | O, C, A | EKTİS log + retry (A) |
 | `/idare/audit` | C, A | audit table |

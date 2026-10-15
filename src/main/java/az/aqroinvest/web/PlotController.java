@@ -36,11 +36,25 @@ public class PlotController {
     private final az.aqroinvest.ai.SatelliteImageService satellite;
     private final Viewer3dData viewer3d;
     private final az.aqroinvest.auction.AuctionService auctionService;
+    private final az.aqroinvest.listing.PlotListingService listings;
+    private final az.aqroinvest.service.StorageService storage;
+
+    /** Drafts / unpublished plots exist only for staff; everyone else gets 404. */
+    private Plot visible(Long id, org.springframework.security.core.Authentication auth) {
+        Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!plot.isPublished() && !isStaff(auth)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return plot;
+    }
+
+    static boolean isStaff(org.springframework.security.core.Authentication auth) {
+        return auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().matches("ROLE_(OPERATOR|COMMISSION|ADMIN)"));
+    }
 
     @GetMapping("/saheler")
     public String catalog(@ModelAttribute("filter") PlotFilter filter, Model model, jakarta.servlet.http.HttpServletRequest request) {
         addFilterOptions(model, filter, request);
         model.addAttribute("cards", plotService.search(filter));
+        model.addAttribute("covers", listings.covers());
         return "saheler";
     }
 
@@ -66,7 +80,7 @@ public class PlotController {
     public String passport(@PathVariable Long id, @RequestParam(required = false) String crop,
                            @RequestParam(required = false) Integer score, Model model,
                            org.springframework.security.core.Authentication auth) {
-        Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Plot plot = visible(id, auth);
         PlotCard card = plotService.card(plot);
         List<Crop> cropOptions = crops.findAll().stream().filter(c -> c.getActivityType() == plot.getPurpose()).toList();
         String firstRec = plot.getRecommendedCrops() == null ? null : plot.getRecommendedCrops().split(",")[0];
@@ -91,6 +105,7 @@ public class PlotController {
         model.addAttribute("plot3d", viewerData(card, auth));
         model.addAttribute("plotAuctions", auctionService.forPlot(plot));
         model.addAttribute("plot", plot);
+        model.addAttribute("photos", listings.photos(plot));
         model.addAttribute("climate", climate);
         model.addAttribute("cropOptions", cropOptions);
         model.addAttribute("selectedCrop", selected);
@@ -105,8 +120,9 @@ public class PlotController {
     /** Cached Esri image of the plot (fetched once). */
     @GetMapping(value = "/saheler/{id}/peyk.jpg", produces = "image/jpeg")
     @ResponseBody
-    public org.springframework.http.ResponseEntity<org.springframework.core.io.FileSystemResource> satelliteImage(@PathVariable Long id) {
-        Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.FileSystemResource> satelliteImage(@PathVariable Long id,
+                                                                                                                 org.springframework.security.core.Authentication auth) {
+        Plot plot = visible(id, auth);
         var path = satellite.image(plot);
         if (path == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         return org.springframework.http.ResponseEntity.ok()
@@ -114,11 +130,27 @@ public class PlotController {
                 .body(new org.springframework.core.io.FileSystemResource(path));
     }
 
+    /** Listing photo of a visible plot (public for published plots; files of drafts only for staff). */
+    @GetMapping("/saheler/{id}/foto/{docId}")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.FileSystemResource> photo(@PathVariable Long id, @PathVariable Long docId,
+                                                                                                        org.springframework.security.core.Authentication auth) {
+        Plot plot = visible(id, auth);
+        var d = listings.photos(plot).stream().filter(x -> x.getId().equals(docId)).findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        var path = storage.path(d);
+        if (path == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return org.springframework.http.ResponseEntity.ok().contentType(org.springframework.http.MediaType.parseMediaType(
+                        az.aqroinvest.service.StorageService.contentType(d)))
+                .cacheControl(org.springframework.http.CacheControl.maxAge(java.time.Duration.ofHours(1)))
+                .body(new org.springframework.core.io.FileSystemResource(path));
+    }
+
     @PostMapping("/saheler/{id}/ai-analiz")
     public String aiAnalysis(@PathVariable Long id, @RequestParam(required = false) String yeniden,
                              org.springframework.security.core.Authentication auth,
                              org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
-        Plot plot = plots.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Plot plot = visible(id, auth);
         try {
             aiService.analyze(plot, auth.getName(), yeniden != null);
             ra.addFlashAttribute("success", I18n.t("plots.ai.ready"));
@@ -130,7 +162,7 @@ public class PlotController {
 
     @GetMapping("/muqayise")
     public String compare(@RequestParam(required = false) List<Long> ids, Model model) {
-        List<Plot> list = ids == null ? List.of() : plots.findAllById(ids.stream().distinct().limit(3).toList());
+        List<Plot> list = ids == null ? List.of() : plots.findAllById(ids.stream().distinct().limit(3).toList()).stream().filter(Plot::isPublished).toList();
         List<PlotCard> cards = list.stream().map(plotService::card).toList();
         List<Row> rows = new ArrayList<>();
         if (!cards.isEmpty()) {

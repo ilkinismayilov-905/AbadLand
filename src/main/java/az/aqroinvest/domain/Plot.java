@@ -39,7 +39,7 @@ public class Plot {
     private int feePerHa;
     /** comma-separated crop codes */
     private String recommendedCrops;
-    @Column(length = 2000)
+    @Column(length = 3000)
     private String description;
     @Lob
     private String geoJson;
@@ -47,4 +47,27 @@ public class Plot {
     @Enumerated(EnumType.STRING)
     private PlotStatus status = PlotStatus.AVAILABLE;
     private double lng;
+
+    // ---- staff listing (SPEC "Plot listings")
+    @Enumerated(EnumType.STRING)
+    private PlotCategory category;
+    @Enumerated(EnumType.STRING)
+    private ListingStatus listingStatus = ListingStatus.PUBLISHED;
+    @ManyToOne
+    private User createdBy;
+    private java.time.LocalDateTime createdAt;
+    private java.time.LocalDateTime publishedAt;
+    @Column(length = 3000)
+    private String conceptLinkToAgri;
+    private Long estimatedInvestment;
+    private Integer expectedJobs;
+
+    public boolean isPublished() {
+        return listingStatus == ListingStatus.PUBLISHED;
+    }
+
+    /** "Yeni" badge: published within the last 7 days. */
+    public boolean isRecent() {
+        return publishedAt != null && publishedAt.isAfter(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Baku")).minusDays(7));
+    }
 }

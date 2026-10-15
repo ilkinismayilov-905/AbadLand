@@ -18,7 +18,7 @@ public class I18n {
     public static final Locale AZ = Locale.forLanguageTag("az");
     public static final List<String> LANGS = List.of("az", "en", "ru");
     /** Every bundle; add a new group here. */
-    public static final String[] BASENAMES = {"messages", "i18n/enums", "i18n/common", "i18n/plots", "i18n/apply", "i18n/staff", "i18n/auction"};
+    public static final String[] BASENAMES = {"messages", "i18n/enums", "i18n/common", "i18n/plots", "i18n/apply", "i18n/staff", "i18n/auction", "i18n/listing"};
     /** Persisted texts (notifications) are stored as key + args and rendered in the reader's language. */
     private static final String STORED = "@i18n:", SEP = "\u001F", KEY_ARG = "@key:";
 

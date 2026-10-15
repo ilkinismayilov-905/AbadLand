@@ -61,6 +61,7 @@ public class PlotService {
         List<PlotCard> cards = new ArrayList<>();
         String q = notBlank(f.q()) ? f.q().strip().toLowerCase(AZ) : null;
         for (Plot p : plots.findAll(org.springframework.data.domain.Sort.by("code"))) {
+            if (!p.isPublished()) continue; // staff drafts are not public
             if (f.region() != null && p.getEconomicRegion() != f.region()) continue;
             if (notBlank(f.district()) && !p.getDistrict().equals(f.district())) continue;
             if (f.activity() != null && p.getPurpose() != f.activity()) continue;

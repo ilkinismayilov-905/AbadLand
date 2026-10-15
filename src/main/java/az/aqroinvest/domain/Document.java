@@ -22,6 +22,10 @@ public class Document {
     private Application application;
     @ManyToOne
     private ProgressReport report;
+    /** Photo (ordered by sortOrder, first = cover), demining certificate or other file of a plot listing. */
+    @ManyToOne
+    private Plot plot;
+    private int sortOrder;
     @Enumerated(EnumType.STRING)
     private DocType type;
     private String originalName;

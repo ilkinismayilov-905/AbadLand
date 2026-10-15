@@ -26,9 +26,10 @@ public class StaffAuctionController {
     private final PlotRepository plots;
 
     @GetMapping
-    public String list(Model model) {
+    public String list(@RequestParam(required = false) Long plotId, Model model) {
+        model.addAttribute("preselectPlot", plotId); // "Hərrac qaralaması yarat" after publishing a listing
         model.addAttribute("auctions", auctions.list());
-        model.addAttribute("freePlots", plots.findAll(Sort.by("code")).stream().filter(p -> p.getStatus() == PlotStatus.AVAILABLE).toList());
+        model.addAttribute("freePlots", plots.findAll(Sort.by("code")).stream().filter(p -> p.getStatus() == PlotStatus.AVAILABLE && p.isPublished()).toList());
         model.addAttribute("dealTypes", auctions.saleEnabled() ? DealType.values() : new DealType[]{DealType.LEASE});
         model.addAttribute("defaultStart", LocalDateTime.now(az.aqroinvest.service.AuditService.BAKU).plusDays(1).withHour(11).withMinute(0).withSecond(0).withNano(0));
         return "idare-herraclar";

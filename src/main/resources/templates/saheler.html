@@ -21,9 +21,12 @@
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div th:each="c : ${cards}" class="card p-4 flex flex-col gap-2">
+                <a th:if="${covers.containsKey(c.plot.id)}" th:href="@{/saheler/{id}(id=${c.plot.id})}" class="-mx-4 -mt-4 mb-1 block" tabindex="-1">
+                    <img th:src="@{/saheler/{id}/foto/{d}(id=${c.plot.id},d=${covers.get(c.plot.id)})}" alt="" class="w-full h-40 object-cover rounded-t-[inherit]" loading="lazy"></a>
                 <div class="flex items-start justify-between gap-2">
                     <div>
-                        <div class="text-xs text-gray-500" th:text="${c.plot.code}"></div>
+                        <div class="text-xs text-gray-500"><span th:text="${c.plot.code}"></span>
+                            <span th:if="${c.plot.recent}" class="ml-1 px-1.5 py-0.5 rounded bg-[#2E6B3A] text-white font-semibold" th:text="#{listing.newBadge}"></span></div>
                         <a th:href="@{/saheler/{id}(id=${c.plot.id})}" class="font-semibold text-lg hover:underline" th:text="${c.plot.name}"></a>
                         <div class="text-sm text-gray-600" th:text="${c.plot.district} + ' · ' + #{plots.ha(${@fmt.dec(c.plot.areaHa)})}"></div>
                     </div>

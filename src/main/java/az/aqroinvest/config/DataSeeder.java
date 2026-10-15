@@ -268,6 +268,7 @@ public class DataSeeder implements CommandLineRunner {
         x.setVillage(village);
         x.setAreaHa(area);
         x.setPurpose(purpose);
+        x.setCategory(PlotCategory.of(purpose));
         x.setDemining(demining);
         x.setWaterSource(water);
         x.setIrrigation(irrigation);

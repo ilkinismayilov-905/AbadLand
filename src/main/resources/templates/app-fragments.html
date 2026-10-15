@@ -40,6 +40,7 @@
 <nav th:fragment="staffNav(active)" class="flex flex-wrap gap-2 text-sm">
     <a th:href="@{/idare}" th:class="'px-3 py-1.5 rounded ' + (${active == 'dashboard'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.dashboard}"></a>
     <a th:href="@{/idare/muracietler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'apps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.applications}"></a>
+    <a sec:authorize="hasAnyRole('OPERATOR','ADMIN')" th:href="@{/idare/elanlar}" th:class="'px-3 py-1.5 rounded ' + (${active == 'listings'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.listings}"></a>
     <a th:href="@{/idare/musabiqeler}" th:class="'px-3 py-1.5 rounded ' + (${active == 'comps'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.competitions}"></a>
     <a th:href="@{/idare/herraclar}" th:class="'px-3 py-1.5 rounded ' + (${active == 'auctions'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.auctions}"></a>
     <a th:href="@{/idare/monitorinq}" th:class="'px-3 py-1.5 rounded ' + (${active == 'monitor'} ? 'bg-leaf-700 text-white' : 'bg-white shadow hover:bg-leaf-50')" th:text="#{common.staff.monitoring}"></a>
