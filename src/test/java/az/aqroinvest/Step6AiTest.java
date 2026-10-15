@@ -46,10 +46,13 @@ class Step6AiTest {
                 public String model() { return "fake-model"; }
                 public String analyze(byte[] jpeg, String userText) {
                     calls.incrementAndGet();
-                    assertThat(userText).contains("Allowed crop codes", "Satellite image is NOT available");
+                    assertThat(userText).contains("İcazə verilən bitkilər", "APPLE | Alma | ", "Peyk şəkli YOXDUR",
+                            "Minadan təmizlənmə statusu (rəsmi məlumat): ").doesNotContain("{", "sarı xətt");
                     return """
                             {"summary":"Dağ yamacında bağ üçün yararlı sahə.","landCover":"Ot örtüyü","terrain":"Mülayim yamac",
-                             "waterSigns":"Çay yaxındır","risks":["Yazda gec şaxta"],
+                             "waterSigns":"Çay yaxındır","observations":["Sahədə kol örtüyü var"],
+                             "risks":[{"title":"Yazda gec şaxta","level":"HIGH","reason":"Mütləq minimum aşağıdır"}],
+                             "recommendedChecks":["ANAMA sertifikatı"],
                              "suitableCrops":[{"code":"APPLE","name":"Alma","score":90,"reason":"Hündürlük uyğundur"},
                                               {"code":"WALNUT","name":"Qoz","score":82,"reason":"Şaxtaya davamlı"}],
                              "notRecommended":[{"name":"Nar","reason":"Soyuq qış"}],"irrigationAdvice":"Damcı suvarma",
@@ -91,6 +94,8 @@ class Step6AiTest {
         mvc.perform(get("/saheler/" + lcn).with(ELVIN)).andExpect(content().string(allOf(
                 containsString("Alma 90%"), containsString("· AI"), containsString("Dağ yamacında"), containsString("✗ Nar — Soyuq qış"),
                 containsString("fake-model"), containsString("AI analizinə bax (keşdə)"),
+                containsString("Yüksək"), containsString("Yazda gec şaxta"), containsString("Mütləq minimum aşağıdır"),
+                containsString("Sahədə kol örtüyü var"), containsString("Yerində yoxlanılmalıdır"), containsString("ANAMA sertifikatı"),
                 containsString("750 000 AZN")))); // ROI pre-selects AI top crop: 30 ha × 25 000 (Alma)
 
         // FZL-001 keeps the sample label and its demo default crop (Fındıq)

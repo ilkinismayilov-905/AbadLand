@@ -104,3 +104,8 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 
 ### Rebrand — AbadLand (2026-10-15)
 - Brand "AgroInvest" → "AbadLand" (common.brand az/en/ru, manifest, Swagger, docs, EKTİS source `ABADLAND_QARABAG`). Logo PNGs: only the top word redrawn ("AbadLand", Avenir Next Bold, same color #35693C / white, same cap height); icon and "Qarabağ" pixels unchanged, canvas 640→679 px wide. File names `agroinvest-*.png` and the Render URL kept.
+
+### AI prompt v2 wired in — 2026-10-15
+- New `prompts/land-analysis.txt` (stricter rules, risk levels, observations, on-site checks) now matches the code: `AiView` reads `risks` as objects **or** legacy strings, plus `observations` / `recommendedChecks`; passport shows level badges and the new sections (az/en/ru).
+- Satellite image: square Web Mercator extent + yellow plot outline (`SatelliteImageService.withOutline`), cache `{code}-v2.jpg`. User text built from `prompts/land-analysis-user.txt` incl. the crop requirement table. `max_tokens` 8000, timeout 120 s. SPEC updated.
+- Tests 60 green (+`AiViewAndOutlineTest`; Step6 fake AI uses the new shape). Outline checked on real Esri images (FZL-001, LCN-001). No real Claude call made with the new prompt yet.

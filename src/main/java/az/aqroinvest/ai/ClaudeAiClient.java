@@ -28,8 +28,8 @@ import java.util.Set;
 public class ClaudeAiClient implements AiClient {
 
     static final String URL = "https://api.anthropic.com/v1/messages";
-    /** Thinking is on by default for current models and counts toward max_tokens — keep room for the JSON. */
-    static final long MAX_TOKENS = 4000;
+    /** Thinking is on by default for current models and counts toward max_tokens — keep room for the (richer) JSON. */
+    static final long MAX_TOKENS = 8000;
     /** Models that take the server-side refusal fallback (Claude API). Haiku 5.5 has none. */
     static final Set<String> FALLBACK_MODELS = Set.of("claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-5", "claude-fable-5-1");
 
@@ -63,7 +63,7 @@ public class ClaudeAiClient implements AiClient {
     public String analyze(byte[] jpeg, String userText) {
         if (!isConfigured()) throw new AiException(az.aqroinvest.web.I18n.t("plots.ai.noKey"));
         HttpRequest.Builder req = HttpRequest.newBuilder(URI.create(URL))
-                .timeout(Duration.ofSeconds(90)) // image analysis takes ~10–30 s; connect timeout is 10 s
+                .timeout(Duration.ofSeconds(120)) // image analysis takes ~20–60 s; connect timeout is 10 s
                 .header("x-api-key", apiKey)
                 .header("anthropic-version", "2023-06-01")
                 .header("content-type", "application/json")

@@ -176,9 +176,19 @@
                         <ul class="space-y-1"><li th:each="n : ${ai.notRecommended}" class="text-red-700" th:text="'✗ ' + ${n.name} + ' — ' + ${n.reason}"></li></ul>
                     </div>
                     <div class="space-y-3">
+                        <div th:if="${ai.observations != null and !ai.observations.isEmpty()}"><h3 class="font-semibold mb-1" th:text="#{plots.passport.aiObservations}"></h3>
+                            <ul class="list-disc ml-5"><li th:each="o : ${ai.observations}" th:text="${o}"></li></ul></div>
                         <div><h3 class="font-semibold mb-1" th:text="#{plots.passport.aiRisks}"></h3>
-                            <ul class="list-disc ml-5"><li th:each="r : ${ai.risks}" th:text="${r}"></li></ul></div>
+                            <ul class="space-y-1">
+                                <li th:each="r : ${ai.risks}" class="flex gap-2 items-start">
+                                    <span th:if="${r.levelEnum() != null}" th:class="${@statusLabels.badge(r.levelEnum())} + ' shrink-0 mt-0.5'" th:text="${@statusLabels.label(r.levelEnum())}"></span>
+                                    <span th:unless="${r.levelEnum() != null}" class="shrink-0" aria-hidden="true">•</span>
+                                    <span><b th:if="${r.reason != null}" th:text="${r.title}"></b><span th:if="${r.reason != null}" th:text="' — ' + ${r.reason}"></span><span th:if="${r.reason == null}" th:text="${r.title}"></span></span>
+                                </li>
+                            </ul></div>
                         <div><h3 class="font-semibold mb-1" th:text="#{plots.passport.aiIrrigation}"></h3><p th:text="${ai.irrigationAdvice}"></p></div>
+                        <div th:if="${ai.recommendedChecks != null and !ai.recommendedChecks.isEmpty()}"><h3 class="font-semibold mb-1" th:text="#{plots.passport.aiChecks}"></h3>
+                            <ul class="list-disc ml-5"><li th:each="k : ${ai.recommendedChecks}" th:text="${k}"></li></ul></div>
                         <div th:if="${ai.dataGaps != null and !ai.dataGaps.isEmpty()}"><h3 class="font-semibold mb-1" th:text="#{plots.passport.aiDataGaps}"></h3>
                             <ul class="list-disc ml-5 text-gray-600"><li th:each="g : ${ai.dataGaps}" th:text="${g}"></li></ul></div>
                     </div>

@@ -126,26 +126,56 @@ public class AiAnalysisService {
         return auditLogs.countByActorEmailIgnoreCaseAndActionAndAtAfter(email, "AI_ANALYSIS", start);
     }
 
-    /** Plot facts + climate + allowed crop codes (SPEC "User text"). */
+    /** prompts/land-analysis-user.txt: plot facts, climate and the allowed-crop table; {placeholders} filled below. */
+    private static final String USER_TEMPLATE = load("prompts/land-analysis-user.txt");
+    static final String NO_IMAGE_NOTE = "Peyk şəkli YOXDUR — bunu dataGaps-da qeyd et və etibarlılığı aşağı sal. Yalnız JSON cavab ver.";
+    private static final String UNKNOWN = "məlum deyil";
+
+    private static String load(String resource) {
+        try {
+            return new org.springframework.core.io.ClassPathResource(resource).getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException(resource, e);
+        }
+    }
+
+    /** Facts in Azerbaijani (the prompt language) whatever language the user browses in; nothing invented: missing → "məlum deyil". */
     String userText(Plot p, PlotClimate c, boolean hasImage) {
-        String allowed = crops.findAll().stream().map(cr -> cr.getCode() + " (" + cr.getNameAz() + ")").collect(Collectors.joining(", "));
-        StringBuilder sb = new StringBuilder();
-        sb.append(hasImage ? "Satellite image above (Esri World Imagery, bbox +15%).\n" : "Satellite image is NOT available — say so in dataGaps.\n");
-        sb.append("Plot: ").append(p.getCode()).append(" — ").append(p.getName()).append('\n');
-        sb.append("District: ").append(p.getDistrict()).append(", region: ").append(labels.label(p.getEconomicRegion()))
-                .append(", village: ").append(p.getVillage()).append('\n');
-        sb.append(String.format(Locale.ROOT, "Area: %.1f ha; purpose: %s; lat/lng: %.5f, %.5f%n", p.getAreaHa(),
-                labels.label(p.getPurpose()), p.getLat(), p.getLng()));
-        sb.append("Demining: ").append(labels.label(p.getDemining())).append('\n');
-        sb.append("Water source: ").append(p.getWaterSource()).append("; irrigation: ").append(p.isIrrigation() ? "yes" : "no").append('\n');
-        sb.append("Soil type: ").append(p.getSoilType()).append(String.format(Locale.ROOT, "; road: %.1f km; electricity: %s%n",
-                p.getRoadKm(), p.isElectricity() ? "yes" : "no"));
-        if (c != null)
-            sb.append(String.format(Locale.ROOT, "Climate (%s): elevation %s m, mean temp %s °C, absolute min %s °C, frost days %s, precipitation %s mm/year%n",
-                    c.getFetchedAt() == null ? "test values" : "Open-Meteo 2025", c.getElevationM(), c.getMeanTempC(),
-                    c.getAbsMinTempC(), c.getFrostDays(), c.getPrecipMm()));
-        else sb.append("Climate: not available\n");
-        sb.append("Allowed crop codes (use these in suitableCrops[].code, null if none fits): ").append(allowed).append('\n');
-        return sb.toString();
+        Locale azLocale = az.aqroinvest.web.I18n.AZ;
+        java.util.function.Function<Enum<?>, String> label = e -> e == null ? UNKNOWN
+                : e.name() + " (" + az.aqroinvest.web.I18n.t(azLocale, "enum." + e.getDeclaringClass().getSimpleName() + "." + e.name()) + ")";
+        java.util.Map<String, String> v = new java.util.LinkedHashMap<>();
+        v.put("code", p.getCode());
+        v.put("name", p.getName());
+        v.put("district", p.getDistrict());
+        v.put("economicRegion", label.apply(p.getEconomicRegion()));
+        v.put("village", p.getVillage());
+        v.put("lat", String.format(Locale.ROOT, "%.5f", p.getLat()));
+        v.put("lng", String.format(Locale.ROOT, "%.5f", p.getLng()));
+        v.put("areaHa", String.format(Locale.ROOT, "%.1f", p.getAreaHa()));
+        v.put("purpose", label.apply(p.getPurpose()));
+        v.put("deminingStatus", label.apply(p.getDemining()));
+        v.put("waterSource", p.getWaterSource());
+        v.put("irrigation", p.isIrrigation() ? "var" : "yoxdur");
+        v.put("soilType", p.getSoilType());
+        v.put("roadKm", String.format(Locale.ROOT, "%.1f", p.getRoadKm()));
+        v.put("electricity", p.isElectricity() ? "var" : "yoxdur");
+        v.put("climateYear", c == null ? UNKNOWN : c.getFetchedAt() == null ? "sınaq dəyərləri, real ölçü deyil" : "2025 il arxivi");
+        v.put("elevationM", c == null ? null : String.valueOf(c.getElevationM()));
+        v.put("meanTempC", c == null ? null : String.valueOf(c.getMeanTempC()));
+        v.put("absMinTempC", c == null ? null : String.valueOf(c.getAbsMinTempC()));
+        v.put("frostDays", c == null ? null : String.valueOf(c.getFrostDays()));
+        v.put("precipMm", c == null ? null : String.valueOf(c.getPrecipMm()));
+        v.put("cropTable", crops.findAll().stream().sorted(java.util.Comparator.comparing(Crop::getCode))
+                .map(cr -> cr.getCode() + " | " + cr.getNameAz() + " | " + cr.getFrostToleranceC() + " | " + cr.getMaxElevationM()
+                        + " | " + (cr.getWaterNeed() == null ? UNKNOWN : cr.getWaterNeed().name()))
+                .collect(Collectors.joining("\n")));
+        String text = USER_TEMPLATE;
+        for (var e : v.entrySet()) {
+            String val = e.getValue() == null || e.getValue().isBlank() || e.getValue().equals("null") ? UNKNOWN : e.getValue();
+            text = text.replace("{" + e.getKey() + "}", val);
+        }
+        if (!hasImage) text = text.replace("Şəkildə sarı xətt sahənin sərhədidir. Yalnız JSON cavab ver.", NO_IMAGE_NOTE);
+        return text;
     }
 }

@@ -45,6 +45,11 @@ public class I18n {
         return source.getMessage(key, args, key, locale());
     }
 
+    /** Text in a fixed language, e.g. AZ for the AI prompt whatever the UI language is. */
+    public static String t(Locale locale, String key, Object... args) {
+        return source.getMessage(key, args, key, locale);
+    }
+
     public static Locale locale() {
         Locale l = LocaleContextHolder.getLocale();
         return LANGS.contains(l.getLanguage()) ? l : AZ;
