@@ -1,5 +1,7 @@
 # AgroInvest Qarabağ
 
+**Canlı demo:** https://agroinvest-i0vv.onrender.com (demo hesablar aşağıda; pulsuz instans yatıbsa ilk açılış ~1 dəq çəkir)
+
 Qarabağ və Şərqi Zəngəzurda kənd təsərrüfatına investisiya portalı (hakaton MVP). İnvestor torpaq sahələrini tapır
 (xəritə, kataloq, meyvə uyğunluğu, uyğunluq testi), qiymətləndirir (pasport, ROI + proqnoz, peyk + 3D + AI analizi),
 müsabiqəyə müraciət edir və statusu izləyir. Operator baxır, komissiya qərar verir, qərar EKTİS-ə (mock) gedir.
@@ -60,6 +62,8 @@ export AI_MODEL=claude-sonnet-5-5
 **Demodan əvvəl:** tətbiqi yenidən başladın → admin: Dashboard → "İqlim məlumatını yenilə" → LCN-001 üçün AI analizini bir dəfə işə salın (keşə düşür).
 
 ## Deploy (Render)
+
+Canlı: **https://agroinvest-i0vv.onrender.com**
 
 Kök qovluqdakı `Dockerfile` iki mərhələlidir: Maven + JDK 21 ilə jar yığır, sonra `eclipse-temurin:21-jre` üzərində işə salır (root olmayan istifadəçi ilə). Lokal işə salmaq üçün Docker **lazım deyil** — bu yalnız deploy üçündür.
 
