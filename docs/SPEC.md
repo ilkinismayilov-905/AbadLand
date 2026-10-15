@@ -229,7 +229,7 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 - Audit every purchase; notify the lead investor.
 
 ## EKTİS mock
-`interface EktisClient { EktisResult send(String payloadJson); }` · `MockEktisClient` (`ektis.mode=MOCK`, default): 300 ms delay, returns `{"status":"ACCEPTED","ektisReference":"EKTIS-INV-2026-xxxxxx"}`; `ektis.mock.fail=true` → FAILED (retry demo); admin can also flip this flag at runtime on `/idare/inteqrasiya` (a restart would reset the H2 demo data). A FAILED send does not undo the decision; admin "Yenidən göndər" re-sends while the application has no `ektisRef`. Payload schemaVersion 1.0: `source` = "AGROINVEST_QARABAG", application number, decision, reason, investment, jobs, investor type + FIN/VÖEN, plot code/district/area/purpose, competition code. `HttpEktisClient` stub for `ektis.mode=HTTP`.
+`interface EktisClient { EktisResult send(String payloadJson); }` · `MockEktisClient` (`ektis.mode=MOCK`, default): 300 ms delay, returns `{"status":"ACCEPTED","ektisReference":"EKTIS-INV-2026-xxxxxx"}`; `ektis.mock.fail=true` → FAILED (retry demo); admin can also flip this flag at runtime on `/idare/inteqrasiya` (a restart would reset the H2 demo data). A FAILED send does not undo the decision; admin "Yenidən göndər" re-sends while the application has no `ektisRef`. Payload schemaVersion 1.0: `source` = "ABADLAND_QARABAG", application number, decision, reason, investment, jobs, investor type + FIN/VÖEN, plot code/district/area/purpose, competition code. `HttpEktisClient` stub for `ektis.mode=HTTP`.
 
 ## Pages
 | URL | Who | Content |

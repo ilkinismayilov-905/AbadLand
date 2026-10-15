@@ -1,5 +1,5 @@
 /*
- * AgroInvest Qarabağ — 3D plot viewer
+ * AbadLand Qarabağ — 3D plot viewer
  * Satellite imagery (Esri World Imagery) draped on real terrain (AWS Terrain Tiles, Terrarium encoding),
  * rendered with three.js r128. Modes: bird's-eye orbit, walk inside the plot, day / sunset.
  *

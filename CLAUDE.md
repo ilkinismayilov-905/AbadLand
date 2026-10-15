@@ -1,4 +1,4 @@
-# CLAUDE.md — AgroInvest Qarabağ (hackathon MVP)
+# CLAUDE.md — AbadLand Qarabağ (hackathon MVP)
 
 Web portal for agricultural investment in Azerbaijan's liberated territories (Qarabağ, Şərqi Zəngəzur). Investors find plots (map, catalog, fruit suitability, matching quiz), evaluate them (passport, ROI + prediction, satellite + AI analysis), apply to competitions and track status. Operators review, the commission approves, decisions go to a mocked EKTİS (Ministry system). After approval the investor manages the farm (crop plan, planting calendar, workforce, reports), and can optionally open a co-investment share offering (simulation).
 

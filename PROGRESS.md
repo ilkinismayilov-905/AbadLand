@@ -101,3 +101,6 @@ Core (1–7 + 9) ≈ 7:30 · with Step 8 ≈ 8:05
 - `I18n` (static `t()`, `stored()`/`render()` for notifications, `js()` dictionary for static JS), `WebConfig` (MessageSource from `I18n.BASENAMES`, `lang` cookie, `?lang=`), header switcher AZ | EN | RU, `<html lang>` per language. Enum labels + crop names in `i18n/enums*`; pages in `i18n/{common,plots,apply,staff,auction}*` (~1 000 keys × 3). Notifications stored as key + args (crop names via `I18n.keyArg`).
 - Kept Azerbaijani on purpose: seed data, user text, audit details, EKTİS payloads, AI analysis text, Swagger annotations. CLAUDE.md rule 3 and SPEC "Languages" updated.
 - Tests 56 green (+`I18nTest`). Crawled every page as anon/investor/farm owner/operator/commission/admin in en+ru: no missing keys, no 500; 375 px sweep in ru clean (passport columns got `min-w-0`).
+
+### Rebrand — AbadLand (2026-10-15)
+- Brand "AgroInvest" → "AbadLand" (common.brand az/en/ru, manifest, Swagger, docs, EKTİS source `ABADLAND_QARABAG`). Logo PNGs: only the top word redrawn ("AbadLand", Avenir Next Bold, same color #35693C / white, same cap height); icon and "Qarabağ" pixels unchanged, canvas 640→679 px wide. File names `agroinvest-*.png` and the Render URL kept.

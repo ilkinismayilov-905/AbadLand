@@ -1,4 +1,4 @@
-# AgroInvest Qarabağ
+# AbadLand Qarabağ
 
 **Canlı demo:** https://agroinvest-i0vv.onrender.com (demo hesablar aşağıda; pulsuz instans yatıbsa ilk açılış ~1 dəq çəkir)
 
@@ -89,8 +89,8 @@ Qeydlər:
 Lokal yoxlama:
 
 ```bash
-docker build -t agroinvest .
-docker run -p 8080:8080 -e ANTHROPIC_API_KEY=test agroinvest   # http://localhost:8080
+docker build -t abadland .
+docker run -p 8080:8080 -e ANTHROPIC_API_KEY=test abadland   # http://localhost:8080
 ```
 
 ## Səhifələr

@@ -23,7 +23,7 @@ import static az.aqroinvest.service.AuditService.BAKU;
 public class EktisService {
 
     /** Sender id in every EKTİS payload. */
-    static final String SOURCE = "AGROINVEST_QARABAG";
+    static final String SOURCE = "ABADLAND_QARABAG";
 
     private final EktisClient client;
     private final IntegrationLogRepository logs;
