@@ -263,6 +263,11 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 | `/idare/herraclar` | O, C, A | create (O), approve / reject / confirm (C), cancel (O) |
 | `/idare/istifadeciler` | A | users table (name, email, role, active, last login); "Yeni işçi" (OPERATOR / COMMISSION / ADMIN only, temporary password generated and shown once); activate / deactivate (not self). Audit `USER_CREATED`, `USER_DISABLED`, `USER_ENABLED`. |
 
+### Installed app (PWA) — bottom tab bar
+- Manifest `site.webmanifest` (`display: standalone`, `start_url: /`); no service worker.
+- Only when installed on an Android phone held upright (CSS `display-mode: standalone`, ≤ 767 px, portrait, coarse pointer): fixed bottom tabs **Ana səhifə `/` · Xəritə `/xerite` · Sahələr `/saheler` (+ `/muqayise`) · Müsabiqələr `/musabiqeler` · account tab**: "Daxil ol" → `/giris` (anon), "Kabinet" → `/kabinet` (INVESTOR) or `/idare` (staff); also active on `/bildirisler`. Quiz and auctions stay in the ☰ menu.
+- Browser tabs, desktop (also desktop-installed windows), landscape, print and iOS home-screen apps: unchanged. Header, ☰ menu, language switch and 🔔 stay as they are.
+
 ## REST (Swagger at `/swagger-ui.html`)
 `GET /api/v1/plots`, `GET /api/v1/plots/{code}` (incl. suitability), `GET /api/v1/competitions`, `GET /api/v1/applications/{number}/status` (auth), `GET /api/v1/external/decisions` (header `X-API-Key`).
 
@@ -276,5 +281,5 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 
 ## Languages (i18n)
 - UI languages: **az** (default), **en**, **ru**. Header switcher AZ | EN | RU → `?lang=xx` on the current URL; stored in the `lang` cookie (1 year); unsupported values are ignored.
-- Bundles: `messages*.properties` (binding errors) + `i18n/{enums,common,plots,apply,staff,auction}*.properties`; enum labels `enum.<Type>.<NAME>`, crop names `crop.<CODE>`. Missing key → AZ text (base bundle), never the server locale.
+- Bundles: `messages*.properties` (binding errors) + `i18n/{enums,common,plots,apply,staff,auction}*.properties`; enum labels `enum.<Type>.<NAME>`, crop names `crop.<CODE>`. Missing key → AZ text (base bundle), never the server locale. az / en / ru files of every bundle have the same keys (`I18nTest`).
 - Notifications are stored as a key + args and rendered in the reader's language. Seed data (plot names, descriptions, competition titles), user-entered text, audit details, EKTİS payloads and AI analysis text stay Azerbaijani.
