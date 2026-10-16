@@ -159,5 +159,7 @@ body { min-height: 100vh; }
     .app-tabbar a:focus-visible { outline: 3px solid rgba(46, 107, 58, .45); outline-offset: -3px; }
     /* Quiz: the sticky submit bar rides on top of the tabs instead of under them */
     .quiz-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: .75rem; }
+    /* AZ | EN | RU: taller touch targets (≈29 → ≈38 px); still shorter than the 44 px ☰ button, so the header keeps its height */
+    .lang-switch a { padding-top: .6rem; padding-bottom: .6rem; }
 }
 }
