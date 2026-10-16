@@ -236,7 +236,8 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 | URL | Who | Content |
 |---|---|---|
 | `/` | all | hero + CTA "Sizə uyğun torpağı tapın" + KPIs |
-| `/xerite` | all | Leaflet map (Xəritə/Peyk), polygons by activity, filters incl. "Hansı meyvə üçün?" |
+| `/xerite` | all | Leaflet map (Xəritə/Peyk), polygons by activity, filters incl. "Hansı meyvə üçün?"; `?qat=peyk` starts on the Peyk layer; popups link to passport, `/ai?sahe=CODE` and 3D |
+| `/ai` | all (GET only) | AI center: what the land analysis does / does not do (no NDVI, monitoring, soil chemistry, mine assessment, return guarantee), parcel picker `?sahe=CODE` (published plots only; then one cached `peyk.jpg`), AI state per plot (RUNNING · AVAILABLE · FAILED · SAMPLE · NONE, from stored rows), stored real result, the seeded sample labelled "Nümunə analiz — demo məlumat", how to read results (`#izah`). Never calls the model; running stays on the passport (`POST /saheler/{id}/ai-analiz`, login, 5/day) |
 | `/saheler` | all | catalog cards + filters + fruit filter + "N gün qalıb" + compare checkboxes |
 | `/saheler/{id}` | all | passport, crop suitability chips, ROI + prediction, satellite + AI, competition card, **3D görünüş** (layer toggle "Xəritə \| Peyk \| 3D") |
 | `/muqayise?ids=` | all | 2–3 plots side by side |
@@ -265,7 +266,9 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 
 ### Installed app (PWA) — bottom tab bar
 - Manifest `site.webmanifest` (`display: standalone`, `start_url: /`); no service worker.
-- Only when installed on an Android phone held upright (CSS `display-mode: standalone`, ≤ 767 px, portrait, coarse pointer): fixed bottom tabs **Ana səhifə `/` · Xəritə `/xerite` · Sahələr `/saheler` (+ `/muqayise`) · Müsabiqələr `/musabiqeler` · account tab**: "Daxil ol" → `/giris` (anon), "Kabinet" → `/kabinet` (INVESTOR) or `/idare` (staff); also active on `/bildirisler`. Quiz and auctions stay in the ☰ menu.
+- Only when installed on an Android phone held upright (CSS `display-mode: standalone`, ≤ 767 px, portrait, coarse pointer): fixed bottom tabs **Ana səhifə `/` · Xəritə `/xerite` · AI `/ai` · Sahələr `/saheler` (+ `/muqayise`) · Daha çox**.
+- "Daha çox" opens a native popover sheet (outside tap, Escape, Android back close it): Müsabiqələr, Hərraclar, Uyğunluq testi; anon: Daxil ol, Qeydiyyat; INVESTOR: Kabinet; staff: İdarəetmə; logged in: Bildirişlər (count), name + role, Çıxış (POST `/cixis` + CSRF). The tab is active on `/musabiqeler`, `/herraclar*`, `/uygunluq`, `/kabinet*`, `/idare*`, `/bildirisler`, `/giris`, `/qeydiyyat`; a red dot shows unread notifications.
+- In that mode the ☰ button is hidden only where `:popover-open` is supported; otherwise the "Daha çox" tab hides and ☰ stays. Every ☰ destination is reachable from the tabs or the sheet (`PwaTabBarTest`).
 - Browser tabs, desktop (also desktop-installed windows), landscape, print and iOS home-screen apps: unchanged. Header, ☰ menu, language switch and 🔔 stay as they are.
 
 ## REST (Swagger at `/swagger-ui.html`)
@@ -281,5 +284,5 @@ Nav: add "Hərraclar" to the public/investor menu; staff sidebar "Hərraclar". P
 
 ## Languages (i18n)
 - UI languages: **az** (default), **en**, **ru**. Header switcher AZ | EN | RU → `?lang=xx` on the current URL; stored in the `lang` cookie (1 year); unsupported values are ignored.
-- Bundles: `messages*.properties` (binding errors) + `i18n/{enums,common,plots,apply,staff,auction}*.properties`; enum labels `enum.<Type>.<NAME>`, crop names `crop.<CODE>`. Missing key → AZ text (base bundle), never the server locale. az / en / ru files of every bundle have the same keys (`I18nTest`).
+- Bundles: `messages*.properties` (binding errors) + `i18n/{enums,common,plots,apply,staff,auction,listing,ai}*.properties`; enum labels `enum.<Type>.<NAME>`, crop names `crop.<CODE>`. Missing key → AZ text (base bundle), never the server locale. az / en / ru files of every bundle have the same keys (`I18nTest`).
 - Notifications are stored as a key + args and rendered in the reader's language. Seed data (plot names, descriptions, competition titles), user-entered text, audit details, EKTİS payloads and AI analysis text stay Azerbaijani.
