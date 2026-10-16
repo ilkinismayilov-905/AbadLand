@@ -34,6 +34,7 @@
             <nav class="site-nav flex flex-col min-[900px]:flex-row min-[900px]:flex-wrap gap-1 text-sm" th:with="p=${currentPath ?: ''}">
                 <a th:href="@{/xerite}" th:classappend="${p.startsWith('/xerite')} ? 'active'" th:text="#{common.nav.map}"></a>
                 <a th:href="@{/saheler}" th:classappend="${p.startsWith('/saheler')} ? 'active'" th:text="#{common.nav.plots}"></a>
+                <a th:href="@{/ai}" th:classappend="${p == '/ai'} ? 'active'" th:text="#{common.nav.ai}"></a>
                 <a th:href="@{/musabiqeler}" th:classappend="${p.startsWith('/musabiqeler')} ? 'active'" th:text="#{common.nav.competitions}"></a>
                 <a th:href="@{/uygunluq}" th:classappend="${p.startsWith('/uygunluq')} ? 'active'" th:text="#{common.nav.quiz}"></a>
                 <a th:href="@{/herraclar}" th:classappend="${p.startsWith('/herraclar')} ? 'active'" th:text="#{common.nav.auctions}"></a>
@@ -228,6 +229,7 @@
             <span class="font-semibold text-white" th:text="#{common.footer.portal}"></span>
             <a th:href="@{/xerite}" class="hover:text-white" th:text="#{common.nav.map}"></a>
             <a th:href="@{/saheler}" class="hover:text-white" th:text="#{common.nav.plots}"></a>
+            <a th:href="@{/ai}" class="hover:text-white" th:text="#{common.nav.aiCenter}"></a>
             <a th:href="@{/musabiqeler}" class="hover:text-white" th:text="#{common.nav.competitions}"></a>
             <a th:href="@{/herraclar}" class="hover:text-white" th:text="#{common.nav.auctions}"></a>
         </nav>

@@ -50,6 +50,10 @@ function drawPlots(map, plots, withPopup, outlineOnly) {
                 + (p.score ? ' · ' + window.t('js.plots.match', 'uyğunluq') + ' ' + p.score : '')));
             div.appendChild(document.createElement('br'));
             const a = document.createElement('a'); a.href = '/saheler/' + p.id; a.textContent = window.t('js.plots.openPassport', 'Pasporta bax →'); div.appendChild(a);
+            if (p.code) {
+                const ai = document.createElement('a'); ai.href = '/ai?sahe=' + encodeURIComponent(p.code) + '#sec';
+                ai.textContent = window.t('js.plots.ai', 'AI analizi →'); ai.style.marginLeft = '12px'; div.appendChild(ai);
+            }
             if (p.subtitle) {
                 const b3 = document.createElement('a'); b3.href = '#'; b3.textContent = window.t('js.plots.view3d', '3D görünüş'); b3.style.marginLeft = '12px';
                 b3.onclick = e => { e.preventDefault(); map.closePopup(); open3d(p); };

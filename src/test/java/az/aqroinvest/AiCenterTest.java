@@ -180,6 +180,25 @@ class AiCenterTest {
     }
 
     @Test
+    void aiIsLinkedFromNavHomeMapAndPassport() throws Exception {
+        String home = html("/");
+        String nav = home.substring(home.indexOf("<nav class=\"site-nav"), home.indexOf("</nav>", home.indexOf("<nav class=\"site-nav")));
+        assertThat(nav).contains("href=\"/saheler\"", "href=\"/ai\"").doesNotContain("class=\"active\"");
+        assertThat(nav.indexOf("href=\"/ai\"")).isGreaterThan(nav.indexOf("href=\"/saheler\"")); // right after "Sahələr"
+        assertThat(count(home, "href=\"/ai\"")).isGreaterThanOrEqualTo(3); // nav, homepage AI card, footer
+        assertThat(home).contains("AI mərkəzi").doesNotContain("/saheler/" + plot("FZL-001").getId() + "#ai\"");
+        String onAi = html("/ai");
+        assertThat(onAi).containsPattern("<a href=\"/ai\" class=\"active\">AI</a>");
+        assertThat(html("/?lang=ru")).contains(">ИИ</a>", "ИИ-центр");
+        assertThat(html("/?lang=en")).contains(">AI</a>", "AI center");
+        // Map popups get "AI analizi →" (map.js reads it from the js.* dictionary)
+        assertThat(html("/xerite")).contains("\"js.plots.ai\":\"AI analizi ", "\"code\":\"FZL-001\"");
+        // Passport AI section links to the explainer
+        assertThat(html("/saheler/" + plot("LCN-001").getId())).contains("href=\"/ai#izah\"", "Nəticələri necə oxumalı? →");
+        assertThat(html("/saheler/" + plot("LCN-001").getId() + "?lang=en")).contains("How to read the results →");
+    }
+
+    @Test
     void onlyGetIsPublic() throws Exception {
         int s = mvc.perform(post("/ai").with(csrf())).andReturn().getResponse().getStatus();
         assertThat(s).isNotEqualTo(200); // anyRequest().authenticated() → login redirect

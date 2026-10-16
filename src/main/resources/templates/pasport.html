@@ -141,6 +141,7 @@
                     <span th:if="${aiSample}" class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700" th:text="#{plots.passport.aiSample}"></span>
                     <span th:if="${aiAnalysis != null and !aiSample}" class="text-xs text-gray-500"
                           th:text="${aiAnalysis.model} + ' · ' + ${@fmt.dateTime(aiAnalysis.createdAt)}"></span>
+                    <a th:href="@{/ai} + '#izah'" class="ml-auto text-sm font-medium text-[#2E6B3A] hover:underline" th:text="#{plots.passport.aiHowTo}"></a>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
                     <figure>
