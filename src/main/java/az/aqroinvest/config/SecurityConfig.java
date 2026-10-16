@@ -78,6 +78,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/saheler/*/ai-analiz").authenticated()
                         .requestMatchers(HttpMethod.POST, "/herraclar/**").hasRole("INVESTOR")
                         .requestMatchers(HttpMethod.GET, "/herraclar", "/herraclar/*", "/herraclar/*/protokol", "/api/v1/auctions/**").permitAll()
+                        // AI center: read-only page; running an analysis stays on the POST above (login)
+                        .requestMatchers(HttpMethod.GET, "/ai").permitAll()
                         .requestMatchers("/", "/xerite", "/saheler/**", "/muqayise", "/musabiqeler", "/uygunluq/**",
                                 "/qeydiyyat", "/giris", "/error", "/css/**", "/js/**", "/img/**", "/site.webmanifest", "/favicon.ico",
                                 "/api/v1/plots/**", "/api/v1/competitions", "/api/v1/external/**",

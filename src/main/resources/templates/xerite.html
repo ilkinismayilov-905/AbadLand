@@ -20,7 +20,8 @@
 <script th:src="@{/js/filters.js}"></script>
 <th:block th:replace="~{layout :: scripts3d}"></th:block>
 <script th:inline="javascript">
-    const map = createMap('map');
+    // ?qat=peyk starts on the satellite layer (AI center link); plain /xerite keeps the map layer
+    const map = createMap('map', /*[[${param.qat != null and param.qat[0] == 'peyk'}]]*/ false);
     drawPlots(map, /*[[${mapPlots}]]*/ [], true);
     addLegend(map);
 </script>

@@ -20,7 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +63,27 @@ public class AiAnalysisService {
     /** Latest DONE analysis (real or sample). */
     public Optional<AiAnalysis> latest(Plot plot) {
         return analyses.findFirstByPlotAndStatusOrderByCreatedAtDesc(plot, "DONE");
+    }
+
+    /** Latest real (non-sample) DONE analysis. */
+    public Optional<AiAnalysis> latestReal(Plot plot) {
+        return latest(plot).filter(a -> !SAMPLE_MODEL.equals(a.getModel()));
+    }
+
+    /** The seeded demo analysis, shown labelled as an example (AI center). */
+    public Optional<AiAnalysis> sample() {
+        return analyses.findFirstByModelAndStatusOrderByCreatedAtDesc(SAMPLE_MODEL, "DONE");
+    }
+
+    /** AI state per plot id (plots without analyses are absent = NONE). Reads stored rows only — never calls the model. */
+    public Map<Long, AiState> states() {
+        Map<Long, AiState> states = new HashMap<>();
+        for (var r : analyses.stateRows()) {
+            AiState s = SAMPLE_MODEL.equals(r.getModel()) ? AiState.SAMPLE : "DONE".equals(r.getStatus()) ? AiState.AVAILABLE : AiState.FAILED;
+            states.merge(r.getPlotId(), s, (a, b) -> a.ordinal() <= b.ordinal() ? a : b);
+        }
+        running.forEach(id -> states.put(id, AiState.RUNNING));
+        return states;
     }
 
     public Optional<AiView> view(AiAnalysis a) {

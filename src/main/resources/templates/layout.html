@@ -34,6 +34,7 @@
             <nav class="site-nav flex flex-col min-[900px]:flex-row min-[900px]:flex-wrap gap-1 text-sm" th:with="p=${currentPath ?: ''}">
                 <a th:href="@{/xerite}" th:classappend="${p.startsWith('/xerite')} ? 'active'" th:text="#{common.nav.map}"></a>
                 <a th:href="@{/saheler}" th:classappend="${p.startsWith('/saheler')} ? 'active'" th:text="#{common.nav.plots}"></a>
+                <a th:href="@{/ai}" th:classappend="${p == '/ai'} ? 'active'" th:text="#{common.nav.ai}"></a>
                 <a th:href="@{/musabiqeler}" th:classappend="${p.startsWith('/musabiqeler')} ? 'active'" th:text="#{common.nav.competitions}"></a>
                 <a th:href="@{/uygunluq}" th:classappend="${p.startsWith('/uygunluq')} ? 'active'" th:text="#{common.nav.quiz}"></a>
                 <a th:href="@{/herraclar}" th:classappend="${p.startsWith('/herraclar')} ? 'active'" th:text="#{common.nav.auctions}"></a>
@@ -66,12 +67,13 @@
                 <span th:if="${unreadCount > 0}" th:text="${unreadCount}"
                       class="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full px-1.5"></span>
             </a>
-            <button type="button" class="min-[900px]:hidden p-2 w-11 h-11 rounded-lg text-2xl leading-none text-[#1F2933] hover:bg-leaf-50" th:attr="aria-label=#{common.nav.menu}"
+            <button type="button" class="site-menu-btn min-[900px]:hidden p-2 w-11 h-11 rounded-lg text-2xl leading-none text-[#1F2933] hover:bg-leaf-50" th:attr="aria-label=#{common.nav.menu}"
                     aria-controls="site-menu" aria-expanded="false"
                     onclick="const m=document.getElementById('site-menu');m.classList.toggle('hidden');this.setAttribute('aria-expanded',!m.classList.contains('hidden'))">☰</button>
         </div>
     </div>
-    <!-- Bottom tabs: only in the installed Android app on a phone held upright (app.css "Installed Android app"); hidden everywhere else -->
+    <!-- Bottom tabs: only in the installed Android app on a phone held upright (app.css "Installed Android app"); hidden everywhere else.
+         "More" opens the #app-more sheet (native popover) with every other ☰ destination; without popover support the tab hides and ☰ stays. -->
     <nav class="app-tabbar" th:attr="aria-label=#{common.tab.label}" th:with="p=${currentPath ?: ''}">
         <a th:href="@{/}" th:classappend="${p == '/'} ? 'on'" th:attr="aria-current=${p == '/'} ? 'page'">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v12h5v-6h4v6h5V9"/></svg>
@@ -79,23 +81,35 @@
         <a th:href="@{/xerite}" th:with="on=${p.startsWith('/xerite')}" th:classappend="${on} ? 'on'" th:attr="aria-current=${on} ? 'page'">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>
             <span th:text="#{common.nav.map}"></span></a>
+        <a th:href="@{/ai}" th:with="on=${p == '/ai'}" th:classappend="${on} ? 'on'" th:attr="aria-current=${on} ? 'page'">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>
+            <span th:text="#{common.nav.ai}"></span></a>
         <a th:href="@{/saheler}" th:with="on=${p.startsWith('/saheler') or p.startsWith('/muqayise')}" th:classappend="${on} ? 'on'" th:attr="aria-current=${on} ? 'page'">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
             <span th:text="#{common.nav.plots}"></span></a>
-        <a th:href="@{/musabiqeler}" th:with="on=${p.startsWith('/musabiqeler')}" th:classappend="${on} ? 'on'" th:attr="aria-current=${on} ? 'page'">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4m10-4h3a3 3 0 0 1-3 4m-5 3v5m-4 3h8"/></svg>
-            <span th:text="#{common.nav.competitions}"></span></a>
-        <!-- Account follows the existing role links: anonymous → login, investor → /kabinet, staff → /idare -->
-        <a sec:authorize="isAnonymous()" th:href="@{/giris}" th:with="on=${p.startsWith('/giris') or p.startsWith('/qeydiyyat')}" th:classappend="${on} ? 'on'" th:attr="aria-current=${on} ? 'page'">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-            <span th:text="#{common.nav.login}"></span></a>
-        <a sec:authorize="hasRole('INVESTOR')" th:href="@{/kabinet}" th:with="on=${p.startsWith('/kabinet') or p.startsWith('/bildirisler')}" th:classappend="${on} ? 'on'" th:attr="aria-current=${on} ? 'page'">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-            <span th:text="#{common.nav.cabinet}"></span></a>
-        <a sec:authorize="hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/idare}" th:with="on=${p.startsWith('/idare') or p.startsWith('/bildirisler')}" th:classappend="${on} ? 'on'" th:attr="aria-current=${on} ? 'page'">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-            <span th:text="#{common.nav.cabinet}"></span></a>
+        <button type="button" class="tab-more" popovertarget="app-more"
+                th:with="on=${p.startsWith('/musabiqeler') or p.startsWith('/herraclar') or p.startsWith('/uygunluq') or p.startsWith('/kabinet') or p.startsWith('/idare') or p.startsWith('/bildirisler') or p.startsWith('/giris') or p.startsWith('/qeydiyyat')}"
+                th:classappend="${on} ? 'on'">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+            <span th:text="#{common.tab.more}"></span><i th:if="${unreadCount > 0}" class="tab-dot" aria-hidden="true"></i></button>
     </nav>
+    <div id="app-more" class="app-more" popover th:attr="aria-label=#{common.tab.more}" th:with="p=${currentPath ?: ''}">
+        <div sec:authorize="isAuthenticated()" class="app-more-user"><b th:text="${userShortName}"></b>
+            <span th:text="'(' + ${@statusLabels.roleLabel(#authentication.authorities[0].authority)} + ')'"></span></div>
+        <a th:href="@{/musabiqeler}" th:attr="aria-current=${p.startsWith('/musabiqeler')} ? 'page'" th:text="#{common.nav.competitions}"></a>
+        <a th:href="@{/herraclar}" th:attr="aria-current=${p.startsWith('/herraclar')} ? 'page'" th:text="#{common.nav.auctions}"></a>
+        <a th:href="@{/uygunluq}" th:attr="aria-current=${p.startsWith('/uygunluq')} ? 'page'" th:text="#{common.nav.quiz}"></a>
+        <a sec:authorize="hasRole('INVESTOR')" th:href="@{/kabinet}" th:attr="aria-current=${p.startsWith('/kabinet')} ? 'page'" th:text="#{common.nav.cabinet}"></a>
+        <a sec:authorize="hasAnyRole('OPERATOR','COMMISSION','ADMIN')" th:href="@{/idare}" th:attr="aria-current=${p.startsWith('/idare')} ? 'page'" th:text="#{common.nav.admin}"></a>
+        <a sec:authorize="isAuthenticated()" th:href="@{/bildirisler}" th:attr="aria-current=${p.startsWith('/bildirisler')} ? 'page'">[[#{common.nav.notifications}]]
+            <span th:if="${unreadCount > 0}" class="app-more-count" th:text="${unreadCount}"></span></a>
+        <th:block sec:authorize="isAnonymous()">
+            <a th:href="@{/giris}" th:attr="aria-current=${p.startsWith('/giris')} ? 'page'" th:text="#{common.nav.login}"></a>
+            <a th:href="@{/qeydiyyat}" th:attr="aria-current=${p.startsWith('/qeydiyyat')} ? 'page'" th:text="#{common.nav.register}"></a>
+        </th:block>
+        <form sec:authorize="isAuthenticated()" th:action="@{/cixis}" method="post"><button th:text="#{common.nav.logout}"></button></form>
+        <button type="button" class="app-more-close" popovertarget="app-more" popovertargetaction="hide" th:text="#{common.filter.close}"></button>
+    </div>
     <script>
         (function () {
             const h = document.getElementById('site-header');
@@ -228,6 +242,7 @@
             <span class="font-semibold text-white" th:text="#{common.footer.portal}"></span>
             <a th:href="@{/xerite}" class="hover:text-white" th:text="#{common.nav.map}"></a>
             <a th:href="@{/saheler}" class="hover:text-white" th:text="#{common.nav.plots}"></a>
+            <a th:href="@{/ai}" class="hover:text-white" th:text="#{common.nav.aiCenter}"></a>
             <a th:href="@{/musabiqeler}" class="hover:text-white" th:text="#{common.nav.competitions}"></a>
             <a th:href="@{/herraclar}" class="hover:text-white" th:text="#{common.nav.auctions}"></a>
         </nav>

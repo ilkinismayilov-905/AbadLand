@@ -140,7 +140,9 @@ body { min-height: 100vh; }
    Browser tabs, desktop (incl. desktop-installed windows), landscape, print and iOS home-screen apps never match → unchanged.
    The bar is a fixed child of the sticky header, so it paints in the header's layer (1100): above Leaflet controls (1000),
    below the filter sheet (1250/1300) and the 3D viewer (5000). Plain CSS on purpose: it must not depend on the Tailwind CDN. */
-.app-tabbar { display: none; }
+.app-tabbar, .app-more { display: none; }
+/* No popover support (old browsers): no "More" tab — the ☰ menu below stays the way to reach the other pages */
+@supports not selector(:popover-open) { .tab-more { display: none !important; } }
 @supports not (-webkit-touch-callout: none) { /* Android only: iOS Safari is the engine that supports this property */
 @media screen and (display-mode: standalone) and (max-width: 767px) and (orientation: portrait) and (pointer: coarse) {
     :root { --tabbar-h: 60px; }
@@ -148,18 +150,37 @@ body { min-height: 100vh; }
     body { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); } /* footer / last content scrolls clear */
     .app-tabbar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
         padding-bottom: env(safe-area-inset-bottom, 0px); background: #fff; border-top: 1px solid #DDE3DC; box-shadow: 0 -2px 12px rgba(31, 41, 51, .06); }
-    .app-tabbar a { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    .app-tabbar :is(a, button) { flex: 1 1 0; position: relative; background: none; border: 0; font: inherit; cursor: pointer; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
         color: #4b5563; font-size: 11px; line-height: 1.2; font-weight: 500; -webkit-tap-highlight-color: transparent; }
     .app-tabbar span { max-width: 100%; padding: 0 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .app-tabbar svg { display: block; width: 24px; height: 24px; padding: 3px 16px; box-sizing: content-box; border-radius: 9999px;
         fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .app-tabbar a.on { color: #2E6B3A; font-weight: 600; }
-    .app-tabbar a.on svg { background: #e3f0de; }
-    .app-tabbar a:active { background: #f1f8ee; }
-    .app-tabbar a:focus-visible { outline: 3px solid rgba(46, 107, 58, .45); outline-offset: -3px; }
+    .app-tabbar :is(a, button) { color: #4b5563; font-size: 11px; line-height: 1.2; font-weight: 500; }
+    .app-tabbar .on { color: #2E6B3A; font-weight: 600; }
+    .app-tabbar .on svg { background: #e3f0de; }
+    .app-tabbar :is(a, button):active { background: #f1f8ee; }
+    .app-tabbar :is(a, button):focus-visible { outline: 3px solid rgba(46, 107, 58, .45); outline-offset: -3px; }
+    .tab-more svg { fill: currentColor; }
+    .tab-dot { position: absolute; top: 8px; left: calc(50% + 10px); width: 8px; height: 8px; border-radius: 9999px; background: #dc2626; }
+    /* "More" sheet (native popover: outside tap, Escape and Android back close it); top layer = above header, Leaflet, filter sheet */
+    .app-more:popover-open { display: flex; flex-direction: column; position: fixed; inset: auto 0 0 0; width: auto; max-width: none; height: auto;
+        max-height: 80vh; overflow-y: auto; margin: 0; border: 0; border-radius: 18px 18px 0 0; background: #fff; color: #1F2933;
+        padding: .75rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -8px 30px rgba(0, 0, 0, .18); }
+    .app-more::backdrop { background: rgba(17, 24, 39, .45); }
+    .app-more > a, .app-more form button, .app-more-close { display: flex; align-items: center; gap: .5rem; min-height: 48px; padding: 0 .75rem;
+        border-radius: 10px; font-size: 1rem; font-weight: 500; color: #1F2933; background: none; border: 0; width: 100%; text-align: left; cursor: pointer; }
+    .app-more > a[aria-current="page"] { color: #2E6B3A; background: #e3f0de; font-weight: 600; }
+    .app-more > a:active, .app-more form button:active { background: #f1f8ee; }
+    .app-more :is(a, button):focus-visible { outline: 3px solid rgba(46, 107, 58, .45); outline-offset: -3px; }
+    .app-more-user { padding: .5rem .75rem; font-size: .875rem; color: #4b5563; border-bottom: 1px solid #DDE3DC; margin-bottom: .25rem; }
+    .app-more form { border-top: 1px solid #DDE3DC; margin-top: .25rem; padding-top: .25rem; }
+    .app-more-close { justify-content: center; margin-top: .25rem; color: #4b5563; border: 1px solid #DDE3DC; }
+    .app-more-count { margin-left: auto; background: #dc2626; color: #fff; font-size: .75rem; border-radius: 9999px; padding: 0 .45rem; }
     /* Quiz: the sticky submit bar rides on top of the tabs instead of under them */
     .quiz-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: .75rem; }
     /* AZ | EN | RU: taller touch targets (≈29 → ≈38 px); still shorter than the 44 px ☰ button, so the header keeps its height */
     .lang-switch a { padding-top: .6rem; padding-bottom: .6rem; }
+    /* ☰ is replaced by the "More" tab — only where popover works (otherwise the More tab is hidden and ☰ stays) */
+    @supports selector(:popover-open) { .site-menu-btn { display: none !important; } }
 }
 }
