@@ -135,3 +135,31 @@ body { min-height: 100vh; }
 /* Floating sample plot card: centred over the bottom edge on phones, bottom-right corner from 768 px */
 .hero-float { position: absolute; left: 50%; bottom: -3.5rem; transform: translateX(-50%); width: calc(100% - 2rem); max-width: 20rem; }
 @media (min-width: 768px) { .hero-float { left: auto; right: -12px; bottom: -2rem; transform: none; width: 18rem; } }
+
+/* Installed Android app (Chrome "Install app" → display-mode: standalone), phone held upright: bottom tab bar (layout.html header).
+   Browser tabs, desktop (incl. desktop-installed windows), landscape, print and iOS home-screen apps never match → unchanged.
+   The bar is a fixed child of the sticky header, so it paints in the header's layer (1100): above Leaflet controls (1000),
+   below the filter sheet (1250/1300) and the 3D viewer (5000). Plain CSS on purpose: it must not depend on the Tailwind CDN. */
+.app-tabbar { display: none; }
+@supports not (-webkit-touch-callout: none) { /* Android only: iOS Safari is the engine that supports this property */
+@media screen and (display-mode: standalone) and (max-width: 767px) and (orientation: portrait) and (pointer: coarse) {
+    :root { --tabbar-h: 60px; }
+    html { scroll-padding-bottom: var(--tabbar-h); } /* fields scrolled into view stay above the bar */
+    body { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); } /* footer / last content scrolls clear */
+    .app-tabbar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px); background: #fff; border-top: 1px solid #DDE3DC; box-shadow: 0 -2px 12px rgba(31, 41, 51, .06); }
+    .app-tabbar a { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+        color: #4b5563; font-size: 11px; line-height: 1.2; font-weight: 500; -webkit-tap-highlight-color: transparent; }
+    .app-tabbar span { max-width: 100%; padding: 0 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .app-tabbar svg { display: block; width: 24px; height: 24px; padding: 3px 16px; box-sizing: content-box; border-radius: 9999px;
+        fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .app-tabbar a.on { color: #2E6B3A; font-weight: 600; }
+    .app-tabbar a.on svg { background: #e3f0de; }
+    .app-tabbar a:active { background: #f1f8ee; }
+    .app-tabbar a:focus-visible { outline: 3px solid rgba(46, 107, 58, .45); outline-offset: -3px; }
+    /* Quiz: the sticky submit bar rides on top of the tabs instead of under them */
+    .quiz-bar { bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); padding-bottom: .75rem; }
+    /* AZ | EN | RU: taller touch targets (≈29 → ≈38 px); still shorter than the 44 px ☰ button, so the header keeps its height */
+    .lang-switch a { padding-top: .6rem; padding-bottom: .6rem; }
+}
+}

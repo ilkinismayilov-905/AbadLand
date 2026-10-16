@@ -5,7 +5,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,5 +45,24 @@ class I18nTest {
         LocaleContextHolder.setLocale(Locale.ENGLISH);
         assertThat(I18n.t("enum.ActivityType.HORTICULTURE")).isEqualTo("Horticulture");
         assertThat(i18n.js()).containsEntry("js.auction.startPrice", "Starting price"); // JS dictionary follows the language
+    }
+
+    @Test
+    void everyBundleHasTheSameKeysInAllLanguages() throws IOException {
+        for (String base : I18n.BASENAMES) {
+            Set<String> az = keys(base + ".properties");
+            assertThat(az).as(base).isNotEmpty();
+            assertThat(keys(base + "_en.properties")).as(base + " en").isEqualTo(az);
+            assertThat(keys(base + "_ru.properties")).as(base + " ru").isEqualTo(az);
+        }
+    }
+
+    private static Set<String> keys(String file) throws IOException {
+        try (InputStream in = I18nTest.class.getClassLoader().getResourceAsStream(file)) {
+            assertThat(in).as(file).isNotNull();
+            Properties p = new Properties();
+            p.load(new InputStreamReader(in, StandardCharsets.UTF_8));
+            return new TreeSet<>(p.stringPropertyNames());
+        }
     }
 }
