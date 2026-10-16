@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="az" th:lang="${@i18n.lang()}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layout :: head(#{ai.title})}"></head>
+<body class="bg-gray-50 text-gray-900">
+<header th:replace="~{layout :: header}"></header>
+<!--/* Light on purpose: no map, no 3D, no satellite image until a plot is chosen (then exactly one, the cached peyk.jpg) */-->
+<main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- A. Hero -->
+    <section class="card p-5 md:p-8 bg-gradient-to-br from-white to-leaf-50">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-leaf-100 text-leaf-800" th:text="#{ai.badge}"></span>
+        <h1 class="mt-3 text-2xl md:text-3xl font-bold text-[#1E4A28]" th:text="#{ai.heading}"></h1>
+        <p class="mt-2 max-w-3xl text-gray-700" th:text="#{ai.lead}"></p>
+        <div class="mt-5 flex flex-wrap gap-3">
+            <a href="#sec" class="btn-primary" th:text="#{ai.choose}"></a>
+            <a href="#numune" class="btn-secondary" th:text="#{ai.seeExample}"></a>
+        </div>
+        <p class="mt-4 flex items-center gap-2 text-sm text-gray-600">
+            <span class="inline-block w-2.5 h-2.5 rounded-full" th:classappend="${aiConfigured} ? 'bg-green-600' : 'bg-gray-400'" aria-hidden="true"></span>
+            <span th:text="${aiConfigured} ? #{ai.statusOn} : #{ai.statusOff}"></span>
+        </p>
+    </section>
+
+    <!-- B. What it uses and gives (implemented features only) -->
+    <section aria-labelledby="ai-uses">
+        <h2 id="ai-uses" class="text-xl font-bold" th:text="#{ai.uses}"></h2>
+        <div class="mt-3 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="card p-4 flex gap-3 items-start lg:block"><div class="home-icon shrink-0" aria-hidden="true">🛰️</div>
+                <div><h3 class="font-semibold lg:mt-3" th:text="#{ai.cap1}"></h3><p class="mt-1 text-sm text-gray-600" th:text="#{ai.cap1Text}"></p></div></div>
+            <div class="card p-4 flex gap-3 items-start lg:block"><div class="home-icon shrink-0" aria-hidden="true">🌦️</div>
+                <div><h3 class="font-semibold lg:mt-3" th:text="#{ai.cap2}"></h3><p class="mt-1 text-sm text-gray-600" th:text="#{ai.cap2Text}"></p></div></div>
+            <div class="card p-4 flex gap-3 items-start lg:block"><div class="home-icon shrink-0" aria-hidden="true">🌱</div>
+                <div><h3 class="font-semibold lg:mt-3" th:text="#{ai.cap3}"></h3><p class="mt-1 text-sm text-gray-600" th:text="#{ai.cap3Text}"></p></div></div>
+            <div class="card p-4 flex gap-3 items-start lg:block"><div class="home-icon shrink-0" aria-hidden="true">💧</div>
+                <div><h3 class="font-semibold lg:mt-3" th:text="#{ai.cap4}"></h3><p class="mt-1 text-sm text-gray-600" th:text="#{ai.cap4Text}"></p></div></div>
+        </div>
+        <p class="mt-3 text-sm text-gray-600"><b th:text="#{ai.notTitle}"></b> <span th:text="#{ai.notText}"></span></p>
+    </section>
+
+    <!-- C + D. Choose a plot, then its satellite image, AI state and result -->
+    <section id="sec" class="card p-5 space-y-4 scroll-mt-24">
+        <h2 class="text-xl font-bold" th:text="#{ai.pickHeading}"></h2>
+        <form th:action="@{/ai} + '#sec'" method="get" class="flex flex-col sm:flex-row sm:items-end gap-3">
+            <label class="flex-1 min-w-0"><span class="field-label" th:text="#{ai.pickLabel}"></span>
+                <select name="sahe" class="field" required>
+                    <option value="" th:text="#{ai.pickPlaceholder}"></option>
+                    <optgroup th:each="g : ${groups}" th:label="${@statusLabels.label(g.key)}">
+                        <option th:each="p : ${g.value}" th:value="${p.code}" th:selected="${selected != null and selected.id == p.id}"
+                                th:text="${p.code} + ' · ' + ${p.name} + ' · ' + #{plots.ha(${@fmt.dec(p.areaHa)})} + (${analysedIds.contains(p.id)} ? ' · ✓ AI' : '')"></option>
+                    </optgroup>
+                </select></label>
+            <button class="btn-primary" th:text="#{ai.pickSubmit}"></button>
+        </form>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            <a th:href="@{/xerite(qat='peyk')}" class="font-medium text-[#2E6B3A] hover:underline py-1" th:text="'🛰️ ' + #{ai.pickMap} + ' →'"></a>
+        </div>
+        <div class="text-sm">
+            <span class="text-gray-600" th:text="#{ai.withAnalysis}"></span>
+            <span th:if="${analysed.isEmpty()}" class="text-gray-500" th:text="#{ai.noneAnalysed}"></span>
+            <span class="inline-flex flex-wrap gap-2 align-middle">
+                <a th:each="p : ${analysed}" th:href="@{/ai(sahe=${p.code})} + '#sec'" class="inline-block px-3 py-1 rounded-full border border-[#DDE3DC] bg-white hover:bg-leaf-50" th:text="${p.code} + ' · ' + ${p.district}"></a>
+            </span>
+        </div>
+
+        <p th:if="${notFound}" class="p-3 rounded bg-amber-50 border border-amber-200 text-sm text-amber-900" th:text="#{ai.notFound}"></p>
+
+        <div th:if="${selected != null}" class="grid md:grid-cols-2 gap-5 border-t border-[#DDE3DC] pt-4">
+            <figure class="min-w-0">
+                <img th:src="@{/saheler/{id}/peyk.jpg(id=${selected.id})}" th:alt="#{plots.passport.satAlt}" width="1024" height="1024"
+                     loading="lazy" decoding="async" class="w-full h-auto aspect-square object-cover rounded bg-gray-100"
+                     th:data-unavailable="#{plots.passport.satUnavailable}"
+                     onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'w-full aspect-square rounded bg-gray-100 flex items-center justify-center text-sm text-gray-500',textContent:this.dataset.unavailable}))">
+                <figcaption class="text-xs text-gray-500 mt-1"><span th:text="#{ai.imageCaption}"></span> <span th:text="#{plots.passport.satCredit}"></span></figcaption>
+            </figure>
+            <div class="space-y-3 text-sm min-w-0">
+                <div>
+                    <div class="text-gray-500" th:text="${selected.code} + ' · ' + ${@statusLabels.label(selected.economicRegion)}"></div>
+                    <h3 class="text-xl font-semibold" th:text="${selected.name}"></h3>
+                    <div class="text-gray-600" th:text="#{plots.passport.location(${selected.district}, ${selected.village}, ${@fmt.dec(selected.areaHa)})}"></div>
+                </div>
+                <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                    <dt class="text-gray-500" th:text="#{ai.facts.purpose}"></dt><dd th:text="${@statusLabels.label(selected.purpose)}"></dd>
+                    <dt class="text-gray-500" th:text="#{ai.facts.water}"></dt><dd th:text="${selected.waterSource} ?: '—'"></dd>
+                    <dt class="text-gray-500" th:text="#{ai.facts.irrigation}"></dt><dd th:text="${selected.irrigation} ? #{ai.yes} : #{ai.no}"></dd>
+                </dl>
+                <div class="rounded-lg border border-[#DDE3DC] p-3 space-y-2" th:attr="data-ai-state=${selectedState}">
+                    <span th:class="${@statusLabels.badge(selectedState)}" th:text="${@statusLabels.label(selectedState)}"></span>
+                    <p th:text="#{${'ai.state.' + selectedState}}"></p>
+                </div>
+                <div class="flex flex-wrap gap-3" th:with="passport=@{/saheler/{id}(id=${selected.id})} + '#ai', canRun=${selectedState.name() != 'AVAILABLE' and selectedState.name() != 'RUNNING' and aiConfigured}">
+                    <a th:if="${selectedState.name() == 'AVAILABLE'}" th:href="${passport}" class="btn-primary" th:text="#{ai.viewResult}"></a>
+                    <a th:if="${canRun}" sec:authorize="isAuthenticated()" th:href="${passport}" class="btn-primary" th:text="#{ai.runOnPassport}"></a>
+                    <a th:if="${canRun}" sec:authorize="isAnonymous()" th:href="@{/giris}" class="btn-primary" th:text="#{ai.loginToRun}"></a>
+                    <a th:unless="${selectedState.name() == 'AVAILABLE'}" th:href="${passport}" class="btn-secondary" th:text="#{ai.openPassport}"></a>
+                    <a th:if="${selectedState.name() == 'SAMPLE'}" href="#numune" class="btn-secondary" th:text="#{ai.seeExample}"></a>
+                </div>
+                <p th:unless="${aiConfigured}" class="text-xs text-gray-500" th:text="#{ai.noKeyNote}"></p>
+                <p class="text-xs text-gray-500" th:text="#{ai.limitNote}"></p>
+            </div>
+        </div>
+
+        <div th:if="${selectedAi != null}" class="border-t border-[#DDE3DC] pt-4 space-y-4 text-sm">
+            <div class="flex flex-wrap items-center gap-3">
+                <h3 class="font-semibold text-base" th:text="#{ai.realResult}"></h3>
+                <span class="text-xs text-gray-500" th:text="${selectedAnalysis.model} + ' · ' + ${@fmt.dateTime(selectedAnalysis.createdAt)}"></span>
+            </div>
+            <div th:replace="~{ai-fragments :: aiSummary(${selectedAi})}"></div>
+            <div th:replace="~{ai-fragments :: aiDetails(${selectedAi})}"></div>
+            <p class="text-xs text-gray-500" th:text="#{plots.passport.aiDisclaimer}"></p>
+        </div>
+    </section>
+
+    <!-- E. Example: the seeded sample, always labelled as demo data -->
+    <section id="numune" class="card p-5 space-y-4 scroll-mt-24">
+        <div class="flex flex-wrap items-center gap-3">
+            <h2 class="text-xl font-bold" th:text="#{ai.exampleHeading}"></h2>
+            <span class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800" th:text="#{ai.exampleBadge}"></span>
+        </div>
+        <th:block th:if="${sample != null}">
+            <p class="text-sm text-gray-600">[[#{ai.exampleIntro}]]
+                <a th:href="@{/saheler/{id}(id=${samplePlot.id})}" class="font-medium text-[#2E6B3A] hover:underline" th:text="${samplePlot.code} + ' · ' + ${samplePlot.name}"></a></p>
+            <div class="text-sm space-y-4">
+                <div th:replace="~{ai-fragments :: aiSummary(${sample})}"></div>
+                <div th:replace="~{ai-fragments :: aiDetails(${sample})}"></div>
+            </div>
+        </th:block>
+        <p th:if="${sample == null}" class="text-sm text-gray-500" th:text="#{ai.exampleNone}"></p>
+    </section>
+
+    <!-- F. How to read the results -->
+    <section id="izah" class="card p-5 scroll-mt-24">
+        <h2 class="text-xl font-bold" th:text="#{ai.explainHeading}"></h2>
+        <div class="mt-3 divide-y divide-[#DDE3DC]">
+            <details th:each="i : ${#numbers.sequence(1, 5)}" class="py-3 group">
+                <summary class="cursor-pointer font-medium" th:text="#{${'ai.ex' + i}}"></summary>
+                <p class="mt-2 text-sm text-gray-600" th:text="#{${'ai.ex' + i + 'Text'}}"></p>
+            </details>
+        </div>
+    </section>
+
+    <!-- G. Next step -->
+    <section class="card p-5 bg-leaf-50 space-y-3">
+        <h2 class="text-xl font-bold" th:text="#{ai.nextHeading}"></h2>
+        <p sec:authorize="isAnonymous()" class="text-gray-700" th:text="#{ai.nextAnon}"></p>
+        <p sec:authorize="isAuthenticated()" class="text-gray-700" th:text="#{ai.nextUser}"></p>
+        <div class="flex flex-wrap gap-3">
+            <a href="#sec" class="btn-primary" th:text="#{ai.choose}"></a>
+            <th:block sec:authorize="isAnonymous()">
+                <a th:href="@{/giris}" class="btn-secondary" th:text="#{common.nav.login}"></a>
+                <a th:href="@{/qeydiyyat}" class="btn-secondary" th:text="#{common.nav.register}"></a>
+            </th:block>
+        </div>
+        <p class="text-xs text-gray-500" th:text="#{plots.passport.aiDisclaimer}"></p>
+    </section>
+</main>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>

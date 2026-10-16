@@ -59,6 +59,11 @@ public class StatusLabels {
         put(RiskLevel.LOW, GREEN);
         put(RiskLevel.MEDIUM, YELLOW);
         put(RiskLevel.HIGH, RED);
+        put(AiState.RUNNING, BLUE);
+        put(AiState.AVAILABLE, GREEN);
+        put(AiState.FAILED, RED);
+        put(AiState.SAMPLE, YELLOW);
+        put(AiState.NONE, GRAY);
         put(WorkRole.AGRONOMIST, GRAY);
         put(WorkRole.VET, GRAY);
         put(WorkRole.MACHINE_OPERATOR, GRAY);
