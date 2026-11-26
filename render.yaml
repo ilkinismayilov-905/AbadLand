@@ -1,0 +1,23 @@
+# Render Blueprint: New -> Blueprint -> pick this repo. Builds the root Dockerfile.
+# Secrets marked sync: false are asked for once in the Render dashboard (never stored in git).
+services:
+  - type: web
+    name: abadland
+    runtime: docker
+    plan: free            # 512 MB; Dockerfile JVM flags are tuned for it
+    region: frankfurt     # closest Render region to Baku
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false       # optional: without it the AI button is disabled
+      - key: AI_MODEL
+        value: claude-sonnet-5-5
+      - key: APP_EXTERNALAPIKEY
+        generateValue: true   # random key for /api/v1/external/**
+      - key: EKTIS_MODE
+        value: MOCK
+      - key: EKTIS_MOCK_FAIL
+        value: "false"

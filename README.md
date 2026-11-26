@@ -69,8 +69,12 @@ Canlı: **https://agroinvest-i0vv.onrender.com**
 
 Kök qovluqdakı `Dockerfile` iki mərhələlidir: Maven + JDK 21 ilə jar yığır, sonra `eclipse-temurin:21-jre` üzərində işə salır (root olmayan istifadəçi ilə). Lokal işə salmaq üçün Docker **lazım deyil** — bu yalnız deploy üçündür.
 
+**Blueprint ilə (ən sadə):** Render → **New → Blueprint** → bu reponu seçin. Kök qovluqdakı `render.yaml` hər şeyi qurur (Docker, free plan, Frankfurt, health check `/`, `AI_MODEL=claude-sonnet-5-5`, `APP_EXTERNALAPIKEY` avtomatik təsadüfi). Yalnız `ANTHROPIC_API_KEY`-i soruşacaq (boş buraxsanız AI düyməsi deaktiv olur).
+
+**Əl ilə:**
+
 1. Render → **New → Web Service** → GitHub reposunu seçin → **Runtime: Docker** (Dockerfile avtomatik tapılır).
-2. **Instance:** 512 MB kifayətdir — `JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"` heap-i konteyner limitinin 75%-i ilə məhdudlaşdırır.
+2. **Instance:** 512 MB kifayətdir — `Dockerfile`-dakı `JAVA_TOOL_OPTIONS` heap-i konteyner limitinin 60%-i ilə məhdudlaşdırır.
 3. **Environment** (dəyərləri yalnız Render panelində yazın, fayla yox):
 
    | Dəyişən | Qeyd |
