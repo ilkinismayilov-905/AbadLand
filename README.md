@@ -1,6 +1,6 @@
 # AbadLand Qarabağ
 
-**Canlı demo:** https://agroinvest-i0vv.onrender.com (demo hesablar aşağıda; pulsuz instans yatıbsa ilk açılış ~1 dəq çəkir)
+**Canlı demo:** https://abadlandkarabakh-pn11.onrender.com (demo hesablar aşağıda; pulsuz instans yatıbsa ilk açılış ~1 dəq çəkir)
 
 Qarabağ və Şərqi Zəngəzurda kənd təsərrüfatına investisiya portalı (hakaton MVP). İnvestor torpaq sahələrini tapır
 (xəritə, kataloq, meyvə uyğunluğu, uyğunluq testi), qiymətləndirir (pasport, ROI + proqnoz, peyk + 3D + AI analizi),
@@ -65,7 +65,7 @@ export AI_MODEL=claude-sonnet-5-5
 
 ## Deploy (Render)
 
-Canlı: **https://agroinvest-i0vv.onrender.com**
+Canlı: **https://abadlandkarabakh-pn11.onrender.com**
 
 Kök qovluqdakı `Dockerfile` iki mərhələlidir: Maven + JDK 21 ilə jar yığır, sonra `eclipse-temurin:21-jre` üzərində işə salır (root olmayan istifadəçi ilə). Lokal işə salmaq üçün Docker **lazım deyil** — bu yalnız deploy üçündür.
 
